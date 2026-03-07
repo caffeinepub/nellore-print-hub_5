@@ -1,0 +1,220 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "Bricolage Grotesque";
+  src: url("/assets/fonts/BricolageGrotesque.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Cabinet Grotesk";
+  src: url("/assets/fonts/CabinetGrotesk.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Outfit";
+  src: url("/assets/fonts/Outfit.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@layer base {
+  :root {
+    --radius: 0.5rem;
+
+    /* Nellore Print Hub — Indian Professional Printing theme */
+    /* Deep navy-indigo background like Indian ink and offset printing */
+    --background: 0.11 0.015 258;
+    --foreground: 0.97 0.005 85;
+
+    --card: 0.14 0.018 258;
+    --card-foreground: 0.97 0.005 85;
+
+    --popover: 0.16 0.02 258;
+    --popover-foreground: 0.97 0.005 85;
+
+    /* Primary = saffron orange (Indian flag saffron) */
+    --primary: 0.72 0.18 45;
+    --primary-foreground: 0.10 0.01 258;
+
+    /* Secondary = deep navy */
+    --secondary: 0.18 0.025 258;
+    --secondary-foreground: 0.97 0.005 85;
+
+    --muted: 0.17 0.02 258;
+    --muted-foreground: 0.62 0.02 258;
+
+    /* Accent = peacock teal */
+    --accent: 0.55 0.15 195;
+    --accent-foreground: 0.97 0.005 85;
+
+    --destructive: 0.577 0.245 27.325;
+    --destructive-foreground: 0.97 0 0;
+
+    --border: 0.22 0.025 258;
+    --input: 0.19 0.022 258;
+    --ring: 0.72 0.18 45;
+
+    --chart-1: 0.72 0.18 45;
+    --chart-2: 0.55 0.15 195;
+    --chart-3: 0.65 0.16 155;
+    --chart-4: 0.7 0.14 260;
+    --chart-5: 0.6 0.18 30;
+
+    --sidebar: 0.12 0.018 258;
+    --sidebar-foreground: 0.97 0.005 85;
+    --sidebar-primary: 0.72 0.18 45;
+    --sidebar-primary-foreground: 0.10 0.01 258;
+    --sidebar-accent: 0.18 0.025 258;
+    --sidebar-accent-foreground: 0.97 0.005 85;
+    --sidebar-border: 0.22 0.025 258;
+    --sidebar-ring: 0.72 0.18 45;
+
+    /* Brand gradient stops — saffron to gold */
+    --brand-start: #FF6B00;
+    --brand-end: #FFC107;
+    --gold: #FFC107;
+    --whatsapp: #25d366;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: "Outfit", "Cabinet Grotesk", system-ui, sans-serif;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: "Bricolage Grotesque", "Cabinet Grotesk", system-ui, sans-serif;
+  }
+}
+
+@layer utilities {
+  .brand-gradient {
+    background: linear-gradient(135deg, var(--brand-start), var(--brand-end));
+  }
+
+  .brand-gradient-text {
+    background: linear-gradient(135deg, var(--brand-start), var(--brand-end));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .glass {
+    background: rgba(15, 20, 50, 0.6);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .glass-dark {
+    background: rgba(5, 10, 35, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 107, 0, 0.12);
+  }
+
+  .fire-glow {
+    box-shadow:
+      0 0 30px rgba(255, 107, 0, 0.5),
+      0 0 60px rgba(255, 193, 7, 0.2);
+  }
+
+  .text-glow {
+    text-shadow:
+      0 0 30px rgba(255, 107, 0, 0.5),
+      0 0 60px rgba(255, 193, 7, 0.2);
+  }
+
+  .saffron-glow {
+    box-shadow:
+      0 0 20px rgba(255, 107, 0, 0.4),
+      0 0 40px rgba(255, 193, 7, 0.25);
+  }
+
+  .card-hover {
+    transition:
+      transform 0.3s ease,
+      box-shadow 0.3s ease,
+      background 0.3s ease;
+  }
+
+  .card-hover:hover {
+    transform: translateY(-8px);
+    box-shadow:
+      0 20px 60px rgba(255, 107, 0, 0.15),
+      0 8px 24px rgba(0, 0, 0, 0.4);
+  }
+
+  .print-bg {
+    position: relative;
+  }
+
+  .print-bg::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+      radial-gradient(circle, rgba(255, 193, 7, 0.2) 1px, transparent 1px),
+      radial-gradient(circle, rgba(255, 107, 0, 0.12) 1px, transparent 1px);
+    background-size: 30px 30px, 15px 15px;
+    background-position: 0 0, 8px 8px;
+    opacity: 0.07;
+  }
+
+  /* Indian ornamental border — saffron to gold gradient */
+  .india-border {
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    position: relative;
+  }
+
+  .india-border::after {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, #FF6B00, #FFC107, #FF6B00);
+    z-index: -1;
+    opacity: 0.6;
+  }
+
+  /* Decorative gold section divider */
+  .section-divider {
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #FF6B00, #FFC107, #FF6B00, transparent);
+    margin: 0 auto;
+    width: 80px;
+    border-radius: 2px;
+  }
+
+  .noise-texture {
+    position: relative;
+  }
+
+  .noise-texture::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    opacity: 0.4;
+  }
+}
