@@ -8,57 +8,57 @@ const SERVICE_ICONS = [IdCard, Signpost, Tag, Shirt, Package, Palette];
 const SERVICE_STYLES = [
   // Business Cards — saffron/amber
   {
-    gradient: "from-amber-600/25 to-amber-900/15",
-    iconBg: "bg-amber-500/20",
-    iconColor: "text-amber-400",
-    border: "border-amber-500/35",
-    glow: "rgba(255,193,7,0.3)",
-    hoverBorder: "group-hover:border-amber-500/60",
+    gradient: "from-amber-100/80 to-amber-50/60",
+    iconBg: "bg-amber-100",
+    iconColor: "text-amber-600",
+    border: "border-amber-200",
+    glow: "rgba(232,93,4,0.18)",
+    hoverBorder: "group-hover:border-amber-400",
   },
   // Flex Banners — royal blue
   {
-    gradient: "from-blue-700/25 to-blue-900/15",
-    iconBg: "bg-blue-500/20",
-    iconColor: "text-blue-400",
-    border: "border-blue-500/30",
-    glow: "rgba(59,130,246,0.3)",
-    hoverBorder: "group-hover:border-blue-500/60",
+    gradient: "from-blue-100/80 to-blue-50/60",
+    iconBg: "bg-blue-100",
+    iconColor: "text-blue-700",
+    border: "border-blue-200",
+    glow: "rgba(37,99,235,0.18)",
+    hoverBorder: "group-hover:border-blue-400",
   },
   // Sticker Printing — marigold yellow
   {
-    gradient: "from-yellow-500/20 to-yellow-800/15",
-    iconBg: "bg-yellow-500/20",
-    iconColor: "text-yellow-400",
-    border: "border-yellow-500/30",
-    glow: "rgba(234,179,8,0.3)",
-    hoverBorder: "group-hover:border-yellow-500/60",
+    gradient: "from-yellow-100/80 to-yellow-50/60",
+    iconBg: "bg-yellow-100",
+    iconColor: "text-yellow-700",
+    border: "border-yellow-200",
+    glow: "rgba(202,138,4,0.18)",
+    hoverBorder: "group-hover:border-yellow-400",
   },
   // T-Shirt Printing — peacock teal
   {
-    gradient: "from-teal-600/25 to-teal-900/15",
-    iconBg: "bg-teal-500/20",
-    iconColor: "text-teal-400",
-    border: "border-teal-500/30",
-    glow: "rgba(20,184,166,0.3)",
-    hoverBorder: "group-hover:border-teal-500/60",
+    gradient: "from-teal-100/80 to-teal-50/60",
+    iconBg: "bg-teal-100",
+    iconColor: "text-teal-700",
+    border: "border-teal-200",
+    glow: "rgba(15,118,110,0.18)",
+    hoverBorder: "group-hover:border-teal-400",
   },
   // Packaging Boxes — crimson
   {
-    gradient: "from-red-700/20 to-red-900/15",
-    iconBg: "bg-red-500/20",
-    iconColor: "text-red-400",
-    border: "border-red-600/30",
-    glow: "rgba(220,38,38,0.3)",
-    hoverBorder: "group-hover:border-red-500/60",
+    gradient: "from-red-100/80 to-red-50/60",
+    iconBg: "bg-red-100",
+    iconColor: "text-red-700",
+    border: "border-red-200",
+    glow: "rgba(185,28,28,0.18)",
+    hoverBorder: "group-hover:border-red-400",
   },
   // Graphic Design — purple-indigo
   {
-    gradient: "from-violet-700/20 to-violet-900/15",
-    iconBg: "bg-violet-500/20",
-    iconColor: "text-violet-400",
-    border: "border-violet-600/30",
-    glow: "rgba(139,92,246,0.3)",
-    hoverBorder: "group-hover:border-violet-500/60",
+    gradient: "from-violet-100/80 to-violet-50/60",
+    iconBg: "bg-violet-100",
+    iconColor: "text-violet-700",
+    border: "border-violet-200",
+    glow: "rgba(109,40,217,0.18)",
+    hoverBorder: "group-hover:border-violet-400",
   },
 ];
 
@@ -106,7 +106,7 @@ export default function ServicesSection() {
             {t.services.badge}
           </span>
           <div className="section-divider mb-6" />
-          <h2 className="font-display font-black text-4xl sm:text-5xl text-white mb-4">
+          <h2 className="font-display font-black text-4xl sm:text-5xl text-gray-900 mb-4">
             {t.services.heading}
           </h2>
           <p className="text-muted-foreground text-lg max-w-xl mx-auto">
@@ -134,14 +134,14 @@ export default function ServicesSection() {
                 data-ocid={ocid}
                 onMouseEnter={() => setHoveredIdx(index)}
                 onMouseLeave={() => setHoveredIdx(null)}
-                className={`card-hover glass rounded-2xl p-7 group cursor-default relative overflow-hidden border ${style.border} ${style.hoverBorder} transition-all duration-300`}
+                className={`card-hover bg-white rounded-2xl p-7 group cursor-default relative overflow-hidden border ${style.border} ${style.hoverBorder} transition-all duration-300 shadow-sm`}
                 style={{
                   boxShadow: isHovered ? `0 8px 40px ${style.glow}` : undefined,
                 }}
               >
                 {/* Background gradient */}
                 <div
-                  className={`absolute inset-0 bg-gradient-to-br ${style.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl`}
+                  className={`absolute inset-0 bg-gradient-to-br ${style.gradient} opacity-0 group-hover:opacity-60 transition-opacity duration-300 rounded-2xl`}
                 />
                 {/* Icon */}
                 <div className="relative z-10 mb-5">
@@ -153,7 +153,7 @@ export default function ServicesSection() {
                 </div>
                 {/* Text */}
                 <div className="relative z-10">
-                  <h3 className="font-display font-bold text-xl text-white mb-2">
+                  <h3 className="font-display font-bold text-xl text-gray-900 mb-2">
                     {service.title}
                   </h3>
                   <p className="text-muted-foreground text-sm leading-relaxed">

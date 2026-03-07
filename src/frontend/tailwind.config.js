@@ -72,8 +72,8 @@ export default {
           ring: "oklch(var(--sidebar-ring))",
         },
         brand: {
-          orange: "#FF6B00",
-          amber: "#FFC107",
+          orange: "#E85D04",
+          amber: "#F4722B",
         },
         whatsapp: "#25d366",
       },
@@ -84,9 +84,9 @@ export default {
       },
       boxShadow: {
         xs: "0 1px 2px 0 rgba(0,0,0,0.05)",
-        fire: "0 0 30px rgba(255, 107, 0, 0.4), 0 0 60px rgba(255, 193, 7, 0.2)",
-        "fire-lg": "0 0 60px rgba(255, 107, 0, 0.4), 0 0 120px rgba(255, 193, 7, 0.2)",
-        card: "0 4px 20px rgba(0,0,0,0.5), 0 1px 3px rgba(0,0,0,0.3)",
+        fire: "0 4px 20px rgba(26, 58, 110, 0.25), 0 1px 8px rgba(37, 99, 235, 0.15)",
+        "fire-lg": "0 8px 40px rgba(26, 58, 110, 0.30), 0 4px 20px rgba(37, 99, 235, 0.20)",
+        card: "0 4px 20px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.05)",
       },
       keyframes: {
         "accordion-down": {

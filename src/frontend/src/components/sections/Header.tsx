@@ -70,7 +70,7 @@ export default function Header() {
                 e.preventDefault();
                 handleNavClick(link.href);
               }}
-              className="px-4 py-2 text-sm font-medium text-white/80 hover:text-white rounded-lg hover:bg-white/8 transition-all duration-200 relative group"
+              className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 rounded-lg hover:bg-blue-50 transition-all duration-200 relative group"
             >
               {link.label}
               <span className="absolute bottom-0.5 left-4 right-4 h-0.5 brand-gradient rounded-full scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left" />
@@ -81,7 +81,7 @@ export default function Header() {
         {/* Language Switcher + Mobile Toggle */}
         <div className="flex items-center gap-2 flex-shrink-0">
           {/* Language switcher */}
-          <div className="flex items-center gap-1 rounded-lg bg-white/8 p-1">
+          <div className="flex items-center gap-1 rounded-lg bg-gray-100 p-1">
             {LANGUAGES.map((l) => (
               <button
                 key={l.code}
@@ -91,7 +91,7 @@ export default function Header() {
                 className={`w-8 h-7 rounded-md text-xs font-bold transition-all duration-200 ${
                   lang === l.code
                     ? "brand-gradient text-white shadow-sm"
-                    : "text-white/60 hover:text-white hover:bg-white/8"
+                    : "text-gray-500 hover:text-gray-800 hover:bg-gray-200"
                 }`}
                 title={l.label}
                 aria-label={`Switch to ${l.label}`}
@@ -104,7 +104,7 @@ export default function Header() {
           {/* Mobile menu toggle */}
           <button
             type="button"
-            className="md:hidden text-white/80 hover:text-white p-2 rounded-lg hover:bg-white/8 transition-colors"
+            className="md:hidden text-gray-700 hover:text-gray-900 p-2 rounded-lg hover:bg-gray-100 transition-colors"
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
           >
@@ -132,7 +132,7 @@ export default function Header() {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
-          className="md:hidden glass-dark border-t border-white/8 px-6 py-4 flex flex-col gap-1"
+          className="md:hidden glass-dark border-t border-gray-200 px-6 py-4 flex flex-col gap-1"
         >
           {navLinks.map((link) => (
             <a
@@ -143,7 +143,7 @@ export default function Header() {
                 e.preventDefault();
                 handleNavClick(link.href);
               }}
-              className="px-4 py-3 text-sm font-medium text-white/80 hover:text-white rounded-lg hover:bg-white/8 transition-all duration-200"
+              className="px-4 py-3 text-sm font-medium text-gray-700 hover:text-gray-900 rounded-lg hover:bg-blue-50 transition-all duration-200"
             >
               {link.label}
             </a>

@@ -27,7 +27,7 @@ function StarRating({
           className={`${sizeClass} transition-colors ${
             star <= rating
               ? "fill-amber-400 text-amber-400"
-              : "fill-transparent text-white/20"
+              : "fill-transparent text-gray-300"
           }`}
         />
       ))}
@@ -65,7 +65,7 @@ function InteractiveStarRating({
             className={`w-7 h-7 transition-all duration-150 ${
               star <= (hovered || value)
                 ? "fill-amber-400 text-amber-400 scale-110"
-                : "fill-transparent text-white/30 hover:text-white/50"
+                : "fill-transparent text-gray-300 hover:text-gray-400"
             }`}
           />
         </button>
@@ -107,23 +107,23 @@ function ReviewCard({ review, idx }: { review: Review; idx: number }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.4, delay: idx * 0.07 }}
-      className="glass rounded-2xl p-6 border border-white/8 card-hover flex flex-col gap-4"
+      className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm card-hover flex flex-col gap-4"
     >
       {/* Stars */}
       <StarRating rating={Number(review.rating)} size="md" />
 
       {/* Message */}
-      <p className="text-white/85 text-sm leading-relaxed flex-1">
+      <p className="text-gray-700 text-sm leading-relaxed flex-1">
         "{review.message}"
       </p>
 
       {/* Reviewer info */}
-      <div className="flex items-center gap-3 pt-2 border-t border-white/8">
+      <div className="flex items-center gap-3 pt-2 border-t border-gray-100">
         <div className="w-9 h-9 rounded-full brand-gradient flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
           {initials}
         </div>
         <div>
-          <p className="text-white font-semibold text-sm">{review.name}</p>
+          <p className="text-gray-900 font-semibold text-sm">{review.name}</p>
           <p className="text-muted-foreground text-xs">{date}</p>
         </div>
       </div>
@@ -175,7 +175,7 @@ function ReviewForm() {
   };
 
   const inputClass =
-    "bg-white/5 border-white/12 text-white placeholder:text-white/30 h-11 focus:border-blue-500/60 focus:ring-blue-500/20 rounded-xl";
+    "bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 h-11 focus:border-blue-400 focus:ring-blue-200 rounded-xl";
 
   return (
     <div className="mt-12">
@@ -205,9 +205,9 @@ function ReviewForm() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.35 }}
-            className="glass rounded-2xl p-6 sm:p-8 border border-blue-500/20 max-w-xl mx-auto"
+            className="bg-white rounded-2xl p-6 sm:p-8 border border-blue-200 shadow-md max-w-xl mx-auto"
           >
-            <h3 className="font-display font-bold text-white text-lg mb-6 flex items-center gap-2">
+            <h3 className="font-display font-bold text-gray-900 text-lg mb-6 flex items-center gap-2">
               <Star className="w-5 h-5 text-amber-400 fill-amber-400" />
               Share Your Experience
             </h3>
@@ -215,7 +215,7 @@ function ReviewForm() {
             <form onSubmit={handleSubmit} className="space-y-5" noValidate>
               {/* Name */}
               <div className="space-y-2">
-                <Label className="text-white/80 text-sm font-medium">
+                <Label className="text-gray-700 text-sm font-medium">
                   Your Name *
                 </Label>
                 <Input
@@ -237,7 +237,7 @@ function ReviewForm() {
 
               {/* Rating */}
               <div className="space-y-2">
-                <Label className="text-white/80 text-sm font-medium">
+                <Label className="text-gray-700 text-sm font-medium">
                   Rating *
                 </Label>
                 <InteractiveStarRating
@@ -256,7 +256,7 @@ function ReviewForm() {
 
               {/* Message */}
               <div className="space-y-2">
-                <Label className="text-white/80 text-sm font-medium">
+                <Label className="text-gray-700 text-sm font-medium">
                   Your Review *
                 </Label>
                 <Textarea
@@ -268,7 +268,7 @@ function ReviewForm() {
                   }}
                   placeholder="Tell others about your printing experience with us..."
                   rows={4}
-                  className={`bg-white/5 border-white/12 text-white placeholder:text-white/30 focus:border-blue-500/60 focus:ring-blue-500/20 rounded-xl resize-none ${errors.message ? "border-red-500/50" : ""}`}
+                  className={`bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-200 rounded-xl resize-none ${errors.message ? "border-red-400" : ""}`}
                 />
                 <div className="flex items-center justify-between">
                   {errors.message ? (
@@ -279,7 +279,7 @@ function ReviewForm() {
                     <span />
                   )}
                   <span
-                    className={`text-xs ml-auto ${message.length < 10 ? "text-white/30" : "text-emerald-400"}`}
+                    className={`text-xs ml-auto ${message.length < 10 ? "text-gray-400" : "text-emerald-600"}`}
                   >
                     {message.length} chars
                   </span>
@@ -295,7 +295,7 @@ function ReviewForm() {
                     setShowForm(false);
                     setErrors({});
                   }}
-                  className="flex-1 h-11 bg-white/5 border-white/15 text-white/70 hover:bg-white/10 hover:text-white rounded-xl"
+                  className="flex-1 h-11 bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100 hover:text-gray-800 rounded-xl"
                 >
                   Cancel
                 </Button>
@@ -358,17 +358,17 @@ export default function ReviewsSection() {
           transition={{ duration: 0.5 }}
           className="text-center mb-12"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass border border-white/15 text-sm font-medium mb-6 text-blue-300">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-blue-200 shadow-sm text-sm font-medium mb-6 text-blue-700">
             <MessageSquare className="w-4 h-4" />
             Customer Reviews
           </div>
-          <h2 className="font-display font-black text-4xl sm:text-5xl text-white mb-4">
+          <h2 className="font-display font-black text-4xl sm:text-5xl text-gray-900 mb-4">
             What Our <span className="brand-gradient-text">Customers Say</span>
           </h2>
           {reviews && reviews.length > 0 && (
             <div className="flex items-center justify-center gap-3 mt-4">
               <StarRating rating={Math.round(avgRating)} size="lg" />
-              <span className="text-white font-bold text-2xl">
+              <span className="text-gray-900 font-bold text-2xl">
                 {avgRating.toFixed(1)}
               </span>
               <span className="text-muted-foreground text-sm">
@@ -409,17 +409,17 @@ export default function ReviewsSection() {
         {!isLoading && !isError && (!reviews || reviews.length === 0) && (
           <div
             data-ocid="reviews.empty_state"
-            className="flex flex-col items-center justify-center py-16 text-center glass rounded-2xl mb-8"
+            className="flex flex-col items-center justify-center py-16 text-center bg-white rounded-2xl mb-8 border border-gray-200 shadow-sm"
           >
             <div className="flex items-center gap-0.5 mb-4">
               {[1, 2, 3, 4, 5].map((s) => (
                 <Star
                   key={s}
-                  className="w-8 h-8 text-white/15 fill-transparent"
+                  className="w-8 h-8 text-gray-200 fill-transparent"
                 />
               ))}
             </div>
-            <p className="text-white font-semibold mb-1">No reviews yet</p>
+            <p className="text-gray-800 font-semibold mb-1">No reviews yet</p>
             <p className="text-muted-foreground text-sm">
               Be the first to share your experience!
             </p>

@@ -36,7 +36,7 @@ export default function MobileBottomNav() {
   };
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-xl border-t border-white/10">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-t border-gray-200 shadow-lg">
       <div className="flex items-center justify-around px-2 py-2">
         {NAV_ITEMS.map(({ id, label, Icon }) => {
           const isActive = activeSection === id;
@@ -47,18 +47,16 @@ export default function MobileBottomNav() {
               data-ocid={`mobile_nav.${id}.button`}
               onClick={() => scrollTo(id)}
               className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-200 ${
-                isActive
-                  ? "text-amber-400"
-                  : "text-white/40 hover:text-white/70"
+                isActive ? "text-blue-700" : "text-gray-400 hover:text-gray-600"
               }`}
             >
               <div
-                className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-200 ${isActive ? "bg-amber-500/20" : ""}`}
+                className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-200 ${isActive ? "bg-blue-100" : ""}`}
               >
                 <Icon style={{ width: "18px", height: "18px" }} />
               </div>
               <span
-                className={`text-[10px] font-medium ${isActive ? "text-amber-400" : "text-white/40"}`}
+                className={`text-[10px] font-medium ${isActive ? "text-blue-700" : "text-gray-400"}`}
               >
                 {label}
               </span>

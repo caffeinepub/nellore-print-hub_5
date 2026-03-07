@@ -36,7 +36,7 @@ export default function Footer() {
     typeof window !== "undefined" ? window.location.hostname : "";
 
   return (
-    <footer className="bg-black/60 backdrop-blur-sm">
+    <footer className="bg-gray-900">
       {/* Indian flag tricolor decorative stripe */}
       <div
         className="w-full h-1 opacity-30"
@@ -84,7 +84,7 @@ export default function Footer() {
           </div>
 
           {/* Divider */}
-          <div className="w-full h-px bg-white/8" />
+          <div className="w-full h-px bg-white/10" />
 
           {/* Bottom row */}
           <div className="flex flex-col sm:flex-row items-center justify-between w-full gap-3 text-xs text-muted-foreground">

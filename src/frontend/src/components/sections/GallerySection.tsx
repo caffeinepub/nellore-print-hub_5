@@ -66,7 +66,7 @@ export default function GallerySection() {
           <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold tracking-widest uppercase brand-gradient text-white mb-4">
             {t.gallery.badge}
           </span>
-          <h2 className="font-display font-black text-4xl sm:text-5xl text-white mb-4">
+          <h2 className="font-display font-black text-4xl sm:text-5xl text-gray-900 mb-4">
             {t.gallery.heading}
           </h2>
           <p className="text-muted-foreground text-lg max-w-xl mx-auto">

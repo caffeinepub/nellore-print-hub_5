@@ -44,24 +44,24 @@ export default function HeroSection() {
             "url('/assets/generated/hero-print-bg.dim_1920x1080.jpg')",
         }}
       />
-      {/* Gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-indigo-950/40 to-black/70" />
-      {/* Fire gradient accent at bottom */}
+      {/* Gradient overlay — light, airy wash for paper feel */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/60 via-blue-50/40 to-white/50" />
+      {/* Bottom gradient fade to light background */}
       <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-background to-transparent" />
-      {/* Royal blue mandala-style glow */}
+      {/* Ink blue depth glow */}
       <div
-        className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full blur-3xl opacity-25"
+        className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full blur-3xl opacity-15"
         style={{
           background:
-            "radial-gradient(circle, rgba(26,86,219,0.7) 0%, rgba(59,130,246,0.3) 45%, transparent 70%)",
+            "radial-gradient(circle, rgba(26,58,110,0.4) 0%, rgba(37,99,235,0.15) 45%, transparent 70%)",
         }}
       />
-      {/* Gold complementary glow */}
+      {/* Saffron warm glow */}
       <div
-        className="absolute top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full blur-3xl opacity-15"
+        className="absolute top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full blur-3xl opacity-10"
         style={{
           background:
-            "radial-gradient(circle, rgba(255,193,7,0.5) 0%, rgba(255,193,7,0.1) 50%, transparent 70%)",
+            "radial-gradient(circle, rgba(232,93,4,0.5) 0%, rgba(232,93,4,0.1) 50%, transparent 70%)",
         }}
       />
 
@@ -72,8 +72,8 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass border border-white/15 text-sm font-medium mb-8"
-          style={{ color: "#FFC107" }}
+          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass border border-blue-200/60 text-sm font-medium mb-8"
+          style={{ color: "#E85D04" }}
         >
           <span className="w-2 h-2 rounded-full brand-gradient animate-pulse" />
           {t.hero.badge}
@@ -84,7 +84,7 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="font-display font-black text-5xl sm:text-6xl lg:text-7xl text-white leading-[1.05] tracking-tight mb-6 text-glow"
+          className="font-display font-black text-5xl sm:text-6xl lg:text-7xl text-gray-900 leading-[1.05] tracking-tight mb-6 text-glow"
         >
           {t.hero.title1}{" "}
           <span className="brand-gradient-text">{t.hero.title2}</span>
@@ -97,7 +97,7 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.35 }}
-          className="text-lg sm:text-xl text-white/70 max-w-xl mx-auto mb-10 leading-relaxed"
+          className="text-lg sm:text-xl text-gray-600 max-w-xl mx-auto mb-10 leading-relaxed"
         >
           {t.hero.subtitle}
         </motion.p>
@@ -127,7 +127,7 @@ export default function HeroSection() {
                 .querySelector("#services")
                 ?.scrollIntoView({ behavior: "smooth" })
             }
-            className="inline-flex items-center gap-2 px-8 py-4 rounded-full border border-white/25 text-white font-medium text-base hover:bg-white/10 hover:border-white/40 transition-all duration-300"
+            className="inline-flex items-center gap-2 px-8 py-4 rounded-full border border-blue-900/30 text-blue-900 font-medium text-base hover:bg-blue-50 hover:border-blue-900/50 transition-all duration-300"
           >
             {t.hero.viewServices}
           </button>
@@ -144,7 +144,7 @@ export default function HeroSection() {
             type="button"
             data-ocid="hero.share_button"
             onClick={handleShare}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-blue-400/40 text-blue-300 text-sm font-medium hover:bg-blue-500/10 hover:border-blue-400/70 hover:text-blue-200 transition-all duration-300"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-blue-800/30 text-blue-800 text-sm font-medium hover:bg-blue-100 hover:border-blue-800/50 transition-all duration-300"
           >
             <Share2 className="w-4 h-4" />
             Share this site
@@ -165,7 +165,7 @@ export default function HeroSection() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.2, duration: 0.5 }}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/40 animate-bounce"
+        className="absolute bottom-10 left-1/2 -translate-x-1/2 text-gray-500/70 animate-bounce"
       >
         <ChevronDown className="w-6 h-6" />
       </motion.div>
