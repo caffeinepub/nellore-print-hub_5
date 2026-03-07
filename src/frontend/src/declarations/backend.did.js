@@ -46,6 +46,13 @@ export const Quote = IDL.Record({
   'details' : IDL.Text,
   'mobile' : IDL.Text,
 });
+export const Review = IDL.Record({
+  'id' : IDL.Nat,
+  'name' : IDL.Text,
+  'message' : IDL.Text,
+  'timestamp' : IDL.Int,
+  'rating' : IDL.Nat,
+});
 export const SiteSettings = IDL.Record({
   'tagline' : IDL.Text,
   'whatsapp' : IDL.Text,
@@ -84,17 +91,20 @@ export const idlService = IDL.Service({
   '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
   'addPhoto' : IDL.Func([ExternalBlob, IDL.Text, IDL.Nat], [IDL.Nat], []),
   'deletePhoto' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+  'deleteReview' : IDL.Func([IDL.Nat], [IDL.Bool], []),
   'getPhotos' : IDL.Func([], [IDL.Vec(Photo)], ['query']),
   'getQuoteById' : IDL.Func([IDL.Nat], [Quote], ['query']),
   'getQuotes' : IDL.Func([], [IDL.Vec(Quote)], ['query']),
   'getQuotesByMobile' : IDL.Func([IDL.Text], [IDL.Vec(Quote)], ['query']),
   'getQuotesByService' : IDL.Func([ServiceType], [IDL.Vec(Quote)], ['query']),
+  'getReviews' : IDL.Func([], [IDL.Vec(Review)], ['query']),
   'getSiteSettings' : IDL.Func([], [SiteSettings], ['query']),
   'submitQuote' : IDL.Func(
       [IDL.Text, IDL.Text, ServiceType, IDL.Text],
       [IDL.Nat],
       [],
     ),
+  'submitReview' : IDL.Func([IDL.Text, IDL.Nat, IDL.Text], [IDL.Nat], []),
   'updatePhotoTitle' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Bool], []),
   'updateQuoteStatus' : IDL.Func([IDL.Nat, QuoteStatus], [IDL.Bool], []),
   'updateSiteSettings' : IDL.Func([SiteSettings], [IDL.Bool], []),
@@ -138,6 +148,13 @@ export const idlFactory = ({ IDL }) => {
     'details' : IDL.Text,
     'mobile' : IDL.Text,
   });
+  const Review = IDL.Record({
+    'id' : IDL.Nat,
+    'name' : IDL.Text,
+    'message' : IDL.Text,
+    'timestamp' : IDL.Int,
+    'rating' : IDL.Nat,
+  });
   const SiteSettings = IDL.Record({
     'tagline' : IDL.Text,
     'whatsapp' : IDL.Text,
@@ -176,17 +193,20 @@ export const idlFactory = ({ IDL }) => {
     '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
     'addPhoto' : IDL.Func([ExternalBlob, IDL.Text, IDL.Nat], [IDL.Nat], []),
     'deletePhoto' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+    'deleteReview' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'getPhotos' : IDL.Func([], [IDL.Vec(Photo)], ['query']),
     'getQuoteById' : IDL.Func([IDL.Nat], [Quote], ['query']),
     'getQuotes' : IDL.Func([], [IDL.Vec(Quote)], ['query']),
     'getQuotesByMobile' : IDL.Func([IDL.Text], [IDL.Vec(Quote)], ['query']),
     'getQuotesByService' : IDL.Func([ServiceType], [IDL.Vec(Quote)], ['query']),
+    'getReviews' : IDL.Func([], [IDL.Vec(Review)], ['query']),
     'getSiteSettings' : IDL.Func([], [SiteSettings], ['query']),
     'submitQuote' : IDL.Func(
         [IDL.Text, IDL.Text, ServiceType, IDL.Text],
         [IDL.Nat],
         [],
       ),
+    'submitReview' : IDL.Func([IDL.Text, IDL.Nat, IDL.Text], [IDL.Nat], []),
     'updatePhotoTitle' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Bool], []),
     'updateQuoteStatus' : IDL.Func([IDL.Nat, QuoteStatus], [IDL.Bool], []),
     'updateSiteSettings' : IDL.Func([SiteSettings], [IDL.Bool], []),

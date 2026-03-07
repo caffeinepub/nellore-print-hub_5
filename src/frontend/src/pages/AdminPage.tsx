@@ -30,6 +30,7 @@ import {
   RefreshCw,
   Save,
   Settings,
+  Star,
   Trash2,
   Upload,
   X,
@@ -38,14 +39,16 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { SiWhatsapp } from "react-icons/si";
 import { toast } from "sonner";
-import type { Photo, Quote } from "../backend.d";
+import type { Photo, Quote, Review } from "../backend.d";
 import {
   QuoteStatus,
   ServiceType,
   useAddPhotoWithProgress,
   useDeletePhoto,
+  useDeleteReview,
   useGetPhotos,
   useGetQuotes,
+  useGetReviews,
   useGetSiteSettings,
   useUpdatePhotoTitle,
   useUpdateQuoteStatus,
@@ -131,7 +134,7 @@ function QuoteRow({
           <a
             href={`tel:${quote.mobile}`}
             onClick={(e) => e.stopPropagation()}
-            className="text-orange-400 hover:text-orange-300 text-sm font-medium transition-colors"
+            className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors"
           >
             {quote.mobile}
           </a>
@@ -243,7 +246,7 @@ function QuoteRow({
                       }}
                       className={`gap-2 ${
                         isNew
-                          ? "bg-orange-500/10 border-orange-500/30 text-orange-300 hover:bg-orange-500/20 hover:border-orange-400/50"
+                          ? "bg-blue-500/10 border-blue-500/30 text-blue-300 hover:bg-blue-500/20 hover:border-blue-400/50"
                           : "bg-white/8 border-white/15 text-white/60 hover:bg-white/12 hover:text-white/80"
                       }`}
                     >
@@ -378,7 +381,7 @@ function QuotesPanel() {
             }}
             className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
               filter === f.key
-                ? "brand-gradient text-black font-bold shadow-fire"
+                ? "brand-gradient text-white font-bold shadow-fire"
                 : "glass text-white/60 hover:text-white hover:bg-white/10"
             }`}
           >
@@ -563,13 +566,13 @@ function SiteSettingsPanel() {
   }
 
   const inputClass =
-    "bg-white/5 border-white/12 text-white placeholder:text-white/30 h-11 focus:border-orange-500/50 focus:ring-orange-500/20 rounded-xl";
+    "bg-white/5 border-white/12 text-white placeholder:text-white/30 h-11 focus:border-blue-500/50 focus:ring-blue-500/20 rounded-xl";
 
   return (
     <div className="space-y-8">
       <div className="glass rounded-2xl p-6 space-y-6">
         <h3 className="font-display font-bold text-white text-lg flex items-center gap-2">
-          <Settings className="w-5 h-5 text-orange-400" />
+          <Settings className="w-5 h-5 text-blue-400" />
           Business Information
         </h3>
 
@@ -654,7 +657,7 @@ function SiteSettingsPanel() {
               onChange={handleField("address")}
               placeholder="Full business address"
               rows={2}
-              className="bg-white/5 border-white/12 text-white placeholder:text-white/30 focus:border-orange-500/50 focus:ring-orange-500/20 rounded-xl resize-none"
+              className="bg-white/5 border-white/12 text-white placeholder:text-white/30 focus:border-blue-500/50 focus:ring-blue-500/20 rounded-xl resize-none"
             />
           </div>
         </div>
@@ -663,7 +666,7 @@ function SiteSettingsPanel() {
       {/* Logo Preview Section */}
       <div className="glass rounded-2xl p-6 space-y-4">
         <h3 className="font-display font-bold text-white text-lg flex items-center gap-2">
-          <Printer className="w-5 h-5 text-orange-400" />
+          <Printer className="w-5 h-5 text-blue-400" />
           Logo Preview
         </h3>
         <div className="space-y-3">
@@ -733,7 +736,7 @@ function SiteSettingsPanel() {
         data-ocid="admin.settings.save.button"
         onClick={handleSave}
         disabled={updateSettings.isPending}
-        className="w-full h-12 brand-gradient text-black font-bold rounded-xl hover:scale-[1.01] transition-all duration-200 disabled:opacity-60 disabled:scale-100 text-base gap-2"
+        className="w-full h-12 brand-gradient text-white font-bold rounded-xl hover:scale-[1.01] transition-all duration-200 disabled:opacity-60 disabled:scale-100 text-base gap-2"
       >
         {updateSettings.isPending ? (
           <>
@@ -869,7 +872,7 @@ function PhotoCard({
                 setIsEditing(false);
               }
             }}
-            className="flex-1 bg-white/10 border border-white/20 rounded-lg px-2 py-1 text-white text-sm focus:outline-none focus:border-orange-500/60 min-w-0"
+            className="flex-1 bg-white/10 border border-white/20 rounded-lg px-2 py-1 text-white text-sm focus:outline-none focus:border-blue-500/60 min-w-0"
           />
         ) : (
           <button
@@ -884,13 +887,13 @@ function PhotoCard({
         <button
           type="button"
           onClick={handleEditStart}
-          className="text-white/30 hover:text-orange-400 transition-colors flex-shrink-0"
+          className="text-white/30 hover:text-blue-400 transition-colors flex-shrink-0"
           aria-label="Edit title"
         >
           <Pencil className="w-3.5 h-3.5" />
         </button>
         {updateTitle.isPending && (
-          <Loader2 className="w-3.5 h-3.5 animate-spin text-orange-400 flex-shrink-0" />
+          <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-400 flex-shrink-0" />
         )}
       </div>
     </motion.div>
@@ -965,7 +968,7 @@ function GalleryPanel() {
   };
 
   const inputClass =
-    "bg-white/5 border-white/12 text-white placeholder:text-white/30 h-11 focus:border-orange-500/50 focus:ring-orange-500/20 rounded-xl";
+    "bg-white/5 border-white/12 text-white placeholder:text-white/30 h-11 focus:border-blue-500/50 focus:ring-blue-500/20 rounded-xl";
 
   return (
     <div className="space-y-6">
@@ -978,7 +981,7 @@ function GalleryPanel() {
         <Button
           data-ocid="gallery.upload_button"
           onClick={() => setShowUpload((v) => !v)}
-          className="gap-2 brand-gradient text-black font-bold rounded-xl hover:scale-[1.02] transition-all duration-200"
+          className="gap-2 brand-gradient text-white font-bold rounded-xl hover:scale-[1.02] transition-all duration-200"
         >
           {showUpload ? (
             <>
@@ -1004,9 +1007,9 @@ function GalleryPanel() {
             transition={{ duration: 0.25, ease: "easeInOut" }}
             className="overflow-hidden"
           >
-            <div className="glass rounded-2xl p-6 border border-orange-500/20 space-y-4">
+            <div className="glass rounded-2xl p-6 border border-blue-500/20 space-y-4">
               <h3 className="font-display font-bold text-white text-base flex items-center gap-2">
-                <Upload className="w-4 h-4 text-orange-400" />
+                <Upload className="w-4 h-4 text-blue-400" />
                 Upload New Project Photo
               </h3>
 
@@ -1018,11 +1021,11 @@ function GalleryPanel() {
                 <label
                   data-ocid="gallery.dropzone"
                   htmlFor="gallery-file-input"
-                  className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-white/15 hover:border-orange-500/40 rounded-xl p-6 cursor-pointer transition-all duration-200 bg-white/3 hover:bg-white/6"
+                  className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-white/15 hover:border-blue-500/40 rounded-xl p-6 cursor-pointer transition-all duration-200 bg-white/3 hover:bg-white/6"
                 >
                   {selectedFile ? (
                     <>
-                      <CheckCircle2 className="w-8 h-8 text-orange-400" />
+                      <CheckCircle2 className="w-8 h-8 text-blue-400" />
                       <p className="text-white font-medium text-sm">
                         {selectedFile.name}
                       </p>
@@ -1086,7 +1089,7 @@ function GalleryPanel() {
                     </div>
                     <Progress
                       value={uploadProgress}
-                      className="h-1.5 bg-white/10 [&>div]:bg-gradient-to-r [&>div]:from-orange-500 [&>div]:to-amber-400"
+                      className="h-1.5 bg-white/10 [&>div]:bg-gradient-to-r [&>div]:from-blue-600 [&>div]:to-blue-400"
                     />
                   </motion.div>
                 )}
@@ -1099,7 +1102,7 @@ function GalleryPanel() {
                 disabled={
                   addPhoto.isPending || !selectedFile || !uploadTitle.trim()
                 }
-                className="w-full h-11 brand-gradient text-black font-bold rounded-xl hover:scale-[1.01] transition-all duration-200 disabled:opacity-50 disabled:scale-100 gap-2"
+                className="w-full h-11 brand-gradient text-white font-bold rounded-xl hover:scale-[1.01] transition-all duration-200 disabled:opacity-50 disabled:scale-100 gap-2"
               >
                 {addPhoto.isPending ? (
                   <>
@@ -1183,9 +1186,264 @@ function GalleryPanel() {
   );
 }
 
+// ─── Reviews Panel ─────────────────────────────────────────────────────────────
+
+function AdminStarRating({ rating }: { rating: number }) {
+  return (
+    <div className="flex items-center gap-0.5">
+      {[1, 2, 3, 4, 5].map((s) => (
+        <Star
+          key={s}
+          className={`w-3.5 h-3.5 ${s <= rating ? "fill-amber-400 text-amber-400" : "fill-transparent text-white/20"}`}
+        />
+      ))}
+    </div>
+  );
+}
+
+function ReviewItem({
+  review,
+  idx,
+}: {
+  review: Review;
+  idx: number;
+}) {
+  const deleteReview = useDeleteReview();
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
+  const date = (() => {
+    try {
+      const ms = Number(review.timestamp / 1_000_000n);
+      return new Date(ms).toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
+    } catch {
+      return "—";
+    }
+  })();
+
+  const initials = review.name
+    .split(" ")
+    .map((w: string) => w[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+  const handleDelete = async () => {
+    try {
+      await deleteReview.mutateAsync(review.id);
+      toast.success("Review deleted.");
+    } catch {
+      toast.error("Failed to delete review.");
+    }
+    setConfirmDelete(false);
+  };
+
+  return (
+    <motion.div
+      data-ocid={`admin.review.item.${idx + 1}`}
+      layout
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.96 }}
+      transition={{ duration: 0.22 }}
+      className="glass rounded-2xl p-5 border border-white/8 flex flex-col gap-3"
+    >
+      {/* Header: avatar + name + date + stars */}
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full brand-gradient flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+            {initials}
+          </div>
+          <div>
+            <p className="text-white font-semibold text-sm leading-tight">
+              {review.name}
+            </p>
+            <p className="text-muted-foreground text-xs">{date}</p>
+          </div>
+        </div>
+        <AdminStarRating rating={Number(review.rating)} />
+      </div>
+
+      {/* Message */}
+      <p className="text-white/80 text-sm leading-relaxed">
+        "{review.message}"
+      </p>
+
+      {/* Delete action */}
+      <div className="flex justify-end">
+        <AnimatePresence mode="wait">
+          {confirmDelete ? (
+            <motion.div
+              key="confirm"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="flex items-center gap-2"
+            >
+              <span className="text-white/60 text-xs">Delete this review?</span>
+              <button
+                type="button"
+                data-ocid={`admin.review.delete_button.${idx + 1}`}
+                onClick={handleDelete}
+                disabled={deleteReview.isPending}
+                className="px-3 py-1 bg-red-500/80 hover:bg-red-500 text-white text-xs font-semibold rounded-lg transition-colors disabled:opacity-60"
+              >
+                {deleteReview.isPending ? (
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                ) : (
+                  "Delete"
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmDelete(false)}
+                className="px-3 py-1 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+            </motion.div>
+          ) : (
+            <motion.button
+              key="trash"
+              type="button"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setConfirmDelete(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-red-400/70 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 text-xs font-medium transition-all duration-200"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              Delete
+            </motion.button>
+          )}
+        </AnimatePresence>
+      </div>
+    </motion.div>
+  );
+}
+
+function ReviewsPanel() {
+  const { data: reviews, isLoading, isError } = useGetReviews();
+
+  const avgRating =
+    reviews && reviews.length > 0
+      ? reviews.reduce((sum, r) => sum + Number(r.rating), 0) / reviews.length
+      : 0;
+
+  return (
+    <div className="space-y-6">
+      {/* Stats */}
+      {reviews && reviews.length > 0 && (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+            className="glass rounded-xl p-4 flex flex-col gap-1"
+          >
+            <span className="text-muted-foreground text-xs uppercase tracking-wider">
+              Total Reviews
+            </span>
+            <span className="font-display font-black text-3xl text-white">
+              {reviews.length}
+            </span>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="glass rounded-xl p-4 flex flex-col gap-1 border border-amber-500/20"
+          >
+            <span className="text-amber-400/70 text-xs uppercase tracking-wider">
+              Avg Rating
+            </span>
+            <div className="flex items-baseline gap-1.5">
+              <span className="font-display font-black text-3xl text-amber-300">
+                {avgRating.toFixed(1)}
+              </span>
+              <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+            </div>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="glass rounded-xl p-4 flex flex-col gap-1 border border-blue-500/20 sm:col-span-1 col-span-2"
+          >
+            <span className="text-blue-400/70 text-xs uppercase tracking-wider">
+              5-Star Reviews
+            </span>
+            <span className="font-display font-black text-3xl text-blue-300">
+              {reviews.filter((r) => Number(r.rating) === 5).length}
+            </span>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Loading */}
+      {isLoading && (
+        <div
+          data-ocid="admin.reviews.loading_state"
+          className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+        >
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-40 w-full rounded-2xl bg-white/5" />
+          ))}
+        </div>
+      )}
+
+      {/* Error */}
+      {isError && (
+        <div
+          data-ocid="admin.reviews.error_state"
+          className="flex items-center gap-3 p-5 glass rounded-2xl border border-red-500/20 text-red-400"
+        >
+          <AlertCircle className="w-5 h-5 flex-shrink-0" />
+          <p className="text-sm">Failed to load reviews. Please refresh.</p>
+        </div>
+      )}
+
+      {/* Empty */}
+      {!isLoading && !isError && (!reviews || reviews.length === 0) && (
+        <div
+          data-ocid="admin.reviews.empty_state"
+          className="flex flex-col items-center justify-center py-20 text-center glass rounded-2xl"
+        >
+          <div className="flex items-center gap-0.5 mb-4">
+            {[1, 2, 3, 4, 5].map((s) => (
+              <Star
+                key={s}
+                className="w-7 h-7 text-white/15 fill-transparent"
+              />
+            ))}
+          </div>
+          <p className="text-white font-semibold mb-1">No reviews yet</p>
+          <p className="text-muted-foreground text-sm">
+            Customer reviews will appear here once submitted.
+          </p>
+        </div>
+      )}
+
+      {/* Reviews grid */}
+      {!isLoading && !isError && reviews && reviews.length > 0 && (
+        <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <AnimatePresence>
+            {reviews.map((review, idx) => (
+              <ReviewItem key={String(review.id)} review={review} idx={idx} />
+            ))}
+          </AnimatePresence>
+        </motion.div>
+      )}
+    </div>
+  );
+}
+
 // ─── Dashboard (after login) ───────────────────────────────────────────────────
 
-type AdminTab = "quotes" | "settings" | "gallery";
+type AdminTab = "quotes" | "settings" | "gallery" | "reviews";
 
 function Dashboard() {
   const [activeTab, setActiveTab] = useState<AdminTab>("quotes");
@@ -1216,7 +1474,7 @@ function Dashboard() {
               onClick={() => setActiveTab("quotes")}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                 activeTab === "quotes"
-                  ? "brand-gradient text-black font-bold"
+                  ? "brand-gradient text-white font-bold"
                   : "text-white/60 hover:text-white"
               }`}
             >
@@ -1229,7 +1487,7 @@ function Dashboard() {
               onClick={() => setActiveTab("settings")}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                 activeTab === "settings"
-                  ? "brand-gradient text-black font-bold"
+                  ? "brand-gradient text-white font-bold"
                   : "text-white/60 hover:text-white"
               }`}
             >
@@ -1242,12 +1500,25 @@ function Dashboard() {
               onClick={() => setActiveTab("gallery")}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                 activeTab === "gallery"
-                  ? "brand-gradient text-black font-bold"
+                  ? "brand-gradient text-white font-bold"
                   : "text-white/60 hover:text-white"
               }`}
             >
               <Images className="w-4 h-4" />
               <span className="hidden sm:inline">Gallery</span>
+            </button>
+            <button
+              type="button"
+              data-ocid="admin.reviews.tab"
+              onClick={() => setActiveTab("reviews")}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                activeTab === "reviews"
+                  ? "brand-gradient text-white font-bold"
+                  : "text-white/60 hover:text-white"
+              }`}
+            >
+              <Star className="w-4 h-4" />
+              <span className="hidden sm:inline">Reviews</span>
             </button>
           </div>
 
@@ -1284,7 +1555,7 @@ function Dashboard() {
             >
               <div className="mb-6">
                 <h2 className="font-display font-bold text-2xl text-white flex items-center gap-2">
-                  <MessageSquare className="w-6 h-6 text-orange-400" />
+                  <MessageSquare className="w-6 h-6 text-blue-400" />
                   Quote Requests
                 </h2>
                 <p className="text-muted-foreground text-sm mt-0.5">
@@ -1303,7 +1574,7 @@ function Dashboard() {
             >
               <div className="mb-6">
                 <h2 className="font-display font-bold text-2xl text-white flex items-center gap-2">
-                  <Settings className="w-6 h-6 text-orange-400" />
+                  <Settings className="w-6 h-6 text-blue-400" />
                   Site Settings
                 </h2>
                 <p className="text-muted-foreground text-sm mt-0.5">
@@ -1314,7 +1585,7 @@ function Dashboard() {
                 <SiteSettingsPanel />
               </div>
             </motion.div>
-          ) : (
+          ) : activeTab === "gallery" ? (
             <motion.div
               key="gallery"
               initial={{ opacity: 0, x: 16 }}
@@ -1324,7 +1595,7 @@ function Dashboard() {
             >
               <div className="mb-6">
                 <h2 className="font-display font-bold text-2xl text-white flex items-center gap-2">
-                  <Images className="w-6 h-6 text-orange-400" />
+                  <Images className="w-6 h-6 text-blue-400" />
                   Project Gallery
                 </h2>
                 <p className="text-muted-foreground text-sm mt-0.5">
@@ -1332,6 +1603,25 @@ function Dashboard() {
                 </p>
               </div>
               <GalleryPanel />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="reviews"
+              initial={{ opacity: 0, x: 16 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -16 }}
+              transition={{ duration: 0.22 }}
+            >
+              <div className="mb-6">
+                <h2 className="font-display font-bold text-2xl text-white flex items-center gap-2">
+                  <Star className="w-6 h-6 text-amber-400 fill-amber-400" />
+                  Customer Reviews
+                </h2>
+                <p className="text-muted-foreground text-sm mt-0.5">
+                  View and manage customer reviews submitted on the site.
+                </p>
+              </div>
+              <ReviewsPanel />
             </motion.div>
           )}
         </AnimatePresence>
@@ -1372,7 +1662,7 @@ export default function AdminPage() {
       <div
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full blur-3xl opacity-10 pointer-events-none"
         style={{
-          background: "radial-gradient(circle, #ff4d00, transparent 70%)",
+          background: "radial-gradient(circle, #1A56DB, transparent 70%)",
         }}
       />
 
@@ -1418,7 +1708,7 @@ export default function AdminPage() {
                   className={`bg-white/5 border-white/12 text-white placeholder:text-white/30 h-11 pr-10 ${
                     error
                       ? "border-red-500/50 focus:border-red-500/50"
-                      : "focus:border-orange-500/50"
+                      : "focus:border-blue-500/50"
                   }`}
                 />
                 <button
@@ -1455,7 +1745,7 @@ export default function AdminPage() {
               type="submit"
               data-ocid="admin.submit_button"
               disabled={isLoading}
-              className="w-full h-11 brand-gradient text-black font-bold rounded-xl hover:scale-[1.02] transition-all duration-300 disabled:opacity-60 disabled:scale-100"
+              className="w-full h-11 brand-gradient text-white font-bold rounded-xl hover:scale-[1.02] transition-all duration-300 disabled:opacity-60 disabled:scale-100"
             >
               {isLoading ? (
                 <>

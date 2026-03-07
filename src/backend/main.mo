@@ -4,7 +4,6 @@ import Order "mo:core/Order";
 import Text "mo:core/Text";
 import Nat "mo:core/Nat";
 import Iter "mo:core/Iter";
-import Blob "mo:core/Blob";
 import Runtime "mo:core/Runtime";
 import Time "mo:core/Time";
 import Storage "blob-storage/Storage";
@@ -52,11 +51,21 @@ actor {
     timestamp : Int;
   };
 
+  type Review = {
+    id : Nat;
+    name : Text;
+    rating : Nat; // 1-5
+    message : Text;
+    timestamp : Int;
+  };
+
   var nextId = 1;
   var nextPhotoId = 1;
+  var nextReviewId = 1;
 
   let quotes = Map.empty<Nat, Quote>();
   let photos = Map.empty<Nat, Photo>();
+  let reviews = Map.empty<Nat, Review>();
 
   var siteSettings : SiteSettings = {
     phone = "+91-93905-35070";
@@ -182,6 +191,40 @@ actor {
       case (?photo) {
         let updatedPhoto = { photo with title = newTitle };
         photos.add(id, updatedPhoto);
+        true;
+      };
+    };
+  };
+
+  // ************** Reviews (NEW) **************
+  public shared ({ caller }) func submitReview(name : Text, rating : Nat, message : Text) : async Nat {
+    if (rating < 1 or rating > 5) {
+      Runtime.trap("Rating must be between 1 and 5");
+    };
+
+    let id = nextReviewId;
+    let review : Review = {
+      id;
+      name;
+      rating;
+      message;
+      timestamp = Time.now();
+    };
+
+    reviews.add(id, review);
+    nextReviewId += 1;
+    id;
+  };
+
+  public query ({ caller }) func getReviews() : async [Review] {
+    reviews.values().toArray();
+  };
+
+  public shared ({ caller }) func deleteReview(id : Nat) : async Bool {
+    switch (reviews.get(id)) {
+      case (null) { Runtime.trap("Review not found") };
+      case (?_) {
+        reviews.remove(id);
         true;
       };
     };

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ExternalBlob, QuoteStatus, ServiceType } from "../backend";
-import type { Photo, Quote, SiteSettings } from "../backend.d";
+import type { Photo, Quote, Review, SiteSettings } from "../backend.d";
 import { useActor } from "./useActor";
 
 export function useGetQuotes() {
@@ -184,5 +184,55 @@ export function useUpdatePhotoTitle() {
   });
 }
 
+export function useGetReviews() {
+  const { actor, isFetching } = useActor();
+  return useQuery<Review[]>({
+    queryKey: ["reviews"],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getReviews();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useSubmitReview() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      name,
+      rating,
+      message,
+    }: {
+      name: string;
+      rating: bigint;
+      message: string;
+    }) => {
+      if (!actor) throw new Error("No actor available");
+      return actor.submitReview(name, rating, message);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["reviews"] });
+    },
+  });
+}
+
+export function useDeleteReview() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: bigint) => {
+      if (!actor) throw new Error("No actor available");
+      return actor.deleteReview(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["reviews"] });
+    },
+  });
+}
+
 export { ExternalBlob, QuoteStatus, ServiceType };
-export type { Photo, Quote, SiteSettings };
+export type { Photo, Quote, Review, SiteSettings };

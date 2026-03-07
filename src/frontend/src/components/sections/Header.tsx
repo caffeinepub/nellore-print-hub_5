@@ -90,7 +90,7 @@ export default function Header() {
                 onClick={() => setLang(l.code)}
                 className={`w-8 h-7 rounded-md text-xs font-bold transition-all duration-200 ${
                   lang === l.code
-                    ? "brand-gradient text-black shadow-sm"
+                    ? "brand-gradient text-white shadow-sm"
                     : "text-white/60 hover:text-white hover:bg-white/8"
                 }`}
                 title={l.label}

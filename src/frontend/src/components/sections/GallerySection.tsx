@@ -63,7 +63,7 @@ export default function GallerySection() {
           transition={{ duration: 0.5 }}
           className="text-center mb-16"
         >
-          <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold tracking-widest uppercase brand-gradient text-black mb-4">
+          <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold tracking-widest uppercase brand-gradient text-white mb-4">
             {t.gallery.badge}
           </span>
           <h2 className="font-display font-black text-4xl sm:text-5xl text-white mb-4">

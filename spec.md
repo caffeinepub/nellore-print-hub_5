@@ -1,42 +1,36 @@
 # Nellore Print Hub
 
 ## Current State
-
-- Full landing page with services, quote form, gallery, and contact sections.
-- Admin panel at `/admin` (password: Magic123) with two tabs: Quotes and Site Settings.
-- Gallery section on the homepage displays 4 static placeholder images (generated at build time).
-- Backend stores quotes and site settings in Motoko.
-- No ability to upload or manage gallery photos without rebuilding the app.
+Full-stack printing business website with:
+- Landing page: hero, services, quote form, gallery, contact
+- Admin dashboard: quotes management, site settings, gallery photo manager
+- Backend: quotes, photos, site settings stored in Motoko
+- Theme: deep navy-indigo background, saffron/gold primary, peacock teal accent
 
 ## Requested Changes (Diff)
 
 ### Add
-- `GalleryPhoto` type in backend: `{ id: Nat, url: Text, title: Text, order: Nat, timestamp: Int }`.
-- Backend functions: `addGalleryPhoto`, `getGalleryPhotos`, `deleteGalleryPhoto`, `updateGalleryPhotoTitle`.
-- blob-storage component for photo uploads from admin panel.
-- New **Gallery** tab in the admin dashboard (third tab alongside Quotes and Site Settings).
-- Admin Gallery tab features:
-  - Upload button to add new photos (with title input) using blob-storage.
-  - Grid of uploaded photos with delete button on each and editable title.
-  - Loading, error, and empty states.
-- Homepage `GallerySection` updated to fetch photos dynamically from backend instead of using hardcoded static images.
-- If no photos have been uploaded yet, fall back to placeholder images.
+- **Website share button**: Share button on the homepage (hero or header area) using the Web Share API (falls back to copying link to clipboard on unsupported browsers). Shares the site URL with a message like "Check out Nellore Print Hub – Premium Printing in Nellore!"
+- **Customer Reviews section**: New `ReviewsSection` component on the homepage between gallery and contact. Customers can submit a review (name, star rating 1–5, message). Reviews are stored on the backend and displayed publicly in a card grid. 
+- **Admin Reviews tab**: New tab in the admin dashboard to view all submitted reviews and delete inappropriate ones.
+- **Backend Review model**: `Review` type with id, name, rating (Nat 1-5), message, timestamp. CRUD: submitReview, getReviews, deleteReview.
+- **Theme color change**: Shift primary theme from saffron/gold (orange) to a vibrant royal blue + gold/yellow combination — blue as the primary accent, gold as the secondary highlight. More professional and distinctive for a printing business.
 
 ### Modify
-- `AdminPage.tsx`: Add `"gallery"` as a third `AdminTab`, add Gallery tab button in header, add `GalleryPanel` component.
-- `GallerySection.tsx`: Replace static `GALLERY_SRCS` array with dynamic data from `useGetGalleryPhotos` hook.
-- `backend.d.ts`: Add `GalleryPhoto` interface and new backend function signatures.
-- `useQueries.ts` (or equivalent hooks file): Add `useGetGalleryPhotos`, `useAddGalleryPhoto`, `useDeleteGalleryPhoto`, `useUpdateGalleryPhotoTitle` hooks.
+- `index.css`: Update `--primary`, `--ring`, brand-gradient, glow utilities to use royal blue (#1A56DB or similar vibrant blue) as primary with gold (#FFC107) as secondary accent.
+- `HomePage.tsx`: Add `ReviewsSection` between gallery and contact; add share button in hero area or header.
+- `AdminPage.tsx`: Add "Reviews" tab to dashboard tab bar; add `ReviewsPanel` to manage reviews.
+- `backend.d.ts`: Add Review interface, submitReview, getReviews, deleteReview methods.
 
 ### Remove
-- Static hardcoded gallery image array in `GallerySection.tsx` (replaced by dynamic data).
+- Nothing removed.
 
 ## Implementation Plan
-
-1. Select `blob-storage` Caffeine component.
-2. Regenerate Motoko backend with `GalleryPhoto` type and gallery CRUD functions alongside existing quote and site settings logic.
-3. Update `backend.d.ts` with new types and function signatures.
-4. Add gallery query hooks to hooks file.
-5. Build `GalleryPanel` admin component: photo upload with title, photo grid, delete per photo.
-6. Add Gallery tab to admin `Dashboard` header and tab switcher.
-7. Update `GallerySection.tsx` to load photos from backend dynamically.
+1. Update `main.mo` to add Review type, submitReview, getReviews, deleteReview functions.
+2. Regenerate `backend.d.ts` with new Review API.
+3. Update `index.css` theme: primary to royal blue, keep gold as accent/secondary.
+4. Add `ReviewsSection.tsx` component with star rating submit form and review cards grid.
+5. Add share button to hero or header (Web Share API + clipboard fallback).
+6. Update `AdminPage.tsx` with Reviews tab and ReviewsPanel showing all reviews with delete option.
+7. Update `HomePage.tsx` to include `ReviewsSection`.
+8. Validate and deploy.

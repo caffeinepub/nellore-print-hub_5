@@ -29,6 +29,13 @@ export interface Quote {
 }
 export type QuoteStatus = { 'new' : null } |
   { 'replied' : null };
+export interface Review {
+  'id' : bigint,
+  'name' : string,
+  'message' : string,
+  'timestamp' : bigint,
+  'rating' : bigint,
+}
 export type ServiceType = { 'flexBanner' : null } |
   { 'digitalPrinting' : null } |
   { 'tShirtPrinting' : null } |
@@ -70,13 +77,16 @@ export interface _SERVICE {
   '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
   'addPhoto' : ActorMethod<[ExternalBlob, string, bigint], bigint>,
   'deletePhoto' : ActorMethod<[bigint], boolean>,
+  'deleteReview' : ActorMethod<[bigint], boolean>,
   'getPhotos' : ActorMethod<[], Array<Photo>>,
   'getQuoteById' : ActorMethod<[bigint], Quote>,
   'getQuotes' : ActorMethod<[], Array<Quote>>,
   'getQuotesByMobile' : ActorMethod<[string], Array<Quote>>,
   'getQuotesByService' : ActorMethod<[ServiceType], Array<Quote>>,
+  'getReviews' : ActorMethod<[], Array<Review>>,
   'getSiteSettings' : ActorMethod<[], SiteSettings>,
   'submitQuote' : ActorMethod<[string, string, ServiceType, string], bigint>,
+  'submitReview' : ActorMethod<[string, bigint, string], bigint>,
   'updatePhotoTitle' : ActorMethod<[bigint, string], boolean>,
   'updateQuoteStatus' : ActorMethod<[bigint, QuoteStatus], boolean>,
   'updateSiteSettings' : ActorMethod<[SiteSettings], boolean>,

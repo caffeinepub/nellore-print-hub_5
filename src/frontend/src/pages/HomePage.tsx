@@ -6,6 +6,7 @@ import Header from "../components/sections/Header";
 import HeroSection from "../components/sections/HeroSection";
 import MobileBottomNav from "../components/sections/MobileBottomNav";
 import QuoteSection from "../components/sections/QuoteSection";
+import ReviewsSection from "../components/sections/ReviewsSection";
 import ServicesSection from "../components/sections/ServicesSection";
 import WhatsAppButton from "../components/sections/WhatsAppButton";
 
@@ -18,6 +19,7 @@ export default function HomePage() {
         <ServicesSection />
         <QuoteSection />
         <GallerySection />
+        <ReviewsSection />
         <ContactSection />
       </main>
       <Footer />

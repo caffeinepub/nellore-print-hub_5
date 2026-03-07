@@ -14,6 +14,13 @@ export class ExternalBlob {
     static fromBytes(blob: Uint8Array<ArrayBuffer>): ExternalBlob;
     withUploadProgress(onProgress: (percentage: number) => void): ExternalBlob;
 }
+export interface Photo {
+    id: bigint;
+    title: string;
+    order: bigint;
+    blob: ExternalBlob;
+    timestamp: bigint;
+}
 export interface SiteSettings {
     tagline: string;
     whatsapp: string;
@@ -31,12 +38,12 @@ export interface Quote {
     details: string;
     mobile: string;
 }
-export interface Photo {
+export interface Review {
     id: bigint;
-    title: string;
-    order: bigint;
-    blob: ExternalBlob;
+    name: string;
+    message: string;
     timestamp: bigint;
+    rating: bigint;
 }
 export enum QuoteStatus {
     new_ = "new",
@@ -51,13 +58,16 @@ export enum ServiceType {
 export interface backendInterface {
     addPhoto(blob: ExternalBlob, title: string, order: bigint): Promise<bigint>;
     deletePhoto(id: bigint): Promise<boolean>;
+    deleteReview(id: bigint): Promise<boolean>;
     getPhotos(): Promise<Array<Photo>>;
     getQuoteById(id: bigint): Promise<Quote>;
     getQuotes(): Promise<Array<Quote>>;
     getQuotesByMobile(mobile: string): Promise<Array<Quote>>;
     getQuotesByService(service: ServiceType): Promise<Array<Quote>>;
+    getReviews(): Promise<Array<Review>>;
     getSiteSettings(): Promise<SiteSettings>;
     submitQuote(name: string, mobile: string, service: ServiceType, details: string): Promise<bigint>;
+    submitReview(name: string, rating: bigint, message: string): Promise<bigint>;
     updatePhotoTitle(id: bigint, newTitle: string): Promise<boolean>;
     updateQuoteStatus(id: bigint, status: QuoteStatus): Promise<boolean>;
     updateSiteSettings(settings: SiteSettings): Promise<boolean>;

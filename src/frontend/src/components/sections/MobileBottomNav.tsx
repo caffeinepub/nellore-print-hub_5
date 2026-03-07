@@ -1,4 +1,4 @@
-import { FileText, Home, Image, Phone, Scissors } from "lucide-react";
+import { FileText, Home, Image, Phone, Scissors, Star } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const NAV_ITEMS = [
@@ -6,6 +6,7 @@ const NAV_ITEMS = [
   { id: "services", label: "Services", Icon: Scissors },
   { id: "quote", label: "Quote", Icon: FileText },
   { id: "gallery", label: "Gallery", Icon: Image },
+  { id: "reviews", label: "Reviews", Icon: Star },
   { id: "contact", label: "Contact", Icon: Phone },
 ];
 

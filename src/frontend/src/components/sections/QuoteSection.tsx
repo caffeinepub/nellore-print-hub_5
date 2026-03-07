@@ -106,7 +106,7 @@ export default function QuoteSection() {
             transition={{ duration: 0.6 }}
             className="lg:sticky lg:top-28"
           >
-            <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold tracking-widest uppercase brand-gradient text-black mb-4">
+            <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold tracking-widest uppercase brand-gradient text-white mb-4">
               {t.quote.badge}
             </span>
             <h2 className="font-display font-black text-4xl sm:text-5xl text-white mb-6 leading-tight">
@@ -308,7 +308,7 @@ export default function QuoteSection() {
                 type="submit"
                 data-ocid="quote.submit_button"
                 disabled={isPending}
-                className="w-full h-12 brand-gradient text-black font-bold text-base rounded-xl hover:scale-[1.02] hover:shadow-fire transition-all duration-300 disabled:opacity-60 disabled:scale-100"
+                className="w-full h-12 brand-gradient text-white font-bold text-base rounded-xl hover:scale-[1.02] hover:shadow-fire transition-all duration-300 disabled:opacity-60 disabled:scale-100"
               >
                 {isPending ? (
                   <>

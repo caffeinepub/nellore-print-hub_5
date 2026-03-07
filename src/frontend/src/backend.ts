@@ -89,6 +89,13 @@ export class ExternalBlob {
         return this;
     }
 }
+export interface Photo {
+    id: bigint;
+    title: string;
+    order: bigint;
+    blob: ExternalBlob;
+    timestamp: bigint;
+}
 export interface SiteSettings {
     tagline: string;
     whatsapp: string;
@@ -113,16 +120,16 @@ export interface _CaffeineStorageCreateCertificateResult {
     method: string;
     blob_hash: string;
 }
+export interface Review {
+    id: bigint;
+    name: string;
+    message: string;
+    timestamp: bigint;
+    rating: bigint;
+}
 export interface _CaffeineStorageRefillResult {
     success?: boolean;
     topped_up_amount?: bigint;
-}
-export interface Photo {
-    id: bigint;
-    title: string;
-    order: bigint;
-    blob: ExternalBlob;
-    timestamp: bigint;
 }
 export enum QuoteStatus {
     new_ = "new",
@@ -143,13 +150,16 @@ export interface backendInterface {
     _caffeineStorageUpdateGatewayPrincipals(): Promise<void>;
     addPhoto(blob: ExternalBlob, title: string, order: bigint): Promise<bigint>;
     deletePhoto(id: bigint): Promise<boolean>;
+    deleteReview(id: bigint): Promise<boolean>;
     getPhotos(): Promise<Array<Photo>>;
     getQuoteById(id: bigint): Promise<Quote>;
     getQuotes(): Promise<Array<Quote>>;
     getQuotesByMobile(mobile: string): Promise<Array<Quote>>;
     getQuotesByService(service: ServiceType): Promise<Array<Quote>>;
+    getReviews(): Promise<Array<Review>>;
     getSiteSettings(): Promise<SiteSettings>;
     submitQuote(name: string, mobile: string, service: ServiceType, details: string): Promise<bigint>;
+    submitReview(name: string, rating: bigint, message: string): Promise<bigint>;
     updatePhotoTitle(id: bigint, newTitle: string): Promise<boolean>;
     updateQuoteStatus(id: bigint, status: QuoteStatus): Promise<boolean>;
     updateSiteSettings(settings: SiteSettings): Promise<boolean>;
@@ -269,6 +279,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async deleteReview(arg0: bigint): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.deleteReview(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.deleteReview(arg0);
+            return result;
+        }
+    }
     async getPhotos(): Promise<Array<Photo>> {
         if (this.processError) {
             try {
@@ -339,6 +363,20 @@ export class Backend implements backendInterface {
             return from_candid_vec_n19(this._uploadFile, this._downloadFile, result);
         }
     }
+    async getReviews(): Promise<Array<Review>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getReviews();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getReviews();
+            return result;
+        }
+    }
     async getSiteSettings(): Promise<SiteSettings> {
         if (this.processError) {
             try {
@@ -364,6 +402,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.submitQuote(arg0, arg1, to_candid_ServiceType_n20(this._uploadFile, this._downloadFile, arg2), arg3);
+            return result;
+        }
+    }
+    async submitReview(arg0: string, arg1: bigint, arg2: string): Promise<bigint> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.submitReview(arg0, arg1, arg2);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.submitReview(arg0, arg1, arg2);
             return result;
         }
     }
