@@ -2,16 +2,27 @@ import Map "mo:core/Map";
 import Array "mo:core/Array";
 import Order "mo:core/Order";
 import Text "mo:core/Text";
+import Nat "mo:core/Nat";
 import Iter "mo:core/Iter";
+import Blob "mo:core/Blob";
 import Runtime "mo:core/Runtime";
 import Time "mo:core/Time";
+import Storage "blob-storage/Storage";
+import MixinStorage "blob-storage/Mixin";
 
 actor {
+  include MixinStorage();
+
   type ServiceType = {
     #digitalPrinting;
     #flexBanner;
     #stickerPrinting;
     #tShirtPrinting;
+  };
+
+  type QuoteStatus = {
+    #new_;
+    #replied;
   };
 
   type Quote = {
@@ -21,13 +32,48 @@ actor {
     service : ServiceType;
     details : Text;
     timestamp : Int;
+    status : QuoteStatus;
+  };
+
+  type SiteSettings = {
+    phone : Text;
+    email : Text;
+    address : Text;
+    whatsapp : Text;
+    siteName : Text;
+    tagline : Text;
+  };
+
+  type Photo = {
+    id : Nat;
+    blob : Storage.ExternalBlob;
+    title : Text;
+    order : Nat;
+    timestamp : Int;
   };
 
   var nextId = 1;
+  var nextPhotoId = 1;
 
   let quotes = Map.empty<Nat, Quote>();
+  let photos = Map.empty<Nat, Photo>();
 
-  public shared ({ caller }) func submitQuote(name : Text, mobile : Text, service : ServiceType, details : Text) : async Nat {
+  var siteSettings : SiteSettings = {
+    phone = "+91-93905-35070";
+    email = "magic.nelloreprinthub@gmail.com";
+    address = "Dargamitta, Nellore";
+    whatsapp = "919390535070";
+    siteName = "Nellore Print Hub";
+    tagline = "Your Vision Printed to Perfection";
+  };
+
+  // Quote Management
+  public shared ({ caller }) func submitQuote(
+    name : Text,
+    mobile : Text,
+    service : ServiceType,
+    details : Text,
+  ) : async Nat {
     let id = nextId;
     nextId += 1;
 
@@ -38,6 +84,7 @@ actor {
       service;
       details;
       timestamp = Time.now();
+      status = #new_;
     };
 
     quotes.add(id, quote);
@@ -67,5 +114,76 @@ actor {
 
   public query ({ caller }) func getQuotesByMobile(mobile : Text) : async [Quote] {
     quotes.values().toArray().filter(func(q) { Text.equal(q.mobile, mobile) });
+  };
+
+  public shared ({ caller }) func updateQuoteStatus(id : Nat, status : QuoteStatus) : async Bool {
+    switch (quotes.get(id)) {
+      case (null) { Runtime.trap("Quote not found") };
+      case (?quote) {
+        let updatedQuote = { quote with status };
+        quotes.add(id, updatedQuote);
+        true;
+      };
+    };
+  };
+
+  // Site Settings
+  public query ({ caller }) func getSiteSettings() : async SiteSettings {
+    siteSettings;
+  };
+
+  public shared ({ caller }) func updateSiteSettings(settings : SiteSettings) : async Bool {
+    siteSettings := settings;
+    true;
+  };
+
+  // Gallery Photo Management
+  public shared ({ caller }) func addPhoto(blob : Storage.ExternalBlob, title : Text, order : Nat) : async Nat {
+    let id = nextPhotoId;
+    let photo : Photo = {
+      id;
+      blob;
+      title;
+      order;
+      timestamp = Time.now();
+    };
+
+    photos.add(id, photo);
+    nextPhotoId += 1;
+    id;
+  };
+
+  module Photo {
+    public func compareByOrderAndId(photo1 : Photo, photo2 : Photo) : Order.Order {
+      switch (Nat.compare(photo1.order, photo2.order)) {
+        case (#equal) { Nat.compare(photo1.id, photo2.id) };
+        case (other) { other };
+      };
+    };
+  };
+
+  public query ({ caller }) func getPhotos() : async [Photo] {
+    photos.values().toArray().sort(Photo.compareByOrderAndId);
+  };
+
+  public shared ({ caller }) func deletePhoto(id : Nat) : async Bool {
+    switch (photos.get(id)) {
+      case (null) { Runtime.trap("Photo not found") };
+      case (?_photo) {
+        photos.remove(id);
+        true;
+      };
+    };
+  };
+
+  public shared ({ caller }) func updatePhotoTitle(id : Nat, newTitle : Text) : async Bool {
+    switch (photos.get(id)) {
+      case (null) { Runtime.trap("Photo not found") };
+      case (?photo) {
+        let updatedPhoto = { photo with title = newTitle };
+        photos.add(id, updatedPhoto);
+        true;
+      };
+    };
   };
 };

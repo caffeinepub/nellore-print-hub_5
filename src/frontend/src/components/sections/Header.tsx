@@ -1,12 +1,15 @@
 import { Menu, X } from "lucide-react";
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
+import { useGetSiteSettings } from "../../hooks/useQueries";
 import { LANGUAGES, useLang } from "../../lib/i18n";
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { t, lang, setLang } = useLang();
+  const { data: settings } = useGetSiteSettings();
+  const siteName = settings?.siteName ?? "Nellore Print Hub";
 
   const navLinks = [
     { label: t.nav.home, href: "#home" },
@@ -46,8 +49,8 @@ export default function Header() {
           aria-label="Nellore Print Hub - Go to top"
         >
           <img
-            src="/assets/uploads/IMG_0635-1.png"
-            alt="Nellore Print Hub"
+            src="/assets/uploads/IMG_0675-1.png"
+            alt={siteName}
             className="h-14 w-auto object-contain group-hover:scale-105 transition-transform duration-200 drop-shadow-md"
             style={{ maxWidth: "180px" }}
           />

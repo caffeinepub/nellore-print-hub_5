@@ -1,13 +1,16 @@
 import { MessageCircle } from "lucide-react";
 import { motion } from "motion/react";
+import { useGetSiteSettings } from "../../hooks/useQueries";
 import { useLang } from "../../lib/i18n";
 
 export default function WhatsAppButton() {
   const { t } = useLang();
+  const { data: settings } = useGetSiteSettings();
+  const whatsapp = settings?.whatsapp ?? "919390535070";
 
   return (
     <motion.a
-      href="https://wa.me/919390535070"
+      href={`https://wa.me/${whatsapp}`}
       target="_blank"
       rel="noopener noreferrer"
       data-ocid="whatsapp.button"

@@ -10,24 +10,76 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
+export type ExternalBlob = Uint8Array;
+export interface Photo {
+  'id' : bigint,
+  'title' : string,
+  'order' : bigint,
+  'blob' : ExternalBlob,
+  'timestamp' : bigint,
+}
 export interface Quote {
   'id' : bigint,
   'service' : ServiceType,
+  'status' : QuoteStatus,
   'name' : string,
   'timestamp' : bigint,
   'details' : string,
   'mobile' : string,
 }
+export type QuoteStatus = { 'new' : null } |
+  { 'replied' : null };
 export type ServiceType = { 'flexBanner' : null } |
   { 'digitalPrinting' : null } |
   { 'tShirtPrinting' : null } |
   { 'stickerPrinting' : null };
+export interface SiteSettings {
+  'tagline' : string,
+  'whatsapp' : string,
+  'email' : string,
+  'siteName' : string,
+  'address' : string,
+  'phone' : string,
+}
+export interface _CaffeineStorageCreateCertificateResult {
+  'method' : string,
+  'blob_hash' : string,
+}
+export interface _CaffeineStorageRefillInformation {
+  'proposed_top_up_amount' : [] | [bigint],
+}
+export interface _CaffeineStorageRefillResult {
+  'success' : [] | [boolean],
+  'topped_up_amount' : [] | [bigint],
+}
 export interface _SERVICE {
+  '_caffeineStorageBlobIsLive' : ActorMethod<[Uint8Array], boolean>,
+  '_caffeineStorageBlobsToDelete' : ActorMethod<[], Array<Uint8Array>>,
+  '_caffeineStorageConfirmBlobDeletion' : ActorMethod<
+    [Array<Uint8Array>],
+    undefined
+  >,
+  '_caffeineStorageCreateCertificate' : ActorMethod<
+    [string],
+    _CaffeineStorageCreateCertificateResult
+  >,
+  '_caffeineStorageRefillCashier' : ActorMethod<
+    [[] | [_CaffeineStorageRefillInformation]],
+    _CaffeineStorageRefillResult
+  >,
+  '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
+  'addPhoto' : ActorMethod<[ExternalBlob, string, bigint], bigint>,
+  'deletePhoto' : ActorMethod<[bigint], boolean>,
+  'getPhotos' : ActorMethod<[], Array<Photo>>,
   'getQuoteById' : ActorMethod<[bigint], Quote>,
   'getQuotes' : ActorMethod<[], Array<Quote>>,
   'getQuotesByMobile' : ActorMethod<[string], Array<Quote>>,
   'getQuotesByService' : ActorMethod<[ServiceType], Array<Quote>>,
+  'getSiteSettings' : ActorMethod<[], SiteSettings>,
   'submitQuote' : ActorMethod<[string, string, ServiceType, string], bigint>,
+  'updatePhotoTitle' : ActorMethod<[bigint, string], boolean>,
+  'updateQuoteStatus' : ActorMethod<[bigint, QuoteStatus], boolean>,
+  'updateSiteSettings' : ActorMethod<[SiteSettings], boolean>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

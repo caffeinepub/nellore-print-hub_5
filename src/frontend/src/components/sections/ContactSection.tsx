@@ -1,31 +1,37 @@
 import { ExternalLink, Mail, MapPin, Phone } from "lucide-react";
 import { motion } from "motion/react";
+import { useGetSiteSettings } from "../../hooks/useQueries";
 import { useLang } from "../../lib/i18n";
 
 export default function ContactSection() {
   const { t } = useLang();
+  const { data: settings } = useGetSiteSettings();
+
+  const phone = settings?.phone ?? "+91 93905 35070";
+  const email = settings?.email ?? "magic.nelloreprinthub@gmail.com";
+  const address = settings?.address ?? "Dargamitta, Nellore, Andhra Pradesh";
 
   const contactItems = [
     {
       icon: Phone,
       label: t.contact.phone,
-      value: "+91 93905 35070",
-      href: "tel:+919390535070",
+      value: phone,
+      href: `tel:${phone.replace(/\s/g, "")}`,
       color: "text-emerald-400",
       bg: "bg-emerald-500/15",
     },
     {
       icon: Mail,
       label: t.contact.email,
-      value: "magic.nelloreprinthub@gmail.com",
-      href: "mailto:magic.nelloreprinthub@gmail.com",
+      value: email,
+      href: `mailto:${email}`,
       color: "text-blue-400",
       bg: "bg-blue-500/10",
     },
     {
       icon: MapPin,
       label: t.contact.address,
-      value: "Dargamitta, Nellore, Andhra Pradesh",
+      value: address,
       href: "https://maps.app.goo.gl/gXba56vXmLXL1eFp7?g_st=ic",
       color: "text-amber-400",
       bg: "bg-amber-500/15",

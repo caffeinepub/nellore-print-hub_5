@@ -8,61 +8,188 @@
 
 import { IDL } from '@icp-sdk/core/candid';
 
+export const _CaffeineStorageCreateCertificateResult = IDL.Record({
+  'method' : IDL.Text,
+  'blob_hash' : IDL.Text,
+});
+export const _CaffeineStorageRefillInformation = IDL.Record({
+  'proposed_top_up_amount' : IDL.Opt(IDL.Nat),
+});
+export const _CaffeineStorageRefillResult = IDL.Record({
+  'success' : IDL.Opt(IDL.Bool),
+  'topped_up_amount' : IDL.Opt(IDL.Nat),
+});
+export const ExternalBlob = IDL.Vec(IDL.Nat8);
+export const Photo = IDL.Record({
+  'id' : IDL.Nat,
+  'title' : IDL.Text,
+  'order' : IDL.Nat,
+  'blob' : ExternalBlob,
+  'timestamp' : IDL.Int,
+});
 export const ServiceType = IDL.Variant({
   'flexBanner' : IDL.Null,
   'digitalPrinting' : IDL.Null,
   'tShirtPrinting' : IDL.Null,
   'stickerPrinting' : IDL.Null,
 });
+export const QuoteStatus = IDL.Variant({
+  'new' : IDL.Null,
+  'replied' : IDL.Null,
+});
 export const Quote = IDL.Record({
   'id' : IDL.Nat,
   'service' : ServiceType,
+  'status' : QuoteStatus,
   'name' : IDL.Text,
   'timestamp' : IDL.Int,
   'details' : IDL.Text,
   'mobile' : IDL.Text,
 });
+export const SiteSettings = IDL.Record({
+  'tagline' : IDL.Text,
+  'whatsapp' : IDL.Text,
+  'email' : IDL.Text,
+  'siteName' : IDL.Text,
+  'address' : IDL.Text,
+  'phone' : IDL.Text,
+});
 
 export const idlService = IDL.Service({
+  '_caffeineStorageBlobIsLive' : IDL.Func(
+      [IDL.Vec(IDL.Nat8)],
+      [IDL.Bool],
+      ['query'],
+    ),
+  '_caffeineStorageBlobsToDelete' : IDL.Func(
+      [],
+      [IDL.Vec(IDL.Vec(IDL.Nat8))],
+      ['query'],
+    ),
+  '_caffeineStorageConfirmBlobDeletion' : IDL.Func(
+      [IDL.Vec(IDL.Vec(IDL.Nat8))],
+      [],
+      [],
+    ),
+  '_caffeineStorageCreateCertificate' : IDL.Func(
+      [IDL.Text],
+      [_CaffeineStorageCreateCertificateResult],
+      [],
+    ),
+  '_caffeineStorageRefillCashier' : IDL.Func(
+      [IDL.Opt(_CaffeineStorageRefillInformation)],
+      [_CaffeineStorageRefillResult],
+      [],
+    ),
+  '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
+  'addPhoto' : IDL.Func([ExternalBlob, IDL.Text, IDL.Nat], [IDL.Nat], []),
+  'deletePhoto' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+  'getPhotos' : IDL.Func([], [IDL.Vec(Photo)], ['query']),
   'getQuoteById' : IDL.Func([IDL.Nat], [Quote], ['query']),
   'getQuotes' : IDL.Func([], [IDL.Vec(Quote)], ['query']),
   'getQuotesByMobile' : IDL.Func([IDL.Text], [IDL.Vec(Quote)], ['query']),
   'getQuotesByService' : IDL.Func([ServiceType], [IDL.Vec(Quote)], ['query']),
+  'getSiteSettings' : IDL.Func([], [SiteSettings], ['query']),
   'submitQuote' : IDL.Func(
       [IDL.Text, IDL.Text, ServiceType, IDL.Text],
       [IDL.Nat],
       [],
     ),
+  'updatePhotoTitle' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Bool], []),
+  'updateQuoteStatus' : IDL.Func([IDL.Nat, QuoteStatus], [IDL.Bool], []),
+  'updateSiteSettings' : IDL.Func([SiteSettings], [IDL.Bool], []),
 });
 
 export const idlInitArgs = [];
 
 export const idlFactory = ({ IDL }) => {
+  const _CaffeineStorageCreateCertificateResult = IDL.Record({
+    'method' : IDL.Text,
+    'blob_hash' : IDL.Text,
+  });
+  const _CaffeineStorageRefillInformation = IDL.Record({
+    'proposed_top_up_amount' : IDL.Opt(IDL.Nat),
+  });
+  const _CaffeineStorageRefillResult = IDL.Record({
+    'success' : IDL.Opt(IDL.Bool),
+    'topped_up_amount' : IDL.Opt(IDL.Nat),
+  });
+  const ExternalBlob = IDL.Vec(IDL.Nat8);
+  const Photo = IDL.Record({
+    'id' : IDL.Nat,
+    'title' : IDL.Text,
+    'order' : IDL.Nat,
+    'blob' : ExternalBlob,
+    'timestamp' : IDL.Int,
+  });
   const ServiceType = IDL.Variant({
     'flexBanner' : IDL.Null,
     'digitalPrinting' : IDL.Null,
     'tShirtPrinting' : IDL.Null,
     'stickerPrinting' : IDL.Null,
   });
+  const QuoteStatus = IDL.Variant({ 'new' : IDL.Null, 'replied' : IDL.Null });
   const Quote = IDL.Record({
     'id' : IDL.Nat,
     'service' : ServiceType,
+    'status' : QuoteStatus,
     'name' : IDL.Text,
     'timestamp' : IDL.Int,
     'details' : IDL.Text,
     'mobile' : IDL.Text,
   });
+  const SiteSettings = IDL.Record({
+    'tagline' : IDL.Text,
+    'whatsapp' : IDL.Text,
+    'email' : IDL.Text,
+    'siteName' : IDL.Text,
+    'address' : IDL.Text,
+    'phone' : IDL.Text,
+  });
   
   return IDL.Service({
+    '_caffeineStorageBlobIsLive' : IDL.Func(
+        [IDL.Vec(IDL.Nat8)],
+        [IDL.Bool],
+        ['query'],
+      ),
+    '_caffeineStorageBlobsToDelete' : IDL.Func(
+        [],
+        [IDL.Vec(IDL.Vec(IDL.Nat8))],
+        ['query'],
+      ),
+    '_caffeineStorageConfirmBlobDeletion' : IDL.Func(
+        [IDL.Vec(IDL.Vec(IDL.Nat8))],
+        [],
+        [],
+      ),
+    '_caffeineStorageCreateCertificate' : IDL.Func(
+        [IDL.Text],
+        [_CaffeineStorageCreateCertificateResult],
+        [],
+      ),
+    '_caffeineStorageRefillCashier' : IDL.Func(
+        [IDL.Opt(_CaffeineStorageRefillInformation)],
+        [_CaffeineStorageRefillResult],
+        [],
+      ),
+    '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
+    'addPhoto' : IDL.Func([ExternalBlob, IDL.Text, IDL.Nat], [IDL.Nat], []),
+    'deletePhoto' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+    'getPhotos' : IDL.Func([], [IDL.Vec(Photo)], ['query']),
     'getQuoteById' : IDL.Func([IDL.Nat], [Quote], ['query']),
     'getQuotes' : IDL.Func([], [IDL.Vec(Quote)], ['query']),
     'getQuotesByMobile' : IDL.Func([IDL.Text], [IDL.Vec(Quote)], ['query']),
     'getQuotesByService' : IDL.Func([ServiceType], [IDL.Vec(Quote)], ['query']),
+    'getSiteSettings' : IDL.Func([], [SiteSettings], ['query']),
     'submitQuote' : IDL.Func(
         [IDL.Text, IDL.Text, ServiceType, IDL.Text],
         [IDL.Nat],
         [],
       ),
+    'updatePhotoTitle' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Bool], []),
+    'updateQuoteStatus' : IDL.Func([IDL.Nat, QuoteStatus], [IDL.Bool], []),
+    'updateSiteSettings' : IDL.Func([SiteSettings], [IDL.Bool], []),
   });
 };
 

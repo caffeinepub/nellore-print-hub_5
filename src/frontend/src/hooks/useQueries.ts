@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ServiceType } from "../backend";
-import type { Quote } from "../backend.d";
+import { ExternalBlob, QuoteStatus, ServiceType } from "../backend";
+import type { Photo, Quote, SiteSettings } from "../backend.d";
 import { useActor } from "./useActor";
 
 export function useGetQuotes() {
@@ -40,5 +40,149 @@ export function useSubmitQuote() {
   });
 }
 
-export { ServiceType };
-export type { Quote };
+export function useGetSiteSettings() {
+  const { actor, isFetching } = useActor();
+  return useQuery<SiteSettings>({
+    queryKey: ["siteSettings"],
+    queryFn: async () => {
+      if (!actor) throw new Error("No actor available");
+      return actor.getSiteSettings();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useUpdateSiteSettings() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (settings: SiteSettings) => {
+      if (!actor) throw new Error("No actor available");
+      return actor.updateSiteSettings(settings);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["siteSettings"] });
+    },
+  });
+}
+
+export function useUpdateQuoteStatus() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      status,
+    }: {
+      id: bigint;
+      status: QuoteStatus;
+    }) => {
+      if (!actor) throw new Error("No actor available");
+      return actor.updateQuoteStatus(id, status);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["quotes"] });
+    },
+  });
+}
+
+export function useGetPhotos() {
+  const { actor, isFetching } = useActor();
+  return useQuery<Photo[]>({
+    queryKey: ["photos"],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getPhotos();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useAddPhoto() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      bytes,
+      title,
+      order,
+    }: {
+      bytes: Uint8Array<ArrayBuffer>;
+      title: string;
+      order: bigint;
+      onProgress?: (pct: number) => void;
+    }) => {
+      if (!actor) throw new Error("No actor available");
+      const blob = ExternalBlob.fromBytes(bytes);
+      return actor.addPhoto(blob, title, order);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["photos"] });
+    },
+  });
+}
+
+export function useAddPhotoWithProgress() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      bytes,
+      title,
+      order,
+      onProgress,
+    }: {
+      bytes: Uint8Array<ArrayBuffer>;
+      title: string;
+      order: bigint;
+      onProgress?: (pct: number) => void;
+    }) => {
+      if (!actor) throw new Error("No actor available");
+      let blob = ExternalBlob.fromBytes(bytes);
+      if (onProgress) {
+        blob = blob.withUploadProgress(onProgress);
+      }
+      return actor.addPhoto(blob, title, order);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["photos"] });
+    },
+  });
+}
+
+export function useDeletePhoto() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: bigint) => {
+      if (!actor) throw new Error("No actor available");
+      return actor.deletePhoto(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["photos"] });
+    },
+  });
+}
+
+export function useUpdatePhotoTitle() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, newTitle }: { id: bigint; newTitle: string }) => {
+      if (!actor) throw new Error("No actor available");
+      return actor.updatePhotoTitle(id, newTitle);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["photos"] });
+    },
+  });
+}
+
+export { ExternalBlob, QuoteStatus, ServiceType };
+export type { Photo, Quote, SiteSettings };
