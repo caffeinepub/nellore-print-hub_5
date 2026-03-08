@@ -59,7 +59,7 @@ function InteractiveStarRating({
           onClick={() => onChange(star)}
           onMouseEnter={() => setHovered(star)}
           onMouseLeave={() => setHovered(0)}
-          className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
+          className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 rounded"
         >
           <Star
             className={`w-7 h-7 transition-all duration-150 ${
@@ -107,23 +107,23 @@ function ReviewCard({ review, idx }: { review: Review; idx: number }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.4, delay: idx * 0.07 }}
-      className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm card-hover flex flex-col gap-4"
+      className="bg-card rounded-2xl p-6 border border-orange-900/40 shadow-sm card-hover flex flex-col gap-4"
     >
       {/* Stars */}
       <StarRating rating={Number(review.rating)} size="md" />
 
       {/* Message */}
-      <p className="text-gray-700 text-sm leading-relaxed flex-1">
+      <p className="text-orange-100/80 text-sm leading-relaxed flex-1">
         "{review.message}"
       </p>
 
       {/* Reviewer info */}
-      <div className="flex items-center gap-3 pt-2 border-t border-gray-100">
+      <div className="flex items-center gap-3 pt-2 border-t border-orange-900/30">
         <div className="w-9 h-9 rounded-full brand-gradient flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
           {initials}
         </div>
         <div>
-          <p className="text-gray-900 font-semibold text-sm">{review.name}</p>
+          <p className="text-white font-semibold text-sm">{review.name}</p>
           <p className="text-muted-foreground text-xs">{date}</p>
         </div>
       </div>
@@ -175,7 +175,7 @@ function ReviewForm() {
   };
 
   const inputClass =
-    "bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 h-11 focus:border-blue-400 focus:ring-blue-200 rounded-xl";
+    "bg-red-950/40 border-orange-800/40 text-white placeholder:text-orange-300/40 h-11 focus:border-orange-500 focus:ring-orange-900/30 rounded-xl";
 
   return (
     <div className="mt-12">
@@ -205,9 +205,9 @@ function ReviewForm() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.35 }}
-            className="bg-white rounded-2xl p-6 sm:p-8 border border-blue-200 shadow-md max-w-xl mx-auto"
+            className="bg-card rounded-2xl p-6 sm:p-8 border border-orange-600/40 shadow-md max-w-xl mx-auto"
           >
-            <h3 className="font-display font-bold text-gray-900 text-lg mb-6 flex items-center gap-2">
+            <h3 className="font-display font-bold text-white text-lg mb-6 flex items-center gap-2">
               <Star className="w-5 h-5 text-amber-400 fill-amber-400" />
               Share Your Experience
             </h3>
@@ -215,7 +215,7 @@ function ReviewForm() {
             <form onSubmit={handleSubmit} className="space-y-5" noValidate>
               {/* Name */}
               <div className="space-y-2">
-                <Label className="text-gray-700 text-sm font-medium">
+                <Label className="text-orange-200 text-sm font-medium">
                   Your Name *
                 </Label>
                 <Input
@@ -237,7 +237,7 @@ function ReviewForm() {
 
               {/* Rating */}
               <div className="space-y-2">
-                <Label className="text-gray-700 text-sm font-medium">
+                <Label className="text-orange-200 text-sm font-medium">
                   Rating *
                 </Label>
                 <InteractiveStarRating
@@ -256,7 +256,7 @@ function ReviewForm() {
 
               {/* Message */}
               <div className="space-y-2">
-                <Label className="text-gray-700 text-sm font-medium">
+                <Label className="text-orange-200 text-sm font-medium">
                   Your Review *
                 </Label>
                 <Textarea
@@ -268,7 +268,7 @@ function ReviewForm() {
                   }}
                   placeholder="Tell others about your printing experience with us..."
                   rows={4}
-                  className={`bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-200 rounded-xl resize-none ${errors.message ? "border-red-400" : ""}`}
+                  className={`bg-red-950/40 border-orange-800/40 text-white placeholder:text-orange-300/40 focus:border-orange-500 focus:ring-orange-900/30 rounded-xl resize-none ${errors.message ? "border-red-400" : ""}`}
                 />
                 <div className="flex items-center justify-between">
                   {errors.message ? (
@@ -279,7 +279,7 @@ function ReviewForm() {
                     <span />
                   )}
                   <span
-                    className={`text-xs ml-auto ${message.length < 10 ? "text-gray-400" : "text-emerald-600"}`}
+                    className={`text-xs ml-auto ${message.length < 10 ? "text-orange-400/50" : "text-orange-300"}`}
                   >
                     {message.length} chars
                   </span>
@@ -295,7 +295,7 @@ function ReviewForm() {
                     setShowForm(false);
                     setErrors({});
                   }}
-                  className="flex-1 h-11 bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100 hover:text-gray-800 rounded-xl"
+                  className="flex-1 h-11 bg-red-950/40 border-orange-800/40 text-orange-200 hover:bg-red-900/30 hover:text-orange-100 rounded-xl"
                 >
                   Cancel
                 </Button>
@@ -340,12 +340,12 @@ export default function ReviewsSection() {
       data-ocid="reviews.section"
       className="relative py-24 px-4 sm:px-6 overflow-hidden"
     >
-      {/* Blue accent glow */}
+      {/* Red-orange accent glow */}
       <div
         className="absolute top-1/2 right-1/4 -translate-y-1/2 w-80 h-80 rounded-full blur-3xl opacity-10 pointer-events-none"
         style={{
           background:
-            "radial-gradient(circle, rgba(59,130,246,0.7) 0%, rgba(26,86,219,0.3) 50%, transparent 70%)",
+            "radial-gradient(circle, rgba(255,80,0,0.7) 0%, rgba(200,30,0,0.3) 50%, transparent 70%)",
         }}
       />
 
@@ -358,17 +358,17 @@ export default function ReviewsSection() {
           transition={{ duration: 0.5 }}
           className="text-center mb-12"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-blue-200 shadow-sm text-sm font-medium mb-6 text-blue-700">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass border border-orange-500/30 text-sm font-medium mb-6 text-orange-300">
             <MessageSquare className="w-4 h-4" />
             Customer Reviews
           </div>
-          <h2 className="font-display font-black text-4xl sm:text-5xl text-gray-900 mb-4">
+          <h2 className="font-display font-black text-4xl sm:text-5xl text-white mb-4">
             What Our <span className="brand-gradient-text">Customers Say</span>
           </h2>
           {reviews && reviews.length > 0 && (
             <div className="flex items-center justify-center gap-3 mt-4">
               <StarRating rating={Math.round(avgRating)} size="lg" />
-              <span className="text-gray-900 font-bold text-2xl">
+              <span className="text-white font-bold text-2xl">
                 {avgRating.toFixed(1)}
               </span>
               <span className="text-muted-foreground text-sm">
@@ -409,7 +409,7 @@ export default function ReviewsSection() {
         {!isLoading && !isError && (!reviews || reviews.length === 0) && (
           <div
             data-ocid="reviews.empty_state"
-            className="flex flex-col items-center justify-center py-16 text-center bg-white rounded-2xl mb-8 border border-gray-200 shadow-sm"
+            className="flex flex-col items-center justify-center py-16 text-center bg-card rounded-2xl mb-8 border border-orange-900/40 shadow-sm"
           >
             <div className="flex items-center gap-0.5 mb-4">
               {[1, 2, 3, 4, 5].map((s) => (
@@ -419,7 +419,7 @@ export default function ReviewsSection() {
                 />
               ))}
             </div>
-            <p className="text-gray-800 font-semibold mb-1">No reviews yet</p>
+            <p className="text-white font-semibold mb-1">No reviews yet</p>
             <p className="text-muted-foreground text-sm">
               Be the first to share your experience!
             </p>

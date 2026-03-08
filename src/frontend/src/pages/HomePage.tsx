@@ -4,7 +4,9 @@ import Footer from "../components/sections/Footer";
 import GallerySection from "../components/sections/GallerySection";
 import Header from "../components/sections/Header";
 import HeroSection from "../components/sections/HeroSection";
+import IntroSection from "../components/sections/IntroSection";
 import MobileBottomNav from "../components/sections/MobileBottomNav";
+import PostGalleryCTA from "../components/sections/PostGalleryCTA";
 import QuoteSection from "../components/sections/QuoteSection";
 import ReviewsSection from "../components/sections/ReviewsSection";
 import ServicesSection from "../components/sections/ServicesSection";
@@ -16,9 +18,11 @@ export default function HomePage() {
       <Header />
       <main className="pb-20 md:pb-0">
         <HeroSection />
+        <IntroSection />
         <ServicesSection />
         <QuoteSection />
         <GallerySection />
+        <PostGalleryCTA />
         <ReviewsSection />
         <ContactSection />
       </main>

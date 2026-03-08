@@ -1,36 +1,42 @@
 # Nellore Print Hub
 
 ## Current State
-Full-stack printing business website with:
-- Landing page: hero, services, quote form, gallery, contact
-- Admin dashboard: quotes management, site settings, gallery photo manager
-- Backend: quotes, photos, site settings stored in Motoko
-- Theme: deep navy-indigo background, saffron/gold primary, peacock teal accent
+- Light paper-white theme with ink-blue primary and saffron orange accent colors
+- Hero section has two CTA buttons (Start Order, View Services) and a separate smaller Share button below them
+- All sections use blue/saffron brand palette
+- Background is warm paper-white with halftone dot texture
+- Gallery section shows "Our Work" with photos
 
 ## Requested Changes (Diff)
 
 ### Add
-- **Website share button**: Share button on the homepage (hero or header area) using the Web Share API (falls back to copying link to clipboard on unsupported browsers). Shares the site URL with a message like "Check out Nellore Print Hub – Premium Printing in Nellore!"
-- **Customer Reviews section**: New `ReviewsSection` component on the homepage between gallery and contact. Customers can submit a review (name, star rating 1–5, message). Reviews are stored on the backend and displayed publicly in a card grid. 
-- **Admin Reviews tab**: New tab in the admin dashboard to view all submitted reviews and delete inappropriate ones.
-- **Backend Review model**: `Review` type with id, name, rating (Nat 1-5), message, timestamp. CRUD: submitReview, getReviews, deleteReview.
-- **Theme color change**: Shift primary theme from saffron/gold (orange) to a vibrant royal blue + gold/yellow combination — blue as the primary accent, gold as the secondary highlight. More professional and distinctive for a printing business.
+- A third prominent CTA button row in the Hero: "Start Your Order", "View Services", "Share this site" — all three displayed as equal-weight buttons in a single row/group (not separate rows)
+- A call-to-action band/strip AFTER the Gallery ("Our Work") section with the same three action buttons: Start Your Order, View Services, Share this site — so users are prompted to act after seeing the finished projects
 
 ### Modify
-- `index.css`: Update `--primary`, `--ring`, brand-gradient, glow utilities to use royal blue (#1A56DB or similar vibrant blue) as primary with gold (#FFC107) as secondary accent.
-- `HomePage.tsx`: Add `ReviewsSection` between gallery and contact; add share button in hero area or header.
-- `AdminPage.tsx`: Add "Reviews" tab to dashboard tab bar; add `ReviewsPanel` to manage reviews.
-- `backend.d.ts`: Add Review interface, submitReview, getReviews, deleteReview methods.
+- **Theme color overhaul**: Replace the blue/saffron palette with a red-orange fire gradient theme
+  - Background: deep warm dark red (#1a0500) or very dark burnt orange as base
+  - Primary brand color: vivid red-to-orange gradient (#FF2200 → #FF7A00)
+  - Accent: bright amber/orange (#FF9500)
+  - Text on dark backgrounds: white or warm cream (#FFF5E0)
+  - Text on light elements: deep charcoal (#1A0800)
+  - Cards/sections: dark semi-transparent red-tinted surfaces
+  - Halftone dot texture: tinted red/orange instead of blue
+  - Section dividers: red-to-orange gradient
+  - All brand-gradient, glass, fire-glow utilities updated to red-orange palette
+  - All inline blue/saffron color references in Hero, Intro, Services, Gallery sections replaced with red-orange equivalents
+  - Header glass effect: dark red-tinted
+  - Footer: deep dark red background
 
 ### Remove
-- Nothing removed.
+- The separate small "Share this site" button that appears below the two hero CTAs (it will be merged into the main three-button group)
 
 ## Implementation Plan
-1. Update `main.mo` to add Review type, submitReview, getReviews, deleteReview functions.
-2. Regenerate `backend.d.ts` with new Review API.
-3. Update `index.css` theme: primary to royal blue, keep gold as accent/secondary.
-4. Add `ReviewsSection.tsx` component with star rating submit form and review cards grid.
-5. Add share button to hero or header (Web Share API + clipboard fallback).
-6. Update `AdminPage.tsx` with Reviews tab and ReviewsPanel showing all reviews with delete option.
-7. Update `HomePage.tsx` to include `ReviewsSection`.
-8. Validate and deploy.
+1. Update `index.css` — remap all OKLCH CSS variables and utility classes to red-orange fire palette
+2. Update `HeroSection.tsx` — replace two-button + share layout with a unified three-button group (Start Your Order, View Services, Share this site); update all inline color references to red-orange
+3. Update `IntroSection.tsx` — update stat badge colors and gradient references to red-orange
+4. Update `ServicesSection.tsx` — update badge and section header gradient references; service card colors can keep their individual accents but section-level elements use red-orange
+5. Update `GallerySection.tsx` — update badge and overlay to red-orange
+6. Add a new `PostGalleryCTA.tsx` component — a bold strip after the gallery with heading "Ready to start your project?" and three buttons: Start Your Order (primary), View Services (secondary), Share this site (ghost)
+7. Update `HomePage.tsx` — insert `<PostGalleryCTA />` between `<GallerySection />` and `<ReviewsSection />`
+8. Update Header, Footer, WhatsApp, FloatingSocial, MobileBottomNav, Contact, Quote, Reviews sections — apply red-orange color palette throughout

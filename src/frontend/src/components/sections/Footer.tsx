@@ -36,13 +36,13 @@ export default function Footer() {
     typeof window !== "undefined" ? window.location.hostname : "";
 
   return (
-    <footer className="bg-gray-900">
-      {/* Indian flag tricolor decorative stripe */}
+    <footer className="bg-background border-t border-orange-900/30">
+      {/* Red-orange brand gradient stripe */}
       <div
-        className="w-full h-1 opacity-30"
+        className="w-full h-1"
         style={{
-          background:
-            "linear-gradient(90deg, #FF6B00 33%, #FFFFFF 33% 66%, #138808 66%)",
+          background: "linear-gradient(90deg, #CC1500, #FF7A00, #CC1500)",
+          opacity: 0.6,
         }}
       />
       <div className="max-w-7xl mx-auto px-6 py-12">
@@ -58,7 +58,7 @@ export default function Footer() {
           </div>
 
           {/* Tagline */}
-          <p className="text-muted-foreground text-sm text-center max-w-xs">
+          <p className="text-orange-200/60 text-sm text-center max-w-xs">
             {t.footer.tagline}
           </p>
 

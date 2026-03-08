@@ -27,58 +27,58 @@
   :root {
     --radius: 0.5rem;
 
-    /* Nellore Print Hub — Light Professional theme */
-    /* Warm paper white + ink blue + saffron orange */
-    --background: 0.97 0.006 80;
-    --foreground: 0.16 0.012 250;
+    /* Nellore Print Hub — Fire Red-Orange Dark theme */
+    /* Deep dark red-black + vivid red-orange + amber accents */
+    --background: 0.10 0.025 25;
+    --foreground: 0.95 0.012 60;
 
-    --card: 1.0 0.0 0;
-    --card-foreground: 0.16 0.012 250;
+    --card: 0.14 0.030 25;
+    --card-foreground: 0.93 0.010 60;
 
-    --popover: 0.99 0.004 80;
-    --popover-foreground: 0.16 0.012 250;
+    --popover: 0.13 0.028 25;
+    --popover-foreground: 0.93 0.010 60;
 
-    /* Primary = deep ink blue */
-    --primary: 0.36 0.14 248;
-    --primary-foreground: 0.98 0.003 250;
+    /* Primary = vivid orange-red */
+    --primary: 0.62 0.22 30;
+    --primary-foreground: 0.98 0.005 60;
 
-    /* Secondary = warm light gray */
-    --secondary: 0.93 0.008 80;
-    --secondary-foreground: 0.25 0.01 250;
+    /* Secondary = dark warm surface */
+    --secondary: 0.18 0.030 25;
+    --secondary-foreground: 0.85 0.012 60;
 
-    --muted: 0.94 0.006 80;
-    --muted-foreground: 0.50 0.018 250;
+    --muted: 0.16 0.025 25;
+    --muted-foreground: 0.62 0.020 40;
 
-    /* Accent = warm saffron orange */
-    --accent: 0.68 0.18 42;
-    --accent-foreground: 0.98 0.003 80;
+    /* Accent = vivid amber */
+    --accent: 0.72 0.19 50;
+    --accent-foreground: 0.12 0.020 25;
 
     --destructive: 0.577 0.245 27.325;
     --destructive-foreground: 0.97 0 0;
 
-    --border: 0.88 0.01 80;
-    --input: 0.90 0.008 80;
-    --ring: 0.36 0.14 248;
+    --border: 0.22 0.030 25;
+    --input: 0.20 0.028 25;
+    --ring: 0.62 0.22 30;
 
-    --chart-1: 0.36 0.14 248;
-    --chart-2: 0.55 0.16 195;
-    --chart-3: 0.65 0.12 155;
-    --chart-4: 0.68 0.18 42;
-    --chart-5: 0.60 0.20 30;
+    --chart-1: 0.62 0.22 30;
+    --chart-2: 0.72 0.19 50;
+    --chart-3: 0.65 0.20 40;
+    --chart-4: 0.55 0.18 25;
+    --chart-5: 0.80 0.15 60;
 
-    --sidebar: 0.95 0.006 80;
-    --sidebar-foreground: 0.16 0.012 250;
-    --sidebar-primary: 0.36 0.14 248;
-    --sidebar-primary-foreground: 0.98 0.003 250;
-    --sidebar-accent: 0.92 0.008 80;
-    --sidebar-accent-foreground: 0.25 0.01 250;
-    --sidebar-border: 0.86 0.01 80;
-    --sidebar-ring: 0.36 0.14 248;
+    --sidebar: 0.12 0.028 25;
+    --sidebar-foreground: 0.93 0.010 60;
+    --sidebar-primary: 0.62 0.22 30;
+    --sidebar-primary-foreground: 0.98 0.005 60;
+    --sidebar-accent: 0.18 0.030 25;
+    --sidebar-accent-foreground: 0.85 0.012 60;
+    --sidebar-border: 0.22 0.030 25;
+    --sidebar-ring: 0.62 0.22 30;
 
-    /* Brand gradient stops — ink blue to teal */
-    --brand-start: #1a3a6e;
-    --brand-end: #2563EB;
-    --gold: #E85D04;
+    /* Brand gradient stops — deep red to vivid orange */
+    --brand-start: #CC1500;
+    --brand-end: #FF7A00;
+    --gold: #FF9500;
     --whatsapp: #25d366;
   }
 
@@ -116,36 +116,36 @@
   }
 
   .glass {
-    background: rgba(255, 255, 255, 0.85);
+    background: rgba(30, 5, 0, 0.75);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(26, 58, 110, 0.10);
-    box-shadow: 0 2px 12px rgba(26, 58, 110, 0.06);
+    border: 1px solid rgba(255, 100, 0, 0.20);
+    box-shadow: 0 2px 12px rgba(255, 50, 0, 0.12);
   }
 
   .glass-dark {
-    background: rgba(255, 255, 255, 0.96);
+    background: rgba(15, 2, 0, 0.90);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(26, 58, 110, 0.12);
-    box-shadow: 0 2px 20px rgba(26, 58, 110, 0.08);
+    border-bottom: 1px solid rgba(255, 80, 0, 0.18);
+    box-shadow: 0 2px 20px rgba(200, 30, 0, 0.15);
   }
 
   .fire-glow {
     box-shadow:
-      0 0 24px rgba(26, 58, 110, 0.20),
-      0 0 48px rgba(37, 99, 235, 0.10);
+      0 0 24px rgba(255, 80, 0, 0.35),
+      0 0 48px rgba(255, 120, 0, 0.18);
   }
 
   .text-glow {
-    text-shadow: 0 2px 20px rgba(26, 58, 110, 0.30);
+    text-shadow: 0 2px 20px rgba(255, 80, 0, 0.45);
   }
 
   /* Saffron/orange glow for accents */
   .saffron-glow {
     box-shadow:
-      0 0 16px rgba(232, 93, 4, 0.25),
-      0 0 32px rgba(232, 93, 4, 0.12);
+      0 0 16px rgba(255, 120, 0, 0.30),
+      0 0 32px rgba(255, 80, 0, 0.15);
   }
 
   .card-hover {
@@ -158,8 +158,8 @@
   .card-hover:hover {
     transform: translateY(-8px);
     box-shadow:
-      0 16px 48px rgba(26, 58, 110, 0.12),
-      0 6px 20px rgba(0, 0, 0, 0.08);
+      0 16px 48px rgba(255, 80, 0, 0.18),
+      0 6px 20px rgba(0, 0, 0, 0.20);
   }
 
   .print-bg {
@@ -173,14 +173,14 @@
     pointer-events: none;
     z-index: 0;
     background-image:
-      radial-gradient(circle, rgba(26, 58, 110, 0.12) 1px, transparent 1px),
-      radial-gradient(circle, rgba(37, 99, 235, 0.06) 1px, transparent 1px);
+      radial-gradient(circle, rgba(255, 80, 0, 0.15) 1px, transparent 1px),
+      radial-gradient(circle, rgba(255, 120, 0, 0.08) 1px, transparent 1px);
     background-size: 30px 30px, 15px 15px;
     background-position: 0 0, 8px 8px;
     opacity: 0.5;
   }
 
-  /* Ornamental border — ink blue gradient */
+  /* Ornamental border — red-orange gradient */
   .india-border {
     border: 2px solid transparent;
     background-clip: padding-box;
@@ -192,7 +192,7 @@
     position: absolute;
     inset: -2px;
     border-radius: inherit;
-    background: linear-gradient(135deg, #1a3a6e, #2563EB, #1a3a6e);
+    background: linear-gradient(135deg, #CC1500, #FF7A00, #CC1500);
     z-index: -1;
     opacity: 0.4;
   }
@@ -200,7 +200,7 @@
   /* Decorative section divider */
   .section-divider {
     height: 3px;
-    background: linear-gradient(90deg, transparent, #1a3a6e, #2563EB, #1a3a6e, transparent);
+    background: linear-gradient(90deg, transparent, #CC1500, #FF7A00, #CC1500, transparent);
     margin: 0 auto;
     width: 80px;
     border-radius: 2px;

@@ -18,6 +18,7 @@ export const translations = {
   en: {
     nav: {
       home: "Home",
+      about: "About",
       services: "Services",
       quote: "Quote",
       gallery: "Gallery",
@@ -151,6 +152,7 @@ export const translations = {
   te: {
     nav: {
       home: "హోమ్",
+      about: "గురించి",
       services: "సేవలు",
       quote: "కోట్",
       gallery: "గ్యాలరీ",
@@ -261,6 +263,7 @@ export const translations = {
   hi: {
     nav: {
       home: "होम",
+      about: "हमारे बारे में",
       services: "सेवाएं",
       quote: "कोट",
       gallery: "गैलरी",
@@ -371,6 +374,7 @@ export const translations = {
   ar: {
     nav: {
       home: "الرئيسية",
+      about: "عن الشركة",
       services: "الخدمات",
       quote: "عرض سعر",
       gallery: "معرض",

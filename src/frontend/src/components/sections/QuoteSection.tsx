@@ -89,10 +89,10 @@ export default function QuoteSection() {
     <section id="quote" className="py-24 px-6 relative">
       {/* Background decoration */}
       <div
-        className="absolute bottom-0 left-0 w-80 h-80 rounded-full blur-3xl opacity-5"
+        className="absolute bottom-0 left-0 w-80 h-80 rounded-full blur-3xl opacity-10"
         style={{
           background:
-            "radial-gradient(circle, rgba(255,255,255,0.4), transparent 70%)",
+            "radial-gradient(circle, rgba(255,80,0,0.4), transparent 70%)",
         }}
       />
 
@@ -109,7 +109,7 @@ export default function QuoteSection() {
             <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold tracking-widest uppercase brand-gradient text-white mb-4">
               {t.quote.badge}
             </span>
-            <h2 className="font-display font-black text-4xl sm:text-5xl text-gray-900 mb-6 leading-tight">
+            <h2 className="font-display font-black text-4xl sm:text-5xl text-white mb-6 leading-tight">
               {t.quote.heading1}
               <br />
               <span className="brand-gradient-text">{t.quote.heading2}</span>
@@ -127,7 +127,7 @@ export default function QuoteSection() {
                       <FeatureIcon className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <div className="font-semibold text-gray-900 text-sm">
+                      <div className="font-semibold text-white text-sm">
                         {item.title}
                       </div>
                       <div className="text-muted-foreground text-sm">
@@ -149,7 +149,7 @@ export default function QuoteSection() {
           >
             <form
               onSubmit={handleSubmit}
-              className="bg-white india-border rounded-2xl p-8 space-y-5 shadow-md"
+              className="bg-card india-border rounded-2xl p-8 space-y-5 shadow-md"
             >
               {/* Success state */}
               {submitted && (
@@ -170,10 +170,12 @@ export default function QuoteSection() {
               <div className="space-y-2">
                 <Label
                   htmlFor="quote-name"
-                  className="text-gray-700 text-sm font-medium"
+                  className="text-orange-200 text-sm font-medium"
                 >
                   {t.quote.form.name}{" "}
-                  <span className="text-gray-400">{t.quote.form.required}</span>
+                  <span className="text-orange-400/60">
+                    {t.quote.form.required}
+                  </span>
                 </Label>
                 <Input
                   id="quote-name"
@@ -183,7 +185,7 @@ export default function QuoteSection() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
-                  className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-100 h-11"
+                  className="bg-red-950/40 border-orange-800/40 text-white placeholder:text-orange-300/40 focus:border-orange-500 focus:ring-orange-900/30 h-11"
                 />
               </div>
 
@@ -191,10 +193,12 @@ export default function QuoteSection() {
               <div className="space-y-2">
                 <Label
                   htmlFor="quote-mobile"
-                  className="text-gray-700 text-sm font-medium"
+                  className="text-orange-200 text-sm font-medium"
                 >
                   {t.quote.form.mobile}{" "}
-                  <span className="text-gray-400">{t.quote.form.required}</span>
+                  <span className="text-orange-400/60">
+                    {t.quote.form.required}
+                  </span>
                 </Label>
                 <Input
                   id="quote-mobile"
@@ -204,15 +208,17 @@ export default function QuoteSection() {
                   value={mobile}
                   onChange={(e) => setMobile(e.target.value)}
                   required
-                  className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-100 h-11"
+                  className="bg-red-950/40 border-orange-800/40 text-white placeholder:text-orange-300/40 focus:border-orange-500 focus:ring-orange-900/30 h-11"
                 />
               </div>
 
               {/* Service */}
               <div className="space-y-2">
-                <Label className="text-gray-700 text-sm font-medium">
+                <Label className="text-orange-200 text-sm font-medium">
                   {t.quote.form.service}{" "}
-                  <span className="text-gray-400">{t.quote.form.required}</span>
+                  <span className="text-orange-400/60">
+                    {t.quote.form.required}
+                  </span>
                 </Label>
                 <Select
                   value={service}
@@ -220,18 +226,18 @@ export default function QuoteSection() {
                 >
                   <SelectTrigger
                     data-ocid="quote.select"
-                    className="bg-gray-50 border-gray-200 text-gray-900 focus:border-blue-400 h-11"
+                    className="bg-red-950/40 border-orange-800/40 text-white focus:border-orange-500 h-11"
                   >
                     <SelectValue
                       placeholder={t.quote.form.servicePlaceholder}
                     />
                   </SelectTrigger>
-                  <SelectContent className="bg-white border-gray-200">
+                  <SelectContent className="bg-red-950 border-orange-800/50">
                     {SERVICE_OPTIONS.map((opt) => (
                       <SelectItem
                         key={opt.value}
                         value={opt.value}
-                        className="text-gray-900 hover:bg-blue-50 focus:bg-blue-50"
+                        className="text-orange-100 hover:bg-orange-900/40 focus:bg-orange-900/40"
                       >
                         {opt.label}
                       </SelectItem>
@@ -244,10 +250,12 @@ export default function QuoteSection() {
               <div className="space-y-2">
                 <Label
                   htmlFor="quote-details"
-                  className="text-gray-700 text-sm font-medium"
+                  className="text-orange-200 text-sm font-medium"
                 >
                   {t.quote.form.details}{" "}
-                  <span className="text-gray-400">{t.quote.form.required}</span>
+                  <span className="text-orange-400/60">
+                    {t.quote.form.required}
+                  </span>
                 </Label>
                 <Textarea
                   id="quote-details"
@@ -257,15 +265,15 @@ export default function QuoteSection() {
                   onChange={(e) => setDetails(e.target.value)}
                   required
                   rows={4}
-                  className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-100 resize-none"
+                  className="bg-red-950/40 border-orange-800/40 text-white placeholder:text-orange-300/40 focus:border-orange-500 focus:ring-orange-900/30 resize-none"
                 />
               </div>
 
               {/* File Upload */}
               <div className="space-y-2">
-                <Label className="text-gray-700 text-sm font-medium">
+                <Label className="text-orange-200 text-sm font-medium">
                   {t.quote.form.fileLabel}{" "}
-                  <span className="text-gray-400 font-normal">
+                  <span className="text-orange-400/60 font-normal">
                     {t.quote.form.fileOptional}
                   </span>
                 </Label>
@@ -274,9 +282,9 @@ export default function QuoteSection() {
                   className="relative cursor-pointer w-full text-left"
                   onClick={() => fileInputRef.current?.click()}
                 >
-                  <div className="flex items-center gap-3 p-3.5 rounded-xl border border-gray-200 border-dashed bg-gray-50 hover:bg-blue-50 hover:border-blue-300 transition-all duration-200">
-                    <Upload className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                    <span className="text-sm text-gray-400">
+                  <div className="flex items-center gap-3 p-3.5 rounded-xl border border-orange-800/40 border-dashed bg-red-950/30 hover:bg-orange-900/20 hover:border-orange-600/50 transition-all duration-200">
+                    <Upload className="w-5 h-5 text-orange-400/60 flex-shrink-0" />
+                    <span className="text-sm text-orange-300/60">
                       {fileName || t.quote.form.fileUpload}
                     </span>
                   </div>
@@ -296,7 +304,7 @@ export default function QuoteSection() {
               {isPending && (
                 <div
                   data-ocid="quote.loading_state"
-                  className="flex items-center gap-2 text-gray-500 text-sm"
+                  className="flex items-center gap-2 text-orange-300/70 text-sm"
                 >
                   <Loader2 className="w-4 h-4 animate-spin" />
                   {t.quote.submittingMsg}

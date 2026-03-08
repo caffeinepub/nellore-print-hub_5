@@ -13,6 +13,7 @@ export default function Header() {
 
   const navLinks = [
     { label: t.nav.home, href: "#home" },
+    { label: t.nav.about, href: "#about" },
     { label: t.nav.services, href: "#services" },
     { label: t.nav.quote, href: "#quote" },
     { label: t.nav.gallery, href: "#gallery" },
@@ -70,7 +71,7 @@ export default function Header() {
                 e.preventDefault();
                 handleNavClick(link.href);
               }}
-              className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 rounded-lg hover:bg-blue-50 transition-all duration-200 relative group"
+              className="px-4 py-2 text-sm font-medium text-orange-200 hover:text-white rounded-lg hover:bg-orange-900/30 transition-all duration-200 relative group"
             >
               {link.label}
               <span className="absolute bottom-0.5 left-4 right-4 h-0.5 brand-gradient rounded-full scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left" />
@@ -81,7 +82,7 @@ export default function Header() {
         {/* Language Switcher + Mobile Toggle */}
         <div className="flex items-center gap-2 flex-shrink-0">
           {/* Language switcher */}
-          <div className="flex items-center gap-1 rounded-lg bg-gray-100 p-1">
+          <div className="flex items-center gap-1 rounded-lg bg-red-950/60 border border-orange-800/40 p-1">
             {LANGUAGES.map((l) => (
               <button
                 key={l.code}
@@ -91,7 +92,7 @@ export default function Header() {
                 className={`w-8 h-7 rounded-md text-xs font-bold transition-all duration-200 ${
                   lang === l.code
                     ? "brand-gradient text-white shadow-sm"
-                    : "text-gray-500 hover:text-gray-800 hover:bg-gray-200"
+                    : "text-orange-300/70 hover:text-orange-100 hover:bg-orange-900/40"
                 }`}
                 title={l.label}
                 aria-label={`Switch to ${l.label}`}
@@ -104,7 +105,7 @@ export default function Header() {
           {/* Mobile menu toggle */}
           <button
             type="button"
-            className="md:hidden text-gray-700 hover:text-gray-900 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="md:hidden text-orange-200 hover:text-white p-2 rounded-lg hover:bg-orange-900/40 transition-colors"
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
           >
@@ -117,12 +118,12 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Indian flag tricolor decorative stripe */}
+      {/* Red-orange brand stripe */}
       <div
-        className="w-full h-0.5 opacity-30"
+        className="w-full h-0.5"
         style={{
-          background:
-            "linear-gradient(90deg, #FF6B00 33%, #FFFFFF 33% 66%, #138808 66%)",
+          background: "linear-gradient(90deg, #CC1500, #FF7A00, #CC1500)",
+          opacity: 0.5,
         }}
       />
 
@@ -132,7 +133,7 @@ export default function Header() {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
-          className="md:hidden glass-dark border-t border-gray-200 px-6 py-4 flex flex-col gap-1"
+          className="md:hidden glass-dark border-t border-orange-900/40 px-6 py-4 flex flex-col gap-1"
         >
           {navLinks.map((link) => (
             <a
@@ -143,7 +144,7 @@ export default function Header() {
                 e.preventDefault();
                 handleNavClick(link.href);
               }}
-              className="px-4 py-3 text-sm font-medium text-gray-700 hover:text-gray-900 rounded-lg hover:bg-blue-50 transition-all duration-200"
+              className="px-4 py-3 text-sm font-medium text-orange-200 hover:text-white rounded-lg hover:bg-orange-900/30 transition-all duration-200"
             >
               {link.label}
             </a>
