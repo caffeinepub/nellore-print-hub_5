@@ -36,7 +36,13 @@ export default function MobileBottomNav() {
   };
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-red-950/90 backdrop-blur-xl border-t border-orange-800/40 shadow-lg">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-t border-gray-200 shadow-lg">
+      <div
+        className="absolute top-0 left-0 right-0 h-0.5"
+        style={{
+          background: "linear-gradient(90deg, #1E3A8A, #F97316)",
+        }}
+      />
       <div className="flex items-center justify-around px-2 py-2">
         {NAV_ITEMS.map(({ id, label, Icon }) => {
           const isActive = activeSection === id;
@@ -47,18 +53,21 @@ export default function MobileBottomNav() {
               data-ocid={`mobile_nav.${id}.button`}
               onClick={() => scrollTo(id)}
               className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-200 ${
-                isActive
-                  ? "text-orange-400"
-                  : "text-orange-300/60 hover:text-orange-200"
+                isActive ? "text-gray-900" : "text-gray-400 hover:text-gray-600"
               }`}
             >
               <div
-                className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-200 ${isActive ? "bg-orange-900/50" : ""}`}
+                className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-200 ${
+                  isActive ? "brand-gradient" : ""
+                }`}
               >
-                <Icon style={{ width: "18px", height: "18px" }} />
+                <Icon
+                  style={{ width: "18px", height: "18px" }}
+                  className={isActive ? "text-black" : ""}
+                />
               </div>
               <span
-                className={`text-[10px] font-medium ${isActive ? "text-orange-400" : "text-orange-300/60"}`}
+                className={`text-[10px] font-medium ${isActive ? "brand-gradient-text" : "text-gray-400"}`}
               >
                 {label}
               </span>

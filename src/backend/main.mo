@@ -7,7 +7,9 @@ import Iter "mo:core/Iter";
 import Runtime "mo:core/Runtime";
 import Time "mo:core/Time";
 import Storage "blob-storage/Storage";
+
 import MixinStorage "blob-storage/Mixin";
+
 
 actor {
   include MixinStorage();
@@ -59,13 +61,25 @@ actor {
     timestamp : Int;
   };
 
+  type Customer = {
+    id : Nat;
+    name : Text;
+    mobile : Text;
+    firstVisit : Int;
+    lastVisit : Int;
+    visitCount : Nat;
+  };
+
   var nextId = 1;
   var nextPhotoId = 1;
   var nextReviewId = 1;
+  var nextCustomerId = 1;
 
   let quotes = Map.empty<Nat, Quote>();
   let photos = Map.empty<Nat, Photo>();
   let reviews = Map.empty<Nat, Review>();
+  let customers = Map.empty<Nat, Customer>();
+  let customerByMobile = Map.empty<Text, Nat>();
 
   var siteSettings : SiteSettings = {
     phone = "+91-93905-35070";
@@ -196,7 +210,7 @@ actor {
     };
   };
 
-  // ************** Reviews (NEW) **************
+  // Reviews
   public shared ({ caller }) func submitReview(name : Text, rating : Nat, message : Text) : async Nat {
     if (rating < 1 or rating > 5) {
       Runtime.trap("Rating must be between 1 and 5");
@@ -226,6 +240,68 @@ actor {
       case (?_) {
         reviews.remove(id);
         true;
+      };
+    };
+  };
+
+  // ******************** Customer Management ********************
+  public shared ({ caller }) func registerOrLoginCustomer(name : Text, mobile : Text) : async Customer {
+    let now = Time.now();
+
+    switch (customerByMobile.get(mobile)) {
+      case (null) {
+        let id = nextCustomerId;
+        let newCustomer : Customer = {
+          id;
+          name;
+          mobile;
+          firstVisit = now;
+          lastVisit = now;
+          visitCount = 1;
+        };
+        customers.add(id, newCustomer);
+        customerByMobile.add(mobile, id);
+        nextCustomerId += 1;
+        newCustomer;
+      };
+      case (?id) {
+        switch (customers.get(id)) {
+          case (null) { Runtime.trap("Customer data inconsistency") };
+          case (?existing) {
+            let updatedCustomer = {
+              id;
+              name;
+              mobile;
+              firstVisit = existing.firstVisit;
+              lastVisit = now;
+              visitCount = existing.visitCount + 1;
+            };
+            customers.add(id, updatedCustomer);
+            updatedCustomer;
+          };
+        };
+      };
+    };
+  };
+
+  module Customer {
+    public func compareByLastVisitDesc(c1 : Customer, c2 : Customer) : Order.Order {
+      Int.compare(c2.lastVisit, c1.lastVisit);
+    };
+  };
+
+  public query ({ caller }) func getCustomers() : async [Customer] {
+    customers.values().toArray().sort(Customer.compareByLastVisitDesc);
+  };
+
+  public query ({ caller }) func getCustomerByMobile(mobile : Text) : async Customer {
+    switch (customerByMobile.get(mobile)) {
+      case (null) { Runtime.trap("Customer not found") };
+      case (?id) {
+        switch (customers.get(id)) {
+          case (null) { Runtime.trap("Customer not found") };
+          case (?customer) { customer };
+        };
       };
     };
   };

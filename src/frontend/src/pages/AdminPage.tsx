@@ -33,19 +33,22 @@ import {
   Star,
   Trash2,
   Upload,
+  UserCheck,
+  Users,
   X,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { SiWhatsapp } from "react-icons/si";
 import { toast } from "sonner";
-import type { Photo, Quote, Review } from "../backend.d";
+import type { Customer, Photo, Quote, Review } from "../backend.d";
 import {
   QuoteStatus,
   ServiceType,
   useAddPhotoWithProgress,
   useDeletePhoto,
   useDeleteReview,
+  useGetCustomers,
   useGetPhotos,
   useGetQuotes,
   useGetReviews,
@@ -493,6 +496,7 @@ function QuotesPanel() {
 function SiteSettingsPanel() {
   const { data: settings, isLoading, isError } = useGetSiteSettings();
   const updateSettings = useUpdateSiteSettings();
+  const addPhoto = useAddPhotoWithProgress();
 
   const [form, setForm] = useState({
     siteName: "",
@@ -502,8 +506,25 @@ function SiteSettingsPanel() {
     address: "",
     whatsapp: "",
   });
-  const [logoUrl, setLogoUrl] = useState("");
-  const [logoPreviewOk, setLogoPreviewOk] = useState(false);
+
+  // Logo upload state
+  const [currentLogoSrc, setCurrentLogoSrc] = useState<string>(
+    () =>
+      localStorage.getItem("nph_logo_url") || "/assets/uploads/IMG_0675-1.png",
+  );
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(null);
+  const [logoUploading, setLogoUploading] = useState(false);
+  const [logoUploadProgress, setLogoUploadProgress] = useState(0);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+
+  // Intro text state
+  const [introHeadline, setIntroHeadline] = useState(
+    () => localStorage.getItem("nph_intro_headline") || "",
+  );
+  const [introDesc, setIntroDesc] = useState(
+    () => localStorage.getItem("nph_intro_desc") || "",
+  );
 
   // Sync form when settings load
   useEffect(() => {
@@ -519,6 +540,46 @@ function SiteSettingsPanel() {
     }
   }, [settings]);
 
+  const handleLogoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setLogoFile(file);
+    const previewUrl = URL.createObjectURL(file);
+    setLogoPreviewUrl(previewUrl);
+  };
+
+  const handleLogoUpload = async () => {
+    if (!logoFile) return;
+    setLogoUploading(true);
+    setLogoUploadProgress(0);
+    try {
+      const arrayBuffer = await logoFile.arrayBuffer();
+      const bytes = new Uint8Array(arrayBuffer) as Uint8Array<ArrayBuffer>;
+      const resultId = await addPhoto.mutateAsync({
+        bytes,
+        title: `logo_${Date.now()}`,
+        order: 0n,
+        onProgress: (pct) => setLogoUploadProgress(pct),
+      });
+      // Build the direct URL from blob id
+      const blobUrl = `/api/blob/${resultId}`;
+      // Use the preview URL as the logo since blob URL may not be directly accessible
+      // Save to localStorage using the object URL temporarily; for production use blobUrl
+      const savedUrl = logoPreviewUrl || blobUrl;
+      localStorage.setItem("nph_logo_url", savedUrl);
+      setCurrentLogoSrc(savedUrl);
+      window.dispatchEvent(new Event("logo-updated"));
+      toast.success("Logo updated successfully!");
+      setLogoFile(null);
+      setLogoPreviewUrl(null);
+    } catch {
+      toast.error("Failed to upload logo. Please try again.");
+    } finally {
+      setLogoUploading(false);
+      setLogoUploadProgress(0);
+    }
+  };
+
   const handleSave = async () => {
     try {
       await updateSettings.mutateAsync({
@@ -529,6 +590,18 @@ function SiteSettingsPanel() {
         address: form.address,
         whatsapp: form.whatsapp,
       });
+      // Save intro text to localStorage
+      if (introHeadline.trim()) {
+        localStorage.setItem("nph_intro_headline", introHeadline.trim());
+      } else {
+        localStorage.removeItem("nph_intro_headline");
+      }
+      if (introDesc.trim()) {
+        localStorage.setItem("nph_intro_desc", introDesc.trim());
+      } else {
+        localStorage.removeItem("nph_intro_desc");
+      }
+      window.dispatchEvent(new Event("intro-updated"));
       toast.success("Settings saved successfully!");
     } catch {
       toast.error("Failed to save settings. Please try again.");
@@ -570,6 +643,7 @@ function SiteSettingsPanel() {
 
   return (
     <div className="space-y-8">
+      {/* Business Information */}
       <div className="glass rounded-2xl p-6 space-y-6">
         <h3 className="font-display font-bold text-white text-lg flex items-center gap-2">
           <Settings className="w-5 h-5 text-blue-400" />
@@ -663,71 +737,164 @@ function SiteSettingsPanel() {
         </div>
       </div>
 
-      {/* Logo Preview Section */}
+      {/* Logo Upload Section */}
       <div className="glass rounded-2xl p-6 space-y-4">
         <h3 className="font-display font-bold text-white text-lg flex items-center gap-2">
           <Printer className="w-5 h-5 text-blue-400" />
-          Logo Preview
+          Company Logo
         </h3>
-        <div className="space-y-3">
-          <div className="space-y-2">
-            <Label className="text-white/80 text-sm font-medium">
-              Logo URL
-            </Label>
-            <Input
-              value={logoUrl}
-              onChange={(e) => {
-                setLogoUrl(e.target.value);
-                setLogoPreviewOk(false);
+
+        {/* Current logo preview */}
+        <div className="flex items-center gap-4 p-4 bg-white/5 rounded-xl border border-white/10">
+          <div className="w-24 h-16 rounded-xl bg-white/10 flex items-center justify-center overflow-hidden border border-white/10">
+            <img
+              src={currentLogoSrc}
+              alt="Current logo"
+              className="max-h-14 max-w-20 object-contain"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src =
+                  "/assets/uploads/IMG_0675-1.png";
               }}
-              placeholder="https://example.com/logo.png or /assets/uploads/logo.png"
-              className={inputClass}
             />
           </div>
-          {logoUrl && (
-            <div className="flex items-center gap-4">
-              <div className="glass rounded-xl p-3 flex items-center justify-center min-w-20 min-h-16">
-                <img
-                  src={logoUrl}
-                  alt="Logo preview"
-                  className="max-h-16 max-w-36 object-contain"
-                  onLoad={() => setLogoPreviewOk(true)}
-                  onError={() => setLogoPreviewOk(false)}
-                />
-              </div>
-              <div>
-                {logoPreviewOk ? (
-                  <span className="flex items-center gap-1.5 text-emerald-400 text-sm">
-                    <CheckCircle2 className="w-4 h-4" />
-                    Logo loaded successfully
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1.5 text-red-400 text-sm">
-                    <AlertCircle className="w-4 h-4" />
-                    Could not load image
-                  </span>
-                )}
-                <p className="text-muted-foreground text-xs mt-1">
-                  Current logo: /assets/uploads/IMG_0635-1.png
+          <div>
+            <p className="text-white/80 text-sm font-medium">
+              Current Active Logo
+            </p>
+            <p className="text-muted-foreground text-xs mt-0.5">
+              Upload a new image below to replace it
+            </p>
+          </div>
+        </div>
+
+        {/* Upload zone */}
+        <div className="space-y-3">
+          <label
+            data-ocid="admin.logo.dropzone"
+            htmlFor="logo-file-input"
+            className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-white/15 hover:border-blue-500/40 rounded-xl p-6 cursor-pointer transition-all duration-200 bg-white/3 hover:bg-white/6"
+          >
+            {logoFile ? (
+              <>
+                <CheckCircle2 className="w-8 h-8 text-blue-400" />
+                <p className="text-white font-medium text-sm">
+                  {logoFile.name}
                 </p>
-              </div>
-            </div>
-          )}
-          {!logoUrl && (
-            <div className="flex items-center gap-4">
-              <div className="glass rounded-xl p-3 flex items-center justify-center min-w-20 min-h-16">
+                <p className="text-muted-foreground text-xs">
+                  {(logoFile.size / 1024).toFixed(0)} KB — click to change
+                </p>
+              </>
+            ) : (
+              <>
+                <Upload className="w-8 h-8 text-white/30" />
+                <p className="text-white/60 text-sm font-medium">
+                  Click to upload new logo
+                </p>
+                <p className="text-white/30 text-xs">
+                  PNG, JPG, SVG, WebP supported
+                </p>
+              </>
+            )}
+          </label>
+          <input
+            id="logo-file-input"
+            ref={logoInputRef}
+            data-ocid="admin.logo.upload_button"
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleLogoFileChange}
+          />
+
+          {/* Preview new logo */}
+          {logoPreviewUrl && (
+            <div className="flex items-center gap-4 p-3 bg-blue-500/10 rounded-xl border border-blue-500/20">
+              <div className="w-20 h-14 rounded-lg bg-white flex items-center justify-center overflow-hidden">
                 <img
-                  src="/assets/uploads/IMG_0635-1.png"
-                  alt="Current logo"
-                  className="max-h-16 max-w-36 object-contain"
+                  src={logoPreviewUrl}
+                  alt="New logo preview"
+                  className="max-h-12 max-w-16 object-contain"
                 />
               </div>
-              <p className="text-muted-foreground text-sm">
-                Current active logo — enter a URL above to preview a
-                replacement.
-              </p>
+              <div className="flex-1">
+                <p className="text-blue-300 text-sm font-medium">
+                  New logo ready to upload
+                </p>
+                <p className="text-blue-400/60 text-xs">{logoFile?.name}</p>
+              </div>
+              <Button
+                data-ocid="admin.logo.save_button"
+                onClick={handleLogoUpload}
+                disabled={logoUploading}
+                size="sm"
+                className="brand-gradient text-black font-bold rounded-xl gap-2 flex-shrink-0"
+              >
+                {logoUploading ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    {Math.round(logoUploadProgress)}%
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-3.5 h-3.5" />
+                    Apply Logo
+                  </>
+                )}
+              </Button>
             </div>
           )}
+
+          {logoUploading && (
+            <Progress
+              value={logoUploadProgress}
+              className="h-1.5 bg-white/10 [&>div]:brand-gradient"
+            />
+          )}
+        </div>
+      </div>
+
+      {/* Company Intro Text Section */}
+      <div className="glass rounded-2xl p-6 space-y-5">
+        <h3 className="font-display font-bold text-white text-lg flex items-center gap-2">
+          <Pencil className="w-5 h-5 text-blue-400" />
+          Company Intro Text
+        </h3>
+        <p className="text-muted-foreground text-sm">
+          Edit the headline and description shown in the "About" section of the
+          homepage.
+        </p>
+
+        <div className="space-y-2">
+          <Label className="text-white/80 text-sm font-medium">
+            Intro Headline
+          </Label>
+          <Input
+            data-ocid="admin.settings.intro_headline.input"
+            value={introHeadline}
+            onChange={(e) => setIntroHeadline(e.target.value)}
+            placeholder="e.g. Nellore's Most Trusted Printing Studio"
+            className={inputClass}
+          />
+          <p className="text-xs text-muted-foreground">
+            Leave blank to use default headline.
+          </p>
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-white/80 text-sm font-medium">
+            Intro Description
+          </Label>
+          <Textarea
+            data-ocid="admin.settings.intro_desc.input"
+            value={introDesc}
+            onChange={(e) => setIntroDesc(e.target.value)}
+            placeholder="At Magic Advertising, we don't just print — we craft your brand's first impression..."
+            rows={4}
+            className="bg-white/5 border-white/12 text-white placeholder:text-white/30 focus:border-blue-500/50 focus:ring-blue-500/20 rounded-xl resize-none"
+          />
+          <p className="text-xs text-muted-foreground">
+            Leave blank to use default description.
+          </p>
         </div>
       </div>
 
@@ -736,7 +903,7 @@ function SiteSettingsPanel() {
         data-ocid="admin.settings.save.button"
         onClick={handleSave}
         disabled={updateSettings.isPending}
-        className="w-full h-12 brand-gradient text-white font-bold rounded-xl hover:scale-[1.01] transition-all duration-200 disabled:opacity-60 disabled:scale-100 text-base gap-2"
+        className="w-full h-12 brand-gradient text-black font-bold rounded-xl hover:scale-[1.01] transition-all duration-200 disabled:opacity-60 disabled:scale-100 text-base gap-2"
       >
         {updateSettings.isPending ? (
           <>
@@ -1441,9 +1608,220 @@ function ReviewsPanel() {
   );
 }
 
+// ─── Visitors Panel ────────────────────────────────────────────────────────────
+
+function VisitorRow({ customer, idx }: { customer: Customer; idx: number }) {
+  const whatsappMsg = encodeURIComponent(
+    `Hi ${customer.name}, thank you for visiting Nellore Print Hub! How can we help you today?`,
+  );
+
+  return (
+    <TableRow
+      data-ocid={`admin.visitors.row.${idx + 1}`}
+      className="border-white/6 hover:bg-white/4 transition-colors"
+    >
+      <TableCell className="text-muted-foreground text-sm font-mono w-10">
+        {idx + 1}
+      </TableCell>
+      <TableCell className="text-white font-semibold">
+        {customer.name}
+      </TableCell>
+      <TableCell>
+        <a
+          href={`tel:${customer.mobile}`}
+          className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors"
+        >
+          {customer.mobile}
+        </a>
+      </TableCell>
+      <TableCell className="text-muted-foreground text-sm hidden lg:table-cell whitespace-nowrap">
+        {formatTimestamp(customer.firstVisit)}
+      </TableCell>
+      <TableCell className="text-muted-foreground text-sm hidden md:table-cell whitespace-nowrap">
+        {formatTimestamp(customer.lastVisit)}
+      </TableCell>
+      <TableCell>
+        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-purple-500/15 text-purple-300 border border-purple-500/30">
+          <UserCheck className="w-3 h-3" />
+          {String(customer.visitCount)}
+        </span>
+      </TableCell>
+      <TableCell>
+        <div className="flex items-center gap-1.5">
+          <a href={`tel:${customer.mobile}`}>
+            <button
+              type="button"
+              title="Call"
+              className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 flex items-center justify-center transition-all duration-200"
+            >
+              <Phone className="w-3.5 h-3.5" />
+            </button>
+          </a>
+          <a
+            href={`https://wa.me/${customer.mobile.replace(/[^0-9]/g, "")}?text=${whatsappMsg}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <button
+              type="button"
+              title="WhatsApp"
+              className="w-7 h-7 rounded-lg bg-[#25D366]/10 border border-[#25D366]/30 text-[#25D366] hover:bg-[#25D366]/20 flex items-center justify-center transition-all duration-200"
+            >
+              <SiWhatsapp className="w-3.5 h-3.5" />
+            </button>
+          </a>
+        </div>
+      </TableCell>
+    </TableRow>
+  );
+}
+
+function VisitorsPanel() {
+  const { data: customers, isLoading, isError } = useGetCustomers();
+
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  const todayStartMs = todayStart.getTime();
+
+  const newTodayCount =
+    customers?.filter((c) => {
+      try {
+        const ms = Number(c.firstVisit / 1_000_000n);
+        return ms >= todayStartMs;
+      } catch {
+        return false;
+      }
+    }).length ?? 0;
+
+  const totalCount = customers?.length ?? 0;
+
+  return (
+    <div className="space-y-6">
+      {/* Stats row */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 max-w-sm">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+          className="glass rounded-xl p-4 flex flex-col gap-1"
+        >
+          <span className="text-muted-foreground text-xs uppercase tracking-wider">
+            Total Visitors
+          </span>
+          <span className="font-display font-black text-3xl text-white">
+            {isLoading ? (
+              <Skeleton className="h-8 w-12 bg-white/5" />
+            ) : (
+              totalCount
+            )}
+          </span>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="glass rounded-xl p-4 flex flex-col gap-1 border border-purple-500/20"
+        >
+          <span className="text-purple-400/70 text-xs uppercase tracking-wider">
+            New Today
+          </span>
+          <span className="font-display font-black text-3xl text-purple-300">
+            {isLoading ? (
+              <Skeleton className="h-8 w-12 bg-white/5" />
+            ) : (
+              newTodayCount
+            )}
+          </span>
+        </motion.div>
+      </div>
+
+      {/* Loading */}
+      {isLoading && (
+        <div data-ocid="admin.visitors.loading_state" className="space-y-2">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <Skeleton key={i} className="h-14 w-full rounded-xl bg-white/5" />
+          ))}
+        </div>
+      )}
+
+      {/* Error */}
+      {isError && (
+        <div
+          data-ocid="admin.visitors.error_state"
+          className="flex items-center gap-3 p-5 glass rounded-2xl border border-red-500/20 text-red-400"
+        >
+          <AlertCircle className="w-5 h-5 flex-shrink-0" />
+          <p className="text-sm">Failed to load visitors. Please refresh.</p>
+        </div>
+      )}
+
+      {/* Empty state */}
+      {!isLoading && !isError && (!customers || customers.length === 0) && (
+        <div
+          data-ocid="admin.visitors.empty_state"
+          className="flex flex-col items-center justify-center py-20 text-center glass rounded-2xl"
+        >
+          <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
+            <Users className="w-7 h-7 text-muted-foreground" />
+          </div>
+          <p className="text-white font-semibold mb-1">No visitors yet</p>
+          <p className="text-muted-foreground text-sm">
+            Visitors who sign in on the site will appear here.
+          </p>
+        </div>
+      )}
+
+      {/* Table */}
+      {!isLoading && !isError && customers && customers.length > 0 && (
+        <div
+          data-ocid="admin.visitors.table"
+          className="glass rounded-2xl overflow-hidden"
+        >
+          <Table>
+            <TableHeader>
+              <TableRow className="border-white/8 hover:bg-transparent">
+                <TableHead className="text-white/60 font-semibold w-10">
+                  #
+                </TableHead>
+                <TableHead className="text-white/60 font-semibold">
+                  Name
+                </TableHead>
+                <TableHead className="text-white/60 font-semibold">
+                  Mobile
+                </TableHead>
+                <TableHead className="text-white/60 font-semibold hidden lg:table-cell">
+                  First Visit
+                </TableHead>
+                <TableHead className="text-white/60 font-semibold hidden md:table-cell">
+                  Last Visit
+                </TableHead>
+                <TableHead className="text-white/60 font-semibold">
+                  Visits
+                </TableHead>
+                <TableHead className="text-white/60 font-semibold w-24">
+                  Actions
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {customers.map((customer, idx) => (
+                <VisitorRow
+                  key={String(customer.id)}
+                  customer={customer}
+                  idx={idx}
+                />
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Dashboard (after login) ───────────────────────────────────────────────────
 
-type AdminTab = "quotes" | "settings" | "gallery" | "reviews";
+type AdminTab = "quotes" | "settings" | "gallery" | "reviews" | "visitors";
 
 function Dashboard() {
   const [activeTab, setActiveTab] = useState<AdminTab>("quotes");
@@ -1519,6 +1897,19 @@ function Dashboard() {
             >
               <Star className="w-4 h-4" />
               <span className="hidden sm:inline">Reviews</span>
+            </button>
+            <button
+              type="button"
+              data-ocid="admin.visitors.tab"
+              onClick={() => setActiveTab("visitors")}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                activeTab === "visitors"
+                  ? "brand-gradient text-white font-bold"
+                  : "text-white/60 hover:text-white"
+              }`}
+            >
+              <Users className="w-4 h-4" />
+              <span className="hidden sm:inline">Visitors</span>
             </button>
           </div>
 
@@ -1604,7 +1995,7 @@ function Dashboard() {
               </div>
               <GalleryPanel />
             </motion.div>
-          ) : (
+          ) : activeTab === "reviews" ? (
             <motion.div
               key="reviews"
               initial={{ opacity: 0, x: 16 }}
@@ -1622,6 +2013,25 @@ function Dashboard() {
                 </p>
               </div>
               <ReviewsPanel />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="visitors"
+              initial={{ opacity: 0, x: 16 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -16 }}
+              transition={{ duration: 0.22 }}
+            >
+              <div className="mb-6">
+                <h2 className="font-display font-bold text-2xl text-white flex items-center gap-2">
+                  <Users className="w-6 h-6 text-purple-400" />
+                  Site Visitors
+                </h2>
+                <p className="text-muted-foreground text-sm mt-0.5">
+                  Customers who have signed in on the website.
+                </p>
+              </div>
+              <VisitorsPanel />
             </motion.div>
           )}
         </AnimatePresence>

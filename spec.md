@@ -1,42 +1,32 @@
 # Nellore Print Hub
 
 ## Current State
-- Light paper-white theme with ink-blue primary and saffron orange accent colors
-- Hero section has two CTA buttons (Start Order, View Services) and a separate smaller Share button below them
-- All sections use blue/saffron brand palette
-- Background is warm paper-white with halftone dot texture
-- Gallery section shows "Our Work" with photos
+- Customer login exists but is triggered only via a "Login" button in the header nav
+- No auto-login on page load — customers must manually click the button
+- Theme uses a rainbow multi-color palette (red, orange, yellow, green, blue, violet) which feels busy
+- LoginModal has no "free website" messaging
 
 ## Requested Changes (Diff)
 
 ### Add
-- A third prominent CTA button row in the Hero: "Start Your Order", "View Services", "Share this site" — all three displayed as equal-weight buttons in a single row/group (not separate rows)
-- A call-to-action band/strip AFTER the Gallery ("Our Work") section with the same three action buttons: Start Your Order, View Services, Share this site — so users are prompted to act after seeing the finished projects
+- Auto-open login modal on first visit (when no `nph_customer` in localStorage)
+- "Free website" badge/text inside the login modal, prominently placed
+- Clear messaging that no OTP is needed, just name and number
 
 ### Modify
-- **Theme color overhaul**: Replace the blue/saffron palette with a red-orange fire gradient theme
-  - Background: deep warm dark red (#1a0500) or very dark burnt orange as base
-  - Primary brand color: vivid red-to-orange gradient (#FF2200 → #FF7A00)
-  - Accent: bright amber/orange (#FF9500)
-  - Text on dark backgrounds: white or warm cream (#FFF5E0)
-  - Text on light elements: deep charcoal (#1A0800)
-  - Cards/sections: dark semi-transparent red-tinted surfaces
-  - Halftone dot texture: tinted red/orange instead of blue
-  - Section dividers: red-to-orange gradient
-  - All brand-gradient, glass, fire-glow utilities updated to red-orange palette
-  - All inline blue/saffron color references in Hero, Intro, Services, Gallery sections replaced with red-orange equivalents
-  - Header glass effect: dark red-tinted
-  - Footer: deep dark red background
+- LoginModal: show a friendly headline like "Welcome to Nellore Print Hub — Free Access!", add a "100% Free • No OTP • Instant Access" badge, make it feel warm and welcoming
+- Theme: replace the busy rainbow palette with a clean, professional yet attractive scheme — warm white background, deep navy/indigo as primary, saffron orange as accent highlight; simple and good-looking for customers
+- index.css: update CSS custom properties and gradient utilities to match new theme
+- App.tsx: add auto-login trigger logic — after actor is ready, if no customer in localStorage, open login modal automatically
+- Header.tsx: pass loginOpen state down or use a shared event so App-level auto-open works seamlessly
 
 ### Remove
-- The separate small "Share this site" button that appears below the two hero CTAs (it will be merged into the main three-button group)
+- Rainbow gradient backgrounds from buttons and the top bar stripe (replace with clean solid/subtle gradient)
 
 ## Implementation Plan
-1. Update `index.css` — remap all OKLCH CSS variables and utility classes to red-orange fire palette
-2. Update `HeroSection.tsx` — replace two-button + share layout with a unified three-button group (Start Your Order, View Services, Share this site); update all inline color references to red-orange
-3. Update `IntroSection.tsx` — update stat badge colors and gradient references to red-orange
-4. Update `ServicesSection.tsx` — update badge and section header gradient references; service card colors can keep their individual accents but section-level elements use red-orange
-5. Update `GallerySection.tsx` — update badge and overlay to red-orange
-6. Add a new `PostGalleryCTA.tsx` component — a bold strip after the gallery with heading "Ready to start your project?" and three buttons: Start Your Order (primary), View Services (secondary), Share this site (ghost)
-7. Update `HomePage.tsx` — insert `<PostGalleryCTA />` between `<GallerySection />` and `<ReviewsSection />`
-8. Update Header, Footer, WhatsApp, FloatingSocial, MobileBottomNav, Contact, Quote, Reviews sections — apply red-orange color palette throughout
+1. Update `index.css` — new color tokens: warm white background, deep navy primary, saffron orange accent, clean grays; remove rainbow gradient utilities, replace with simple brand gradient (navy→saffron)
+2. Update `LoginModal.tsx` — add "FREE" badge, "100% Free Access" headline, update colors to match new theme, keep "No OTP" note prominent
+3. Update `App.tsx` — add auto-login modal trigger: if actor ready and no `nph_customer` in storage, fire an event or set state to open LoginModal on first load
+4. Update `Header.tsx` — respond to auto-open event from App, show modal on first visit automatically
+5. Update `HomePage.tsx` if needed for new theme utilities
+6. Validate and deploy

@@ -50,7 +50,7 @@ export default function FloatingSocial() {
             stiffness: 200,
           }}
           whileHover={{ x: 4, scale: 1.15 }}
-          className="w-10 h-10 glass rounded-lg flex items-center justify-center opacity-60 hover:opacity-100 transition-opacity duration-200 border border-white/10 hover:border-white/30"
+          className="w-10 h-10 bg-white/80 backdrop-blur-sm rounded-lg flex items-center justify-center opacity-60 hover:opacity-100 transition-opacity duration-200 border border-gray-200 hover:border-gray-400 shadow-xs"
         >
           <img
             src={social.icon}

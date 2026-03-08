@@ -38,6 +38,14 @@ export interface Quote {
     details: string;
     mobile: string;
 }
+export interface Customer {
+    id: bigint;
+    visitCount: bigint;
+    name: string;
+    firstVisit: bigint;
+    lastVisit: bigint;
+    mobile: string;
+}
 export interface Review {
     id: bigint;
     name: string;
@@ -59,6 +67,8 @@ export interface backendInterface {
     addPhoto(blob: ExternalBlob, title: string, order: bigint): Promise<bigint>;
     deletePhoto(id: bigint): Promise<boolean>;
     deleteReview(id: bigint): Promise<boolean>;
+    getCustomerByMobile(mobile: string): Promise<Customer>;
+    getCustomers(): Promise<Array<Customer>>;
     getPhotos(): Promise<Array<Photo>>;
     getQuoteById(id: bigint): Promise<Quote>;
     getQuotes(): Promise<Array<Quote>>;
@@ -66,6 +76,7 @@ export interface backendInterface {
     getQuotesByService(service: ServiceType): Promise<Array<Quote>>;
     getReviews(): Promise<Array<Review>>;
     getSiteSettings(): Promise<SiteSettings>;
+    registerOrLoginCustomer(name: string, mobile: string): Promise<Customer>;
     submitQuote(name: string, mobile: string, service: ServiceType, details: string): Promise<bigint>;
     submitReview(name: string, rating: bigint, message: string): Promise<bigint>;
     updatePhotoTitle(id: bigint, newTitle: string): Promise<boolean>;

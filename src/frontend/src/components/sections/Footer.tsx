@@ -36,13 +36,13 @@ export default function Footer() {
     typeof window !== "undefined" ? window.location.hostname : "";
 
   return (
-    <footer className="bg-background border-t border-orange-900/30">
-      {/* Red-orange brand gradient stripe */}
+    <footer className="bg-white border-t border-gray-200">
+      {/* Brand gradient stripe */}
       <div
         className="w-full h-1"
         style={{
-          background: "linear-gradient(90deg, #CC1500, #FF7A00, #CC1500)",
-          opacity: 0.6,
+          background: "linear-gradient(90deg, #1E3A8A, #F97316)",
+          opacity: 0.8,
         }}
       />
       <div className="max-w-7xl mx-auto px-6 py-12">
@@ -52,13 +52,13 @@ export default function Footer() {
             <div className="w-9 h-9 rounded-lg brand-gradient flex items-center justify-center">
               <PrinterCheck className="w-5 h-5 text-black" />
             </div>
-            <span className="font-display font-bold text-lg text-white">
+            <span className="font-display font-bold text-lg text-gray-900">
               Nellore <span className="brand-gradient-text">Print Hub</span>
             </span>
           </div>
 
           {/* Tagline */}
-          <p className="text-orange-200/60 text-sm text-center max-w-xs">
+          <p className="text-gray-500 text-sm text-center max-w-xs">
             {t.footer.tagline}
           </p>
 
@@ -84,10 +84,10 @@ export default function Footer() {
           </div>
 
           {/* Divider */}
-          <div className="w-full h-px bg-white/10" />
+          <div className="w-full h-px bg-gray-200" />
 
           {/* Bottom row */}
-          <div className="flex flex-col sm:flex-row items-center justify-between w-full gap-3 text-xs text-muted-foreground">
+          <div className="flex flex-col sm:flex-row items-center justify-between w-full gap-3 text-xs text-gray-400">
             <p>
               © {year} {t.footer.copyright}
             </p>
@@ -97,7 +97,7 @@ export default function Footer() {
                 href={`https://caffeine.ai?utm_source=caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(hostname)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-white/70 hover:text-white transition-colors"
+                className="text-gray-600 hover:text-gray-900 transition-colors"
               >
                 caffeine.ai
               </a>

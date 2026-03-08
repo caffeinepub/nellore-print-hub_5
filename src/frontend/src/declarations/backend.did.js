@@ -20,6 +20,14 @@ export const _CaffeineStorageRefillResult = IDL.Record({
   'topped_up_amount' : IDL.Opt(IDL.Nat),
 });
 export const ExternalBlob = IDL.Vec(IDL.Nat8);
+export const Customer = IDL.Record({
+  'id' : IDL.Nat,
+  'visitCount' : IDL.Nat,
+  'name' : IDL.Text,
+  'firstVisit' : IDL.Int,
+  'lastVisit' : IDL.Int,
+  'mobile' : IDL.Text,
+});
 export const Photo = IDL.Record({
   'id' : IDL.Nat,
   'title' : IDL.Text,
@@ -92,6 +100,8 @@ export const idlService = IDL.Service({
   'addPhoto' : IDL.Func([ExternalBlob, IDL.Text, IDL.Nat], [IDL.Nat], []),
   'deletePhoto' : IDL.Func([IDL.Nat], [IDL.Bool], []),
   'deleteReview' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+  'getCustomerByMobile' : IDL.Func([IDL.Text], [Customer], ['query']),
+  'getCustomers' : IDL.Func([], [IDL.Vec(Customer)], ['query']),
   'getPhotos' : IDL.Func([], [IDL.Vec(Photo)], ['query']),
   'getQuoteById' : IDL.Func([IDL.Nat], [Quote], ['query']),
   'getQuotes' : IDL.Func([], [IDL.Vec(Quote)], ['query']),
@@ -99,6 +109,7 @@ export const idlService = IDL.Service({
   'getQuotesByService' : IDL.Func([ServiceType], [IDL.Vec(Quote)], ['query']),
   'getReviews' : IDL.Func([], [IDL.Vec(Review)], ['query']),
   'getSiteSettings' : IDL.Func([], [SiteSettings], ['query']),
+  'registerOrLoginCustomer' : IDL.Func([IDL.Text, IDL.Text], [Customer], []),
   'submitQuote' : IDL.Func(
       [IDL.Text, IDL.Text, ServiceType, IDL.Text],
       [IDL.Nat],
@@ -125,6 +136,14 @@ export const idlFactory = ({ IDL }) => {
     'topped_up_amount' : IDL.Opt(IDL.Nat),
   });
   const ExternalBlob = IDL.Vec(IDL.Nat8);
+  const Customer = IDL.Record({
+    'id' : IDL.Nat,
+    'visitCount' : IDL.Nat,
+    'name' : IDL.Text,
+    'firstVisit' : IDL.Int,
+    'lastVisit' : IDL.Int,
+    'mobile' : IDL.Text,
+  });
   const Photo = IDL.Record({
     'id' : IDL.Nat,
     'title' : IDL.Text,
@@ -194,6 +213,8 @@ export const idlFactory = ({ IDL }) => {
     'addPhoto' : IDL.Func([ExternalBlob, IDL.Text, IDL.Nat], [IDL.Nat], []),
     'deletePhoto' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'deleteReview' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+    'getCustomerByMobile' : IDL.Func([IDL.Text], [Customer], ['query']),
+    'getCustomers' : IDL.Func([], [IDL.Vec(Customer)], ['query']),
     'getPhotos' : IDL.Func([], [IDL.Vec(Photo)], ['query']),
     'getQuoteById' : IDL.Func([IDL.Nat], [Quote], ['query']),
     'getQuotes' : IDL.Func([], [IDL.Vec(Quote)], ['query']),
@@ -201,6 +222,7 @@ export const idlFactory = ({ IDL }) => {
     'getQuotesByService' : IDL.Func([ServiceType], [IDL.Vec(Quote)], ['query']),
     'getReviews' : IDL.Func([], [IDL.Vec(Review)], ['query']),
     'getSiteSettings' : IDL.Func([], [SiteSettings], ['query']),
+    'registerOrLoginCustomer' : IDL.Func([IDL.Text, IDL.Text], [Customer], []),
     'submitQuote' : IDL.Func(
         [IDL.Text, IDL.Text, ServiceType, IDL.Text],
         [IDL.Nat],

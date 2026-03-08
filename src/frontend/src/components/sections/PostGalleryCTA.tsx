@@ -40,28 +40,27 @@ export default function PostGalleryCTA() {
       transition={{ duration: 0.6 }}
       className="py-16 px-6 relative overflow-hidden"
     >
-      {/* Fire gradient background strip */}
       <div className="relative max-w-5xl mx-auto">
         <div
-          className="rounded-3xl p-10 sm:p-14 text-center relative overflow-hidden fire-glow"
+          className="rounded-3xl p-10 sm:p-14 text-center relative overflow-hidden shadow-lg"
           style={{
             background:
-              "linear-gradient(135deg, #CC1500 0%, #E84000 40%, #FF7A00 100%)",
+              "linear-gradient(135deg, #1E3A8A 0%, #2D5BB5 40%, #F97316 100%)",
           }}
         >
           {/* Noise texture overlay */}
           <div
-            className="absolute inset-0 rounded-3xl opacity-20 pointer-events-none"
+            className="absolute inset-0 rounded-3xl opacity-15 pointer-events-none"
             style={{
               backgroundImage:
-                "radial-gradient(circle, rgba(255,255,255,0.15) 1px, transparent 1px), radial-gradient(circle, rgba(255,200,0,0.08) 1px, transparent 1px)",
+                "radial-gradient(circle, rgba(255,255,255,0.2) 1px, transparent 1px), radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px)",
               backgroundSize: "20px 20px, 10px 10px",
             }}
           />
-          {/* Highlight glow top */}
+          {/* White highlight glow top */}
           <div
-            className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 rounded-full blur-3xl opacity-30 pointer-events-none"
-            style={{ background: "rgba(255,200,100,0.5)" }}
+            className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 rounded-full blur-3xl opacity-20 pointer-events-none"
+            style={{ background: "rgba(255,255,255,0.6)" }}
           />
 
           <div className="relative z-10">
@@ -80,7 +79,7 @@ export default function PostGalleryCTA() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="text-orange-100/90 text-lg mb-10 max-w-xl mx-auto"
+              className="text-white/75 text-lg mb-10 max-w-xl mx-auto font-medium"
             >
               Get a free quote today — same-day service available
             </motion.p>
@@ -98,7 +97,7 @@ export default function PostGalleryCTA() {
                 type="button"
                 data-ocid="postgallery.primary_button"
                 onClick={scrollToQuote}
-                className="group inline-flex items-center gap-2.5 px-8 py-4 bg-white rounded-full text-red-600 font-bold text-base hover:scale-105 hover:bg-orange-50 transition-all duration-300 shadow-lg"
+                className="group inline-flex items-center gap-2.5 px-8 py-4 bg-white rounded-full text-blue-900 font-bold text-base hover:scale-105 hover:bg-gray-100 transition-all duration-300 shadow-lg"
               >
                 Start Your Order
                 <span className="group-hover:translate-x-1 transition-transform duration-200">
@@ -111,7 +110,7 @@ export default function PostGalleryCTA() {
                 type="button"
                 data-ocid="postgallery.secondary_button"
                 onClick={scrollToServices}
-                className="inline-flex items-center gap-2 px-8 py-4 rounded-full border-2 border-white/70 text-white font-medium text-base hover:bg-white/15 hover:border-white transition-all duration-300"
+                className="inline-flex items-center gap-2 px-8 py-4 rounded-full border-2 border-white/70 text-white font-bold text-base hover:bg-white/15 hover:border-white transition-all duration-300"
               >
                 View Services
               </button>
@@ -121,7 +120,7 @@ export default function PostGalleryCTA() {
                 type="button"
                 data-ocid="postgallery.share_button"
                 onClick={handleShare}
-                className="inline-flex items-center gap-2 px-6 py-4 rounded-full border border-white/30 text-white/80 font-medium text-base hover:bg-white/10 hover:border-white/50 hover:text-white transition-all duration-300"
+                className="inline-flex items-center gap-2 px-6 py-4 rounded-full border border-white/40 text-white/85 font-medium text-base hover:bg-white/15 hover:border-white/60 hover:text-white transition-all duration-300"
               >
                 <Share2 className="w-4 h-4" />
                 Share this site

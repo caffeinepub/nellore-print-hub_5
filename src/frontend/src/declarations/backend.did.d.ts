@@ -10,6 +10,14 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
+export interface Customer {
+  'id' : bigint,
+  'visitCount' : bigint,
+  'name' : string,
+  'firstVisit' : bigint,
+  'lastVisit' : bigint,
+  'mobile' : string,
+}
 export type ExternalBlob = Uint8Array;
 export interface Photo {
   'id' : bigint,
@@ -78,6 +86,8 @@ export interface _SERVICE {
   'addPhoto' : ActorMethod<[ExternalBlob, string, bigint], bigint>,
   'deletePhoto' : ActorMethod<[bigint], boolean>,
   'deleteReview' : ActorMethod<[bigint], boolean>,
+  'getCustomerByMobile' : ActorMethod<[string], Customer>,
+  'getCustomers' : ActorMethod<[], Array<Customer>>,
   'getPhotos' : ActorMethod<[], Array<Photo>>,
   'getQuoteById' : ActorMethod<[bigint], Quote>,
   'getQuotes' : ActorMethod<[], Array<Quote>>,
@@ -85,6 +95,7 @@ export interface _SERVICE {
   'getQuotesByService' : ActorMethod<[ServiceType], Array<Quote>>,
   'getReviews' : ActorMethod<[], Array<Review>>,
   'getSiteSettings' : ActorMethod<[], SiteSettings>,
+  'registerOrLoginCustomer' : ActorMethod<[string, string], Customer>,
   'submitQuote' : ActorMethod<[string, string, ServiceType, string], bigint>,
   'submitReview' : ActorMethod<[string, bigint, string], bigint>,
   'updatePhotoTitle' : ActorMethod<[bigint, string], boolean>,

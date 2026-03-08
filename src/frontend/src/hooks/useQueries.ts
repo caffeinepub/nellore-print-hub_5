@@ -1,6 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ExternalBlob, QuoteStatus, ServiceType } from "../backend";
-import type { Photo, Quote, Review, SiteSettings } from "../backend.d";
+import type {
+  Customer,
+  Photo,
+  Quote,
+  Review,
+  SiteSettings,
+} from "../backend.d";
 import { useActor } from "./useActor";
 
 export function useGetQuotes() {
@@ -234,5 +240,50 @@ export function useDeleteReview() {
   });
 }
 
+export function useGetCustomers() {
+  const { actor, isFetching } = useActor();
+  return useQuery<Customer[]>({
+    queryKey: ["customers"],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getCustomers();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useGetCustomerByMobile(mobile: string) {
+  const { actor, isFetching } = useActor();
+  return useQuery<Customer>({
+    queryKey: ["customer", mobile],
+    queryFn: async () => {
+      if (!actor) throw new Error("No actor available");
+      return actor.getCustomerByMobile(mobile);
+    },
+    enabled: !!actor && !isFetching && !!mobile,
+  });
+}
+
+export function useRegisterOrLoginCustomer() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      name,
+      mobile,
+    }: {
+      name: string;
+      mobile: string;
+    }) => {
+      if (!actor) throw new Error("No actor available");
+      return actor.registerOrLoginCustomer(name, mobile);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["customers"] });
+    },
+  });
+}
+
 export { ExternalBlob, QuoteStatus, ServiceType };
-export type { Photo, Quote, Review, SiteSettings };
+export type { Customer, Photo, Quote, Review, SiteSettings };

@@ -120,6 +120,14 @@ export interface _CaffeineStorageCreateCertificateResult {
     method: string;
     blob_hash: string;
 }
+export interface Customer {
+    id: bigint;
+    visitCount: bigint;
+    name: string;
+    firstVisit: bigint;
+    lastVisit: bigint;
+    mobile: string;
+}
 export interface Review {
     id: bigint;
     name: string;
@@ -151,6 +159,8 @@ export interface backendInterface {
     addPhoto(blob: ExternalBlob, title: string, order: bigint): Promise<bigint>;
     deletePhoto(id: bigint): Promise<boolean>;
     deleteReview(id: bigint): Promise<boolean>;
+    getCustomerByMobile(mobile: string): Promise<Customer>;
+    getCustomers(): Promise<Array<Customer>>;
     getPhotos(): Promise<Array<Photo>>;
     getQuoteById(id: bigint): Promise<Quote>;
     getQuotes(): Promise<Array<Quote>>;
@@ -158,6 +168,7 @@ export interface backendInterface {
     getQuotesByService(service: ServiceType): Promise<Array<Quote>>;
     getReviews(): Promise<Array<Review>>;
     getSiteSettings(): Promise<SiteSettings>;
+    registerOrLoginCustomer(name: string, mobile: string): Promise<Customer>;
     submitQuote(name: string, mobile: string, service: ServiceType, details: string): Promise<bigint>;
     submitReview(name: string, rating: bigint, message: string): Promise<bigint>;
     updatePhotoTitle(id: bigint, newTitle: string): Promise<boolean>;
@@ -293,6 +304,34 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async getCustomerByMobile(arg0: string): Promise<Customer> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getCustomerByMobile(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getCustomerByMobile(arg0);
+            return result;
+        }
+    }
+    async getCustomers(): Promise<Array<Customer>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getCustomers();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getCustomers();
+            return result;
+        }
+    }
     async getPhotos(): Promise<Array<Photo>> {
         if (this.processError) {
             try {
@@ -388,6 +427,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.getSiteSettings();
+            return result;
+        }
+    }
+    async registerOrLoginCustomer(arg0: string, arg1: string): Promise<Customer> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.registerOrLoginCustomer(arg0, arg1);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.registerOrLoginCustomer(arg0, arg1);
             return result;
         }
     }

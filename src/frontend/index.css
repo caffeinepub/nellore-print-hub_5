@@ -27,58 +27,58 @@
   :root {
     --radius: 0.5rem;
 
-    /* Nellore Print Hub — Fire Red-Orange Dark theme */
-    /* Deep dark red-black + vivid red-orange + amber accents */
-    --background: 0.10 0.025 25;
-    --foreground: 0.95 0.012 60;
+    /* Nellore Print Hub — Professional Warm-Light Theme */
+    /* Warm white/cream background, deep navy text, saffron accents */
+    --background: 0.98 0.005 80;
+    --foreground: 0.12 0.020 250;
 
-    --card: 0.14 0.030 25;
-    --card-foreground: 0.93 0.010 60;
+    --card: 0.97 0.005 80;
+    --card-foreground: 0.12 0.020 250;
 
-    --popover: 0.13 0.028 25;
-    --popover-foreground: 0.93 0.010 60;
+    --popover: 0.98 0.005 80;
+    --popover-foreground: 0.12 0.020 250;
 
-    /* Primary = vivid orange-red */
-    --primary: 0.62 0.22 30;
-    --primary-foreground: 0.98 0.005 60;
+    /* Primary = deep navy/indigo */
+    --primary: 0.30 0.120 255;
+    --primary-foreground: 0.99 0.002 80;
 
-    /* Secondary = dark warm surface */
-    --secondary: 0.18 0.030 25;
-    --secondary-foreground: 0.85 0.012 60;
+    /* Secondary = light warm surface */
+    --secondary: 0.93 0.008 80;
+    --secondary-foreground: 0.20 0.020 250;
 
-    --muted: 0.16 0.025 25;
-    --muted-foreground: 0.62 0.020 40;
+    --muted: 0.92 0.008 80;
+    --muted-foreground: 0.50 0.015 250;
 
-    /* Accent = vivid amber */
-    --accent: 0.72 0.19 50;
-    --accent-foreground: 0.12 0.020 25;
+    /* Accent = warm saffron orange */
+    --accent: 0.62 0.18 50;
+    --accent-foreground: 0.99 0.002 80;
 
     --destructive: 0.577 0.245 27.325;
     --destructive-foreground: 0.97 0 0;
 
-    --border: 0.22 0.030 25;
-    --input: 0.20 0.028 25;
-    --ring: 0.62 0.22 30;
+    --border: 0.88 0.010 80;
+    --input: 0.90 0.010 80;
+    --ring: 0.30 0.120 255;
 
-    --chart-1: 0.62 0.22 30;
-    --chart-2: 0.72 0.19 50;
-    --chart-3: 0.65 0.20 40;
-    --chart-4: 0.55 0.18 25;
-    --chart-5: 0.80 0.15 60;
+    --chart-1: 0.30 0.120 255;
+    --chart-2: 0.62 0.18 50;
+    --chart-3: 0.55 0.18 145;
+    --chart-4: 0.65 0.16 220;
+    --chart-5: 0.75 0.14 80;
 
-    --sidebar: 0.12 0.028 25;
-    --sidebar-foreground: 0.93 0.010 60;
-    --sidebar-primary: 0.62 0.22 30;
-    --sidebar-primary-foreground: 0.98 0.005 60;
-    --sidebar-accent: 0.18 0.030 25;
-    --sidebar-accent-foreground: 0.85 0.012 60;
-    --sidebar-border: 0.22 0.030 25;
-    --sidebar-ring: 0.62 0.22 30;
+    --sidebar: 0.96 0.005 80;
+    --sidebar-foreground: 0.12 0.020 250;
+    --sidebar-primary: 0.30 0.120 255;
+    --sidebar-primary-foreground: 0.99 0.002 80;
+    --sidebar-accent: 0.93 0.008 80;
+    --sidebar-accent-foreground: 0.20 0.020 250;
+    --sidebar-border: 0.88 0.010 80;
+    --sidebar-ring: 0.30 0.120 255;
 
-    /* Brand gradient stops — deep red to vivid orange */
-    --brand-start: #CC1500;
-    --brand-end: #FF7A00;
-    --gold: #FF9500;
+    /* Brand palette */
+    --brand-navy: #1E3A8A;
+    --brand-saffron: #F97316;
+    --brand-gold: #F59E0B;
     --whatsapp: #25d366;
   }
 
@@ -105,47 +105,54 @@
 
 @layer utilities {
   .brand-gradient {
-    background: linear-gradient(135deg, var(--brand-start), var(--brand-end));
+    background: linear-gradient(135deg, #1E3A8A, #F97316);
   }
 
   .brand-gradient-text {
-    background: linear-gradient(135deg, var(--brand-start), var(--brand-end));
+    background: linear-gradient(135deg, #1E3A8A, #F97316);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Alias kept for backward compat */
+  .brand-text {
+    background: linear-gradient(135deg, #1E3A8A, #F97316);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
   .glass {
-    background: rgba(30, 5, 0, 0.75);
+    background: rgba(255, 255, 255, 0.80);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 100, 0, 0.20);
-    box-shadow: 0 2px 12px rgba(255, 50, 0, 0.12);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   }
 
   .glass-dark {
-    background: rgba(15, 2, 0, 0.90);
+    background: rgba(255, 255, 255, 0.92);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(255, 80, 0, 0.18);
-    box-shadow: 0 2px 20px rgba(200, 30, 0, 0.15);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
   }
 
   .fire-glow {
     box-shadow:
-      0 0 24px rgba(255, 80, 0, 0.35),
-      0 0 48px rgba(255, 120, 0, 0.18);
+      0 0 24px rgba(30, 58, 138, 0.15),
+      0 0 48px rgba(249, 115, 22, 0.10);
   }
 
   .text-glow {
-    text-shadow: 0 2px 20px rgba(255, 80, 0, 0.45);
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.20);
   }
 
-  /* Saffron/orange glow for accents */
   .saffron-glow {
     box-shadow:
-      0 0 16px rgba(255, 120, 0, 0.30),
-      0 0 32px rgba(255, 80, 0, 0.15);
+      0 0 16px rgba(249, 115, 22, 0.20),
+      0 0 32px rgba(30, 58, 138, 0.10);
   }
 
   .card-hover {
@@ -158,8 +165,8 @@
   .card-hover:hover {
     transform: translateY(-8px);
     box-shadow:
-      0 16px 48px rgba(255, 80, 0, 0.18),
-      0 6px 20px rgba(0, 0, 0, 0.20);
+      0 16px 48px rgba(0, 0, 0, 0.10),
+      0 6px 20px rgba(0, 0, 0, 0.06);
   }
 
   .print-bg {
@@ -173,14 +180,16 @@
     pointer-events: none;
     z-index: 0;
     background-image:
-      radial-gradient(circle, rgba(255, 80, 0, 0.15) 1px, transparent 1px),
-      radial-gradient(circle, rgba(255, 120, 0, 0.08) 1px, transparent 1px);
-    background-size: 30px 30px, 15px 15px;
-    background-position: 0 0, 8px 8px;
-    opacity: 0.5;
+      radial-gradient(circle, rgba(30, 58, 138, 0.05) 1px, transparent 1px),
+      radial-gradient(circle, rgba(249, 115, 22, 0.04) 1px, transparent 1px),
+      radial-gradient(circle, rgba(30, 58, 138, 0.03) 1px, transparent 1px),
+      radial-gradient(circle, rgba(245, 158, 11, 0.03) 1px, transparent 1px);
+    background-size: 30px 30px, 20px 20px, 40px 40px, 15px 15px;
+    background-position: 0 0, 8px 8px, 15px 15px, 5px 20px;
+    opacity: 0.7;
   }
 
-  /* Ornamental border — red-orange gradient */
+  /* Ornamental border — navy-saffron gradient */
   .india-border {
     border: 2px solid transparent;
     background-clip: padding-box;
@@ -192,17 +201,17 @@
     position: absolute;
     inset: -2px;
     border-radius: inherit;
-    background: linear-gradient(135deg, #CC1500, #FF7A00, #CC1500);
+    background: linear-gradient(135deg, #1E3A8A, #F97316);
     z-index: -1;
-    opacity: 0.4;
+    opacity: 0.30;
   }
 
   /* Decorative section divider */
   .section-divider {
     height: 3px;
-    background: linear-gradient(90deg, transparent, #CC1500, #FF7A00, #CC1500, transparent);
+    background: linear-gradient(90deg, transparent, #1E3A8A, #F97316, transparent);
     margin: 0 auto;
-    width: 80px;
+    width: 120px;
     border-radius: 2px;
   }
 
@@ -216,6 +225,26 @@
     inset: 0;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
     pointer-events: none;
-    opacity: 0.4;
+    opacity: 0.3;
+  }
+
+  /* Print styles — show only print area when printing */
+  @media print {
+    body * {
+      visibility: hidden;
+    }
+    #quote-print-area,
+    #quote-print-area * {
+      visibility: visible;
+    }
+    #quote-print-area {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: white !important;
+      color: black !important;
+      padding: 40px;
+    }
   }
 }
