@@ -295,7 +295,7 @@ function QuoteRow({
         toMobile: quote.mobile,
         toName: quote.name,
         subject: `Quotation for your ${SERVICE_LABELS[quote.service] ?? "print"} request`,
-        body: `Dear ${quote.name}, your quotation is ready. Click Open to view your file: ${directUrl}`,
+        body: `Dear ${quote.name}, your quotation is ready.\n\nFILENAME:${fileDisplayName}\nFILEURL:${directUrl}`,
       });
 
       // Auto-mark as replied

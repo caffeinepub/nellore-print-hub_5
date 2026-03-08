@@ -36,22 +36,38 @@ function formatMessageDate(ts: bigint): string {
 }
 
 function forceDownload(url: string, filename: string) {
-  fetch(url)
-    .then((r) => r.blob())
+  // Try fetch with CORS first, fall back to direct anchor download
+  fetch(url, { mode: "cors" })
+    .then((r) => {
+      if (!r.ok) throw new Error("fetch failed");
+      return r.blob();
+    })
     .then((blob) => {
+      // Preserve original MIME type so the file saves with the correct extension
+      const blobWithType = new Blob([blob], {
+        type: blob.type || "application/octet-stream",
+      });
+      const objectUrl = URL.createObjectURL(blobWithType);
       const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
+      a.href = objectUrl;
       a.download = filename;
       document.body.appendChild(a);
       a.click();
       setTimeout(() => {
         document.body.removeChild(a);
-        URL.revokeObjectURL(a.href);
-      }, 100);
+        URL.revokeObjectURL(objectUrl);
+      }, 200);
     })
     .catch(() => {
-      // Fallback: open in new tab
-      window.open(url, "_blank");
+      // CORS blocked — use direct anchor with download attribute as fallback
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => document.body.removeChild(a), 200);
     });
 }
 
@@ -79,19 +95,29 @@ function MessageCard({
   );
   const waUrl = `https://wa.me/919390535070?text=${waText}`;
 
-  // Extract URL from body if present
-  const urlMatch = message.body.match(/https?:\/\/[^\s]+/);
-  const fileUrl = urlMatch ? urlMatch[0] : null;
+  // Parse structured format: FILENAME:<name>\nFILEURL:<url>
+  const filenameMatch = message.body.match(/FILENAME:([^\n]+)/);
+  const fileUrlMatch = message.body.match(/FILEURL:(https?:\/\/[^\s]+)/);
+  // Also support legacy format where URL appears inline
+  const legacyUrlMatch = message.body.match(/https?:\/\/[^\s]+/);
+
+  const fileUrl = fileUrlMatch
+    ? fileUrlMatch[1].trim()
+    : legacyUrlMatch
+      ? legacyUrlMatch[0].trim()
+      : null;
+  const filename = filenameMatch
+    ? filenameMatch[1].trim()
+    : fileUrl
+      ? fileUrl.split("/").pop()?.split("?")[0] || "quotation"
+      : "quotation";
 
   const messageStyle = getMessageStyle(message.subject);
 
-  // Determine if it's an image or document by URL extension
-  const isImage = fileUrl
-    ? /\.(png|jpg|jpeg|gif|webp)(\?|$)/i.test(fileUrl)
+  // Determine if it's an image or document by filename extension
+  const isImage = filename
+    ? /\.(png|jpg|jpeg|gif|webp)$/i.test(filename)
     : false;
-  const filename = fileUrl
-    ? fileUrl.split("/").pop()?.split("?")[0] || "file"
-    : "file";
 
   const containerStyle = (() => {
     if (messageStyle === "accepted")
@@ -146,10 +172,13 @@ function MessageCard({
     return null;
   })();
 
-  // Body text: strip the URL if present
-  const cleanBody = fileUrl
-    ? message.body.replace(fileUrl, "").trim()
-    : message.body;
+  // Body text: strip structured tags and URLs from display text
+  const cleanBody = message.body
+    .replace(/FILENAME:[^\n]*/g, "")
+    .replace(/FILEURL:https?:\/\/[^\s]*/g, "")
+    .replace(/https?:\/\/[^\s]+/g, "")
+    .replace(/\n{2,}/g, "\n")
+    .trim();
 
   return (
     <motion.div
