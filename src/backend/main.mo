@@ -7,8 +7,8 @@ import Iter "mo:core/Iter";
 import Runtime "mo:core/Runtime";
 import Time "mo:core/Time";
 import Storage "blob-storage/Storage";
-
 import MixinStorage "blob-storage/Mixin";
+
 
 
 actor {
@@ -70,6 +70,14 @@ actor {
     visitCount : Nat;
   };
 
+  type PromoSettings = {
+    offerTitle : Text;
+    offerDescription : Text;
+    discountCode : Text;
+    discountPercent : Text;
+    isActive : Bool;
+  };
+
   var nextId = 1;
   var nextPhotoId = 1;
   var nextReviewId = 1;
@@ -88,6 +96,24 @@ actor {
     whatsapp = "919390535070";
     siteName = "Nellore Print Hub";
     tagline = "Your Vision Printed to Perfection";
+  };
+
+  // *** NEW: Promo Settings ***
+  var promoSettings : PromoSettings = {
+    offerTitle = "Special Offer For You";
+    offerDescription = "Get 10% OFF on your first order! Premium business cards, banners, t-shirts, packaging & more — all under one roof. Nellore's most trusted printing studio since 2012.";
+    discountCode = "WELCOME10";
+    discountPercent = "10";
+    isActive = true;
+  };
+
+  public query ({ caller }) func getPromoSettings() : async PromoSettings {
+    promoSettings;
+  };
+
+  public shared ({ caller }) func updatePromoSettings(settings : PromoSettings) : async Bool {
+    promoSettings := settings;
+    true;
   };
 
   // Quote Management

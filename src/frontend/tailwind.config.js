@@ -16,9 +16,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ['"Bricolage Grotesque"', '"Cabinet Grotesk"', "system-ui", "sans-serif"],
-        body: ['"Outfit"', '"Cabinet Grotesk"', "system-ui", "sans-serif"],
-        sans: ['"Outfit"', '"Cabinet Grotesk"', "system-ui", "sans-serif"],
+        display: ['"Plus Jakarta Sans"', '"General Sans"', "system-ui", "sans-serif"],
+        body: ['"General Sans"', '"Plus Jakarta Sans"', "system-ui", "sans-serif"],
+        sans: ['"General Sans"', '"Plus Jakarta Sans"', "system-ui", "sans-serif"],
       },
       colors: {
         border: "oklch(var(--border))",
@@ -72,8 +72,10 @@ export default {
           ring: "oklch(var(--sidebar-ring))",
         },
         brand: {
-          orange: "#E85D04",
-          amber: "#F4722B",
+          green: "#1a5c32",
+          emerald: "#2d9e5e",
+          leaf: "#4caf78",
+          dark: "#0f3320",
         },
         whatsapp: "#25d366",
       },
@@ -83,10 +85,10 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       boxShadow: {
-        xs: "0 1px 2px 0 rgba(0,0,0,0.05)",
-        fire: "0 4px 20px rgba(26, 58, 110, 0.25), 0 1px 8px rgba(37, 99, 235, 0.15)",
-        "fire-lg": "0 8px 40px rgba(26, 58, 110, 0.30), 0 4px 20px rgba(37, 99, 235, 0.20)",
-        card: "0 4px 20px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.05)",
+        xs: "0 1px 2px 0 rgba(0,0,0,0.08)",
+        fire: "0 4px 20px rgba(45, 158, 94, 0.25), 0 1px 8px rgba(26, 92, 50, 0.15)",
+        "fire-lg": "0 8px 40px rgba(45, 158, 94, 0.30), 0 4px 20px rgba(26, 92, 50, 0.20)",
+        card: "0 4px 20px rgba(26,92,50,0.10), 0 1px 3px rgba(0,0,0,0.06)",
       },
       keyframes: {
         "accordion-down": {
@@ -102,12 +104,12 @@ export default {
           to: { opacity: "1", transform: "translateY(0)" },
         },
         "fire-pulse": {
-          "0%, 100%": { boxShadow: "0 0 20px rgba(255, 107, 0, 0.3)" },
-          "50%": { boxShadow: "0 0 40px rgba(255, 193, 7, 0.5)" },
+          "0%, 100%": { boxShadow: "0 0 20px rgba(45, 158, 94, 0.40)" },
+          "50%": { boxShadow: "0 0 40px rgba(26, 92, 50, 0.55)" },
         },
         "saffron-pulse": {
-          "0%, 100%": { boxShadow: "0 0 20px rgba(255,107,0,0.3)" },
-          "50%": { boxShadow: "0 0 45px rgba(255,193,7,0.5)" },
+          "0%, 100%": { boxShadow: "0 0 20px rgba(76, 175, 120, 0.40)" },
+          "50%": { boxShadow: "0 0 45px rgba(45, 158, 94, 0.55)" },
         },
       },
       animation: {

@@ -54,31 +54,32 @@ function QuotePrintArea({ quote }: { quote: QuoteData }) {
   return (
     <div
       id="quote-print-area"
-      className="bg-white rounded-2xl border-2 border-gray-200 p-6 mt-6 shadow-card"
+      className="rounded-2xl border border-white/12 p-6 mt-6 shadow-card"
+      style={{ background: "rgba(255,255,255,0.04)" }}
     >
       {/* Header */}
-      <div className="flex items-start justify-between mb-5 pb-4 border-b border-gray-100">
+      <div className="flex items-start justify-between mb-5 pb-4 border-b border-white/10">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <div
               className="w-8 h-8 rounded-lg brand-gradient flex items-center justify-center"
               aria-hidden="true"
             >
-              <Printer className="w-4 h-4 text-black" />
+              <Printer className="w-4 h-4 text-white" />
             </div>
-            <h3 className="font-display font-black text-lg text-gray-900">
+            <h3 className="font-display font-black text-lg text-white">
               Nellore Print Hub
             </h3>
           </div>
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-white/35">
             Magic Advertising · Dargamitta, Nellore
           </p>
         </div>
         <div className="text-right">
-          <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+          <span className="text-xs font-semibold text-white/35 uppercase tracking-wider">
             Quote Request
           </span>
-          <p className="text-xs text-gray-400 mt-0.5">{quote.submittedAt}</p>
+          <p className="text-xs text-white/35 mt-0.5">{quote.submittedAt}</p>
         </div>
       </div>
 
@@ -94,10 +95,10 @@ function QuotePrintArea({ quote }: { quote: QuoteData }) {
           { label: "Project Details", value: quote.details },
         ].map(({ label, value }) => (
           <div key={label} className="flex gap-3">
-            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider w-32 flex-shrink-0 pt-0.5">
+            <span className="text-xs font-semibold text-white/35 uppercase tracking-wider w-32 flex-shrink-0 pt-0.5">
               {label}
             </span>
-            <span className="text-sm text-gray-800 font-medium flex-1">
+            <span className="text-sm text-white/80 font-medium flex-1">
               {value}
             </span>
           </div>
@@ -105,11 +106,18 @@ function QuotePrintArea({ quote }: { quote: QuoteData }) {
       </div>
 
       {/* Footer note */}
-      <div className="bg-gray-50 rounded-xl p-3 text-xs text-gray-500 border border-gray-100">
-        <strong className="text-gray-700">Note:</strong> This is a quote request
+      <div
+        className="rounded-xl p-3 text-xs text-white/50 border border-white/8"
+        style={{ background: "rgba(255,255,255,0.04)" }}
+      >
+        <strong className="text-white/70">Note:</strong> This is a quote request
         confirmation. Our team will contact you within 24 hours. For urgent
         orders, call{" "}
-        <a href="tel:+919390535070" className="text-blue-500 font-medium">
+        <a
+          href="tel:+919390535070"
+          className="font-medium"
+          style={{ color: "#2d9e5e" }}
+        >
           +91 93905 35070
         </a>
         .
@@ -121,7 +129,7 @@ function QuotePrintArea({ quote }: { quote: QuoteData }) {
           type="button"
           data-ocid="quote.print_button"
           onClick={() => window.print()}
-          className="flex items-center gap-2 px-4 py-2 brand-gradient text-black font-bold text-sm rounded-xl hover:scale-[1.02] transition-all duration-200"
+          className="flex items-center gap-2 px-4 py-2 brand-gradient text-white font-bold text-sm rounded-xl hover:scale-[1.02] transition-all duration-200"
         >
           <Printer className="w-4 h-4" />
           Print Quote
@@ -130,7 +138,7 @@ function QuotePrintArea({ quote }: { quote: QuoteData }) {
           type="button"
           data-ocid="quote.download_button"
           onClick={() => window.print()}
-          className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold text-sm rounded-xl hover:scale-[1.02] transition-all duration-200"
+          className="flex items-center gap-2 px-4 py-2 font-bold text-sm rounded-xl hover:scale-[1.02] transition-all duration-200 border border-white/15 text-white/70 hover:bg-white/8"
         >
           <Download className="w-4 h-4" />
           Download as PDF
@@ -204,14 +212,17 @@ export default function QuoteSection() {
     }
   };
 
+  const inputClass =
+    "bg-white/5 border-white/12 text-white placeholder:text-white/30 h-11 focus:border-brand-emerald/50 focus:ring-brand-emerald/20 rounded-xl";
+
   return (
     <section id="quote" className="py-24 px-6 relative">
       {/* Background decoration */}
       <div
-        className="absolute bottom-0 left-0 w-80 h-80 rounded-full blur-3xl opacity-05"
+        className="absolute bottom-0 left-0 w-80 h-80 rounded-full blur-3xl opacity-05 pointer-events-none"
         style={{
           background:
-            "radial-gradient(circle, rgba(0,136,255,0.3), transparent 70%)",
+            "radial-gradient(circle, rgba(192,40,106,0.20), transparent 70%)",
         }}
       />
 
@@ -225,15 +236,15 @@ export default function QuoteSection() {
             transition={{ duration: 0.6 }}
             className="lg:sticky lg:top-28"
           >
-            <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold tracking-widest uppercase brand-gradient text-black mb-4">
+            <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold tracking-widest uppercase brand-gradient text-white mb-4">
               {t.quote.badge}
             </span>
-            <h2 className="font-display font-black text-4xl sm:text-5xl text-gray-900 mb-6 leading-tight">
+            <h2 className="font-display font-black text-4xl sm:text-5xl text-white mb-6 leading-tight">
               {t.quote.heading1}
               <br />
               <span className="brand-gradient-text">{t.quote.heading2}</span>
             </h2>
-            <p className="text-gray-500 text-lg mb-8 leading-relaxed">
+            <p className="text-white/45 text-lg mb-8 leading-relaxed">
               {t.quote.subtitle}
             </p>
 
@@ -243,13 +254,13 @@ export default function QuoteSection() {
                 return (
                   <div key={item.title} className="flex items-start gap-4">
                     <div className="w-10 h-10 rounded-xl brand-gradient flex items-center justify-center flex-shrink-0">
-                      <FeatureIcon className="w-5 h-5 text-black" />
+                      <FeatureIcon className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <div className="font-semibold text-gray-900 text-sm">
+                      <div className="font-semibold text-white text-sm">
                         {item.title}
                       </div>
-                      <div className="text-gray-500 text-sm">{item.desc}</div>
+                      <div className="text-white/45 text-sm">{item.desc}</div>
                     </div>
                   </div>
                 );
@@ -266,7 +277,8 @@ export default function QuoteSection() {
           >
             <form
               onSubmit={handleSubmit}
-              className="bg-white india-border rounded-2xl p-8 space-y-5 shadow-card"
+              className="india-border rounded-2xl p-8 space-y-5 shadow-card"
+              style={{ background: "rgba(255,255,255,0.04)" }}
             >
               {/* Success state */}
               {submitted && (
@@ -274,7 +286,8 @@ export default function QuoteSection() {
                   data-ocid="quote.success_state"
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="flex items-center gap-3 p-4 rounded-xl bg-green-50 border border-green-200 text-green-700"
+                  className="flex items-center gap-3 p-4 rounded-xl border border-emerald-500/30 text-emerald-400"
+                  style={{ background: "rgba(16,185,129,0.08)" }}
                 >
                   <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
                   <span className="text-sm font-medium">
@@ -287,10 +300,10 @@ export default function QuoteSection() {
               <div className="space-y-2">
                 <Label
                   htmlFor="quote-name"
-                  className="text-gray-700 text-sm font-medium"
+                  className="text-white/70 text-sm font-medium"
                 >
                   {t.quote.form.name}{" "}
-                  <span className="text-gray-400">{t.quote.form.required}</span>
+                  <span className="text-white/35">{t.quote.form.required}</span>
                 </Label>
                 <Input
                   id="quote-name"
@@ -300,7 +313,7 @@ export default function QuoteSection() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
-                  className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-100 h-11"
+                  className={inputClass}
                 />
               </div>
 
@@ -308,10 +321,10 @@ export default function QuoteSection() {
               <div className="space-y-2">
                 <Label
                   htmlFor="quote-mobile"
-                  className="text-gray-700 text-sm font-medium"
+                  className="text-white/70 text-sm font-medium"
                 >
                   {t.quote.form.mobile}{" "}
-                  <span className="text-gray-400">{t.quote.form.required}</span>
+                  <span className="text-white/35">{t.quote.form.required}</span>
                 </Label>
                 <Input
                   id="quote-mobile"
@@ -321,15 +334,15 @@ export default function QuoteSection() {
                   value={mobile}
                   onChange={(e) => setMobile(e.target.value)}
                   required
-                  className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-100 h-11"
+                  className={inputClass}
                 />
               </div>
 
               {/* Service */}
               <div className="space-y-2">
-                <Label className="text-gray-700 text-sm font-medium">
+                <Label className="text-white/70 text-sm font-medium">
                   {t.quote.form.service}{" "}
-                  <span className="text-gray-400">{t.quote.form.required}</span>
+                  <span className="text-white/35">{t.quote.form.required}</span>
                 </Label>
                 <Select
                   value={service}
@@ -337,18 +350,21 @@ export default function QuoteSection() {
                 >
                   <SelectTrigger
                     data-ocid="quote.select"
-                    className="bg-white border-gray-300 text-gray-900 focus:border-blue-400 h-11"
+                    className="bg-white/5 border-white/12 text-white focus:border-brand-emerald/50 h-11"
                   >
                     <SelectValue
                       placeholder={t.quote.form.servicePlaceholder}
                     />
                   </SelectTrigger>
-                  <SelectContent className="bg-white border-gray-200">
+                  <SelectContent
+                    className="border-white/12"
+                    style={{ background: "rgba(20,12,28,0.97)" }}
+                  >
                     {SERVICE_OPTIONS.map((opt) => (
                       <SelectItem
                         key={opt.value}
                         value={opt.value}
-                        className="text-gray-800 hover:bg-gray-50 focus:bg-gray-50"
+                        className="text-white/80 hover:bg-white/8 focus:bg-white/8"
                       >
                         {opt.label}
                       </SelectItem>
@@ -361,10 +377,10 @@ export default function QuoteSection() {
               <div className="space-y-2">
                 <Label
                   htmlFor="quote-details"
-                  className="text-gray-700 text-sm font-medium"
+                  className="text-white/70 text-sm font-medium"
                 >
                   {t.quote.form.details}{" "}
-                  <span className="text-gray-400">{t.quote.form.required}</span>
+                  <span className="text-white/35">{t.quote.form.required}</span>
                 </Label>
                 <Textarea
                   id="quote-details"
@@ -374,15 +390,15 @@ export default function QuoteSection() {
                   onChange={(e) => setDetails(e.target.value)}
                   required
                   rows={4}
-                  className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-100 resize-none"
+                  className="bg-white/5 border-white/12 text-white placeholder:text-white/30 focus:border-brand-emerald/50 focus:ring-brand-emerald/20 resize-none rounded-xl"
                 />
               </div>
 
               {/* File Upload */}
               <div className="space-y-2">
-                <Label className="text-gray-700 text-sm font-medium">
+                <Label className="text-white/70 text-sm font-medium">
                   {t.quote.form.fileLabel}{" "}
-                  <span className="text-gray-400 font-normal">
+                  <span className="text-white/30 font-normal">
                     {t.quote.form.fileOptional}
                   </span>
                 </Label>
@@ -391,9 +407,12 @@ export default function QuoteSection() {
                   className="relative cursor-pointer w-full text-left"
                   onClick={() => fileInputRef.current?.click()}
                 >
-                  <div className="flex items-center gap-3 p-3.5 rounded-xl border border-gray-300 border-dashed bg-gray-50 hover:bg-gray-100 hover:border-gray-400 transition-all duration-200">
-                    <Upload className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                    <span className="text-sm text-gray-500">
+                  <div
+                    className="flex items-center gap-3 p-3.5 rounded-xl border border-white/12 border-dashed hover:border-white/25 transition-all duration-200"
+                    style={{ background: "rgba(255,255,255,0.03)" }}
+                  >
+                    <Upload className="w-5 h-5 text-white/30 flex-shrink-0" />
+                    <span className="text-sm text-white/40">
                       {fileName || t.quote.form.fileUpload}
                     </span>
                   </div>
@@ -413,7 +432,7 @@ export default function QuoteSection() {
               {isPending && (
                 <div
                   data-ocid="quote.loading_state"
-                  className="flex items-center gap-2 text-gray-500 text-sm"
+                  className="flex items-center gap-2 text-white/50 text-sm"
                 >
                   <Loader2 className="w-4 h-4 animate-spin" />
                   {t.quote.submittingMsg}
@@ -425,7 +444,7 @@ export default function QuoteSection() {
                 type="submit"
                 data-ocid="quote.submit_button"
                 disabled={isPending}
-                className="w-full h-12 brand-gradient text-black font-bold text-base rounded-xl hover:scale-[1.02] transition-all duration-300 disabled:opacity-60 disabled:scale-100"
+                className="w-full h-12 brand-gradient text-white font-bold text-base rounded-xl hover:scale-[1.02] transition-all duration-300 disabled:opacity-60 disabled:scale-100 border-0"
               >
                 {isPending ? (
                   <>

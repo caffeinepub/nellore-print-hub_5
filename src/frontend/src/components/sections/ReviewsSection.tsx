@@ -27,7 +27,7 @@ function StarRating({
           className={`${sizeClass} transition-colors ${
             star <= rating
               ? "fill-amber-400 text-amber-400"
-              : "fill-transparent text-gray-300"
+              : "fill-transparent text-white/20"
           }`}
         />
       ))}
@@ -65,13 +65,13 @@ function InteractiveStarRating({
             className={`w-7 h-7 transition-all duration-150 ${
               star <= (hovered || value)
                 ? "fill-amber-400 text-amber-400 scale-110"
-                : "fill-transparent text-gray-300 hover:text-gray-400"
+                : "fill-transparent text-white/30 hover:text-white/50"
             }`}
           />
         </button>
       ))}
       {value > 0 && (
-        <span className="text-amber-500 text-sm font-medium ml-1">
+        <span className="text-amber-400 text-sm font-medium ml-1">
           {["", "Poor", "Fair", "Good", "Great", "Excellent"][value]}
         </span>
       )}
@@ -107,24 +107,25 @@ function ReviewCard({ review, idx }: { review: Review; idx: number }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.4, delay: idx * 0.07 }}
-      className="bg-white rounded-2xl p-6 border border-gray-200 shadow-xs card-hover flex flex-col gap-4"
+      className="rounded-2xl p-6 border border-white/8 card-hover flex flex-col gap-4"
+      style={{ background: "rgba(255,255,255,0.04)" }}
     >
       {/* Stars */}
       <StarRating rating={Number(review.rating)} size="md" />
 
       {/* Message */}
-      <p className="text-gray-600 text-sm leading-relaxed flex-1">
+      <p className="text-white/60 text-sm leading-relaxed flex-1">
         "{review.message}"
       </p>
 
       {/* Reviewer info */}
-      <div className="flex items-center gap-3 pt-2 border-t border-gray-100">
-        <div className="w-9 h-9 rounded-full brand-gradient flex items-center justify-center text-black text-xs font-bold flex-shrink-0">
+      <div className="flex items-center gap-3 pt-2 border-t border-white/8">
+        <div className="w-9 h-9 rounded-full brand-gradient flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
           {initials}
         </div>
         <div>
-          <p className="text-gray-900 font-semibold text-sm">{review.name}</p>
-          <p className="text-gray-400 text-xs">{date}</p>
+          <p className="text-white/90 font-semibold text-sm">{review.name}</p>
+          <p className="text-white/35 text-xs">{date}</p>
         </div>
       </div>
     </motion.div>
@@ -175,7 +176,7 @@ function ReviewForm() {
   };
 
   const inputClass =
-    "bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 h-11 focus:border-blue-400 focus:ring-blue-100 rounded-xl";
+    "bg-white/5 border-white/12 text-white placeholder:text-white/30 h-11 focus:border-brand-emerald/50 focus:ring-brand-emerald/20 rounded-xl";
 
   return (
     <div className="mt-12">
@@ -192,7 +193,7 @@ function ReviewForm() {
               type="button"
               data-ocid="reviews.submit_button"
               onClick={() => setShowForm(true)}
-              className="inline-flex items-center gap-2.5 px-8 py-4 brand-gradient rounded-full text-black font-bold text-base hover:scale-105 transition-all duration-300 shadow-md"
+              className="inline-flex items-center gap-2.5 px-8 py-4 brand-gradient rounded-full text-white font-bold text-base hover:scale-105 transition-all duration-300 shadow-fire"
             >
               <Star className="w-5 h-5" />
               Write a Review
@@ -205,9 +206,10 @@ function ReviewForm() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.35 }}
-            className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-200 shadow-card max-w-xl mx-auto"
+            className="rounded-2xl p-6 sm:p-8 border border-white/10 shadow-card max-w-xl mx-auto"
+            style={{ background: "rgba(255,255,255,0.04)" }}
           >
-            <h3 className="font-display font-bold text-gray-900 text-lg mb-6 flex items-center gap-2">
+            <h3 className="font-display font-bold text-white text-lg mb-6 flex items-center gap-2">
               <Star className="w-5 h-5 text-amber-400 fill-amber-400" />
               Share Your Experience
             </h3>
@@ -215,7 +217,7 @@ function ReviewForm() {
             <form onSubmit={handleSubmit} className="space-y-5" noValidate>
               {/* Name */}
               <div className="space-y-2">
-                <Label className="text-gray-700 text-sm font-medium">
+                <Label className="text-white/70 text-sm font-medium">
                   Your Name *
                 </Label>
                 <Input
@@ -229,7 +231,7 @@ function ReviewForm() {
                   className={`${inputClass} ${errors.name ? "border-red-400" : ""}`}
                 />
                 {errors.name && (
-                  <p className="text-red-500 text-xs flex items-center gap-1">
+                  <p className="text-red-400 text-xs flex items-center gap-1">
                     <AlertCircle className="w-3 h-3" /> {errors.name}
                   </p>
                 )}
@@ -237,7 +239,7 @@ function ReviewForm() {
 
               {/* Rating */}
               <div className="space-y-2">
-                <Label className="text-gray-700 text-sm font-medium">
+                <Label className="text-white/70 text-sm font-medium">
                   Rating *
                 </Label>
                 <InteractiveStarRating
@@ -248,7 +250,7 @@ function ReviewForm() {
                   }}
                 />
                 {errors.rating && (
-                  <p className="text-red-500 text-xs flex items-center gap-1">
+                  <p className="text-red-400 text-xs flex items-center gap-1">
                     <AlertCircle className="w-3 h-3" /> {errors.rating}
                   </p>
                 )}
@@ -256,7 +258,7 @@ function ReviewForm() {
 
               {/* Message */}
               <div className="space-y-2">
-                <Label className="text-gray-700 text-sm font-medium">
+                <Label className="text-white/70 text-sm font-medium">
                   Your Review *
                 </Label>
                 <Textarea
@@ -268,18 +270,18 @@ function ReviewForm() {
                   }}
                   placeholder="Tell others about your printing experience with us..."
                   rows={4}
-                  className={`bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-100 rounded-xl resize-none ${errors.message ? "border-red-400" : ""}`}
+                  className={`bg-white/5 border-white/12 text-white placeholder:text-white/30 focus:border-brand-emerald/50 focus:ring-brand-emerald/20 rounded-xl resize-none ${errors.message ? "border-red-400" : ""}`}
                 />
                 <div className="flex items-center justify-between">
                   {errors.message ? (
-                    <p className="text-red-500 text-xs flex items-center gap-1">
+                    <p className="text-red-400 text-xs flex items-center gap-1">
                       <AlertCircle className="w-3 h-3" /> {errors.message}
                     </p>
                   ) : (
                     <span />
                   )}
                   <span
-                    className={`text-xs ml-auto ${message.length < 10 ? "text-gray-400" : "text-green-500"}`}
+                    className={`text-xs ml-auto ${message.length < 10 ? "text-white/30" : "text-amber-400"}`}
                   >
                     {message.length} chars
                   </span>
@@ -295,7 +297,7 @@ function ReviewForm() {
                     setShowForm(false);
                     setErrors({});
                   }}
-                  className="flex-1 h-11 border-gray-300 text-gray-600 hover:bg-gray-50 hover:text-gray-800 rounded-xl"
+                  className="flex-1 h-11 border-white/15 text-white/60 hover:bg-white/8 hover:text-white/80 rounded-xl bg-transparent"
                 >
                   Cancel
                 </Button>
@@ -303,7 +305,7 @@ function ReviewForm() {
                   type="submit"
                   data-ocid="reviews.submit_button"
                   disabled={submitReview.isPending}
-                  className="flex-1 h-11 brand-gradient text-black font-bold rounded-xl hover:scale-[1.02] transition-all duration-200 disabled:opacity-60 disabled:scale-100 gap-2"
+                  className="flex-1 h-11 brand-gradient text-white font-bold rounded-xl hover:scale-[1.02] transition-all duration-200 disabled:opacity-60 disabled:scale-100 gap-2 border-0"
                 >
                   {submitReview.isPending ? (
                     <>
@@ -345,7 +347,7 @@ export default function ReviewsSection() {
         className="absolute top-1/2 right-1/4 -translate-y-1/2 w-80 h-80 rounded-full blur-3xl opacity-08 pointer-events-none"
         style={{
           background:
-            "radial-gradient(circle, rgba(30,58,138,0.07) 0%, rgba(249,115,22,0.05) 50%, transparent 70%)",
+            "radial-gradient(circle, rgba(139,63,168,0.10) 0%, rgba(192,40,106,0.07) 50%, transparent 70%)",
         }}
       />
 
@@ -358,20 +360,23 @@ export default function ReviewsSection() {
           transition={{ duration: 0.5 }}
           className="text-center mb-12"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-gray-200 shadow-xs text-sm font-medium mb-6 text-gray-700">
+          <div
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/12 shadow-xs text-sm font-medium mb-6 text-white/70"
+            style={{ background: "rgba(255,255,255,0.05)" }}
+          >
             <MessageSquare className="w-4 h-4" />
             Customer Reviews
           </div>
-          <h2 className="font-display font-black text-4xl sm:text-5xl text-gray-900 mb-4">
+          <h2 className="font-display font-black text-4xl sm:text-5xl text-white mb-4">
             What Our <span className="brand-gradient-text">Customers Say</span>
           </h2>
           {reviews && reviews.length > 0 && (
             <div className="flex items-center justify-center gap-3 mt-4">
               <StarRating rating={Math.round(avgRating)} size="lg" />
-              <span className="text-gray-900 font-bold text-2xl">
+              <span className="text-white font-bold text-2xl">
                 {avgRating.toFixed(1)}
               </span>
-              <span className="text-gray-400 text-sm">
+              <span className="text-white/35 text-sm">
                 ({reviews.length} review{reviews.length !== 1 ? "s" : ""})
               </span>
             </div>
@@ -388,7 +393,7 @@ export default function ReviewsSection() {
             {[1, 2, 3].map((i) => (
               <Skeleton
                 key={i}
-                className="h-52 w-full rounded-2xl bg-gray-100"
+                className="h-52 w-full rounded-2xl bg-white/5"
               />
             ))}
           </div>
@@ -398,7 +403,8 @@ export default function ReviewsSection() {
         {isError && (
           <div
             data-ocid="reviews.error_state"
-            className="flex items-center gap-3 p-5 bg-red-50 rounded-2xl border border-red-200 text-red-600 max-w-md mx-auto"
+            className="flex items-center gap-3 p-5 rounded-2xl border border-red-500/20 text-red-400 max-w-md mx-auto"
+            style={{ background: "rgba(255,0,0,0.06)" }}
           >
             <AlertCircle className="w-5 h-5 flex-shrink-0" />
             <p className="text-sm">Failed to load reviews. Please refresh.</p>
@@ -409,18 +415,19 @@ export default function ReviewsSection() {
         {!isLoading && !isError && (!reviews || reviews.length === 0) && (
           <div
             data-ocid="reviews.empty_state"
-            className="flex flex-col items-center justify-center py-16 text-center bg-white rounded-2xl mb-8 border border-gray-200 shadow-xs"
+            className="flex flex-col items-center justify-center py-16 text-center rounded-2xl mb-8 border border-white/8"
+            style={{ background: "rgba(255,255,255,0.03)" }}
           >
             <div className="flex items-center gap-0.5 mb-4">
               {[1, 2, 3, 4, 5].map((s) => (
                 <Star
                   key={s}
-                  className="w-8 h-8 text-gray-200 fill-transparent"
+                  className="w-8 h-8 text-white/15 fill-transparent"
                 />
               ))}
             </div>
-            <p className="text-gray-800 font-semibold mb-1">No reviews yet</p>
-            <p className="text-gray-400 text-sm">
+            <p className="text-white/80 font-semibold mb-1">No reviews yet</p>
+            <p className="text-white/35 text-sm">
               Be the first to share your experience!
             </p>
           </div>

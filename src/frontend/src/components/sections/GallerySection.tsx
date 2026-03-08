@@ -57,10 +57,10 @@ export default function GallerySection() {
     <section id="gallery" className="py-24 px-6 relative">
       {/* Subtle brand glow */}
       <div
-        className="absolute top-1/2 right-0 w-64 h-64 rounded-full blur-3xl opacity-10"
+        className="absolute top-1/2 right-0 w-64 h-64 rounded-full blur-3xl opacity-08 pointer-events-none"
         style={{
           background:
-            "radial-gradient(circle, rgba(30,58,138,0.35), transparent 70%)",
+            "radial-gradient(circle, rgba(232,144,26,0.15), transparent 70%)",
         }}
       />
 
@@ -72,13 +72,13 @@ export default function GallerySection() {
           transition={{ duration: 0.5 }}
           className="text-center mb-16"
         >
-          <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold tracking-widest uppercase brand-gradient text-black mb-4">
+          <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold tracking-widest uppercase brand-gradient text-white mb-4">
             {t.gallery.badge}
           </span>
-          <h2 className="font-display font-black text-4xl sm:text-5xl text-gray-900 mb-4">
+          <h2 className="font-display font-black text-4xl sm:text-5xl text-white mb-4">
             {t.gallery.heading}
           </h2>
-          <p className="text-gray-500 text-lg max-w-xl mx-auto">
+          <p className="text-white/45 text-lg max-w-xl mx-auto">
             {t.gallery.subtitle}
           </p>
         </motion.div>
@@ -92,7 +92,7 @@ export default function GallerySection() {
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <Skeleton
                 key={i}
-                className="w-full aspect-[3/2] rounded-2xl bg-gray-100"
+                className="w-full aspect-[3/2] rounded-2xl bg-white/5"
               />
             ))}
           </div>
@@ -109,7 +109,7 @@ export default function GallerySection() {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true, margin: "-80px" }}
                 transition={{ duration: 0.5, delay: idx * 0.08 }}
-                className="relative group rounded-2xl overflow-hidden cursor-zoom-in aspect-[3/2] shadow-card border border-gray-100"
+                className="relative group rounded-2xl overflow-hidden cursor-zoom-in aspect-[3/2] border border-white/8 shadow-card"
                 onMouseEnter={() => setActiveIdx(idx)}
                 onMouseLeave={() => setActiveIdx(null)}
               >
@@ -146,13 +146,13 @@ export default function GallerySection() {
                     </div>
                   </div>
                 </div>
-                {/* Rainbow accent border on hover */}
+                {/* Brand gradient border on hover */}
                 <div
-                  className="absolute inset-0 rounded-2xl border-2 border-transparent transition-all duration-300"
+                  className="absolute inset-0 rounded-2xl border-2 transition-all duration-300"
                   style={{
                     borderColor:
                       activeIdx === idx
-                        ? "rgba(255,255,255,0.3)"
+                        ? "rgba(192,40,106,0.5)"
                         : "transparent",
                   }}
                 />

@@ -17,24 +17,24 @@ export default function ContactSection() {
       label: t.contact.phone,
       value: phone,
       href: `tel:${phone.replace(/\s/g, "")}`,
-      color: "text-red-500",
-      bg: "bg-red-50",
+      iconColor: "#1a5c32",
+      iconBg: "rgba(26,92,50,0.12)",
     },
     {
       icon: Mail,
       label: t.contact.email,
       value: email,
       href: `mailto:${email}`,
-      color: "text-blue-500",
-      bg: "bg-blue-50",
+      iconColor: "#2d9e5e",
+      iconBg: "rgba(45,158,94,0.12)",
     },
     {
       icon: MapPin,
       label: t.contact.address,
       value: address,
       href: "https://maps.app.goo.gl/gXba56vXmLXL1eFp7?g_st=ic",
-      color: "text-green-500",
-      bg: "bg-green-50",
+      iconColor: "#4caf78",
+      iconBg: "rgba(76,175,120,0.12)",
     },
   ];
 
@@ -48,13 +48,13 @@ export default function ContactSection() {
           transition={{ duration: 0.5 }}
           className="text-center mb-8"
         >
-          <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold tracking-widest uppercase brand-gradient text-black mb-3">
+          <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold tracking-widest uppercase brand-gradient text-white mb-3">
             {t.contact.badge}
           </span>
-          <h2 className="font-display font-black text-3xl sm:text-4xl text-gray-900 mb-3">
+          <h2 className="font-display font-black text-3xl sm:text-4xl text-foreground mb-3">
             {t.contact.heading}
           </h2>
-          <p className="text-gray-500 text-base max-w-xl mx-auto">
+          <p className="text-muted-foreground text-base max-w-xl mx-auto">
             {t.contact.subtitle}
           </p>
         </motion.div>
@@ -84,23 +84,28 @@ export default function ContactSection() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: idx * 0.1 }}
-                  className="flex items-start gap-3 bg-white rounded-xl p-3 hover:bg-gray-50 border border-gray-200 hover:border-gray-300 shadow-xs transition-all duration-200 group"
+                  className="flex items-start gap-3 rounded-xl p-3 border border-white/8 hover:border-white/15 transition-all duration-200 group"
+                  style={{ background: "rgba(255,255,255,0.03)" }}
                 >
                   <div
-                    className={`w-8 h-8 rounded-lg ${item.bg} flex items-center justify-center flex-shrink-0`}
+                    className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                    style={{ background: item.iconBg }}
                   >
-                    <Icon className={`w-4 h-4 ${item.color}`} />
+                    <Icon
+                      className="w-4 h-4"
+                      style={{ color: item.iconColor }}
+                    />
                   </div>
                   <div className="min-w-0">
-                    <div className="text-xs text-gray-400 uppercase tracking-wider mb-0.5">
+                    <div className="text-xs text-white/35 uppercase tracking-wider mb-0.5">
                       {item.label}
                     </div>
-                    <div className="text-gray-800 font-medium text-sm truncate transition-colors">
+                    <div className="text-white/80 font-medium text-sm truncate transition-colors">
                       {item.value}
                     </div>
                   </div>
                   {item.href.startsWith("http") && (
-                    <ExternalLink className="w-3.5 h-3.5 text-gray-300 group-hover:text-gray-500 flex-shrink-0 mt-0.5 transition-colors" />
+                    <ExternalLink className="w-3.5 h-3.5 text-white/20 group-hover:text-white/50 flex-shrink-0 mt-0.5 transition-colors" />
                   )}
                 </motion.a>
               );
@@ -116,7 +121,12 @@ export default function ContactSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.3 }}
-              className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border border-current rounded-lg text-green-600 hover:text-green-700 hover:bg-green-50 transition-all duration-200 mt-1 font-medium"
+              className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border rounded-lg font-medium mt-1 transition-all duration-200"
+              style={{
+                color: "#2d9e5e",
+                borderColor: "rgba(45,158,94,0.35)",
+                background: "rgba(45,158,94,0.08)",
+              }}
             >
               <MapPin className="w-3.5 h-3.5" />
               {t.contact.openMap}
@@ -130,17 +140,18 @@ export default function ContactSection() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-80px" }}
             transition={{ duration: 0.5, delay: 0.15 }}
-            className="bg-white rounded-2xl overflow-hidden relative min-h-48 border border-gray-200 shadow-xs"
+            className="rounded-2xl overflow-hidden relative min-h-48 border border-white/8"
+            style={{ background: "rgba(255,255,255,0.03)" }}
           >
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-6 text-center">
               <div className="w-12 h-12 rounded-full brand-gradient flex items-center justify-center">
-                <MapPin className="w-6 h-6 text-black" />
+                <MapPin className="w-6 h-6 text-white" />
               </div>
               <div>
-                <div className="font-display font-bold text-gray-900 text-base mb-0.5">
+                <div className="font-display font-bold text-white text-base mb-0.5">
                   Nellore Print Hub
                 </div>
-                <div className="text-gray-500 text-sm">
+                <div className="text-white/45 text-sm">
                   Dargamitta, Nellore
                   <br />
                   Andhra Pradesh, India
@@ -150,18 +161,21 @@ export default function ContactSection() {
                 href="https://maps.app.goo.gl/gXba56vXmLXL1eFp7?g_st=ic"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-500 hover:text-blue-600 text-sm font-medium flex items-center gap-1.5 transition-colors"
+                className="text-sm font-medium flex items-center gap-1.5 transition-colors brand-gradient-text"
               >
                 {t.contact.viewOnMap}
-                <ExternalLink className="w-3.5 h-3.5" />
+                <ExternalLink
+                  className="w-3.5 h-3.5"
+                  style={{ color: "#2d9e5e" }}
+                />
               </a>
             </div>
-            {/* Rainbow dot pattern background */}
+            {/* Brand dot pattern background */}
             <div
               className="absolute inset-0 opacity-10"
               style={{
                 backgroundImage:
-                  "radial-gradient(circle, rgba(255,0,0,0.4) 1px, transparent 1px), radial-gradient(circle, rgba(0,136,255,0.3) 1px, transparent 1px)",
+                  "radial-gradient(circle, rgba(45,158,94,0.5) 1px, transparent 1px), radial-gradient(circle, rgba(26,92,50,0.4) 1px, transparent 1px)",
                 backgroundSize: "20px 20px, 10px 10px",
               }}
             />

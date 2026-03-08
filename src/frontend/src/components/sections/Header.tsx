@@ -11,7 +11,8 @@ import { useGetSiteSettings } from "../../hooks/useQueries";
 import { LANGUAGES, useLang } from "../../lib/i18n";
 import LoginModal from "../LoginModal";
 
-const FALLBACK_LOGO = "/assets/uploads/IMG_0675-1.png";
+const FALLBACK_LOGO =
+  "/assets/generated/nellore-print-hub-logo-transparent.dim_600x200.png";
 
 function getLogoUrl(): string {
   return localStorage.getItem("nph_logo_url") || FALLBACK_LOGO;
@@ -126,7 +127,9 @@ export default function Header() {
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled ? "glass-dark shadow-card" : "bg-white/70 backdrop-blur-sm"
+          isScrolled
+            ? "glass-dark shadow-card"
+            : "bg-background/60 backdrop-blur-sm"
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
@@ -160,7 +163,7 @@ export default function Header() {
                   e.preventDefault();
                   handleNavClick(link.href);
                 }}
-                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 rounded-lg hover:bg-gray-100 transition-all duration-200 relative group"
+                className="px-4 py-2 text-sm font-medium text-white/70 hover:text-white rounded-lg hover:bg-white/8 transition-all duration-200 relative group"
               >
                 {link.label}
                 <span className="absolute bottom-0.5 left-4 right-4 h-0.5 brand-gradient rounded-full scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left" />
@@ -171,7 +174,10 @@ export default function Header() {
           {/* Right side: Language + Login + Mobile Toggle */}
           <div className="flex items-center gap-2 flex-shrink-0">
             {/* Language switcher */}
-            <div className="hidden sm:flex items-center gap-1 rounded-lg bg-gray-100 border border-gray-200 p-1">
+            <div
+              className="hidden sm:flex items-center gap-1 rounded-lg border border-white/12 p-1"
+              style={{ background: "rgba(255,255,255,0.05)" }}
+            >
               {LANGUAGES.map((l) => (
                 <button
                   key={l.code}
@@ -180,8 +186,8 @@ export default function Header() {
                   onClick={() => setLang(l.code)}
                   className={`w-8 h-7 rounded-md text-xs font-bold transition-all duration-200 ${
                     lang === l.code
-                      ? "brand-gradient text-black shadow-sm"
-                      : "text-gray-500 hover:text-gray-800 hover:bg-gray-200"
+                      ? "brand-gradient text-white shadow-sm"
+                      : "text-white/50 hover:text-white/80 hover:bg-white/10"
                   }`}
                   title={l.label}
                   aria-label={`Switch to ${l.label}`}
@@ -196,36 +202,33 @@ export default function Header() {
               <DropdownMenu>
                 <DropdownMenuTrigger
                   data-ocid="header.user.dropdown_menu"
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-100 border border-gray-200 hover:border-gray-300 hover:bg-gray-150 transition-all duration-200 group outline-none focus-visible:ring-2 focus-visible:ring-purple-400"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/15 hover:border-white/25 transition-all duration-200 group outline-none focus-visible:ring-2 focus-visible:ring-brand-emerald"
+                  style={{ background: "rgba(45,158,94,0.12)" }}
                 >
-                  <div
-                    className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
-                    style={{
-                      background: "linear-gradient(135deg, #1E3A8A, #F97316)",
-                    }}
-                  >
+                  <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 brand-gradient">
                     {initials}
                   </div>
-                  <span className="text-sm font-semibold text-gray-800 max-w-[90px] truncate hidden sm:block">
+                  <span className="text-sm font-semibold text-white/85 max-w-[90px] truncate hidden sm:block">
                     Hi, {firstName}
                   </span>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="end"
-                  className="w-44 rounded-xl bg-white border border-gray-200 shadow-xl p-1"
+                  className="w-44 rounded-xl border border-white/12 shadow-xl p-1"
+                  style={{ background: "rgba(15,51,32,0.97)" }}
                 >
-                  <div className="px-3 py-2 border-b border-gray-100 mb-1">
-                    <p className="text-xs font-semibold text-gray-900 truncate">
+                  <div className="px-3 py-2 border-b border-white/10 mb-1">
+                    <p className="text-xs font-semibold text-white/90 truncate">
                       {customer.name}
                     </p>
-                    <p className="text-xs text-gray-400 truncate">
+                    <p className="text-xs text-white/40 truncate">
                       {customer.mobile}
                     </p>
                   </div>
                   <DropdownMenuItem
                     data-ocid="header.logout.button"
                     onClick={handleLogout}
-                    className="flex items-center gap-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg cursor-pointer font-medium"
+                    className="flex items-center gap-2 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg cursor-pointer font-medium"
                   >
                     <LogOut className="w-4 h-4" />
                     Logout
@@ -237,10 +240,7 @@ export default function Header() {
                 type="button"
                 data-ocid="header.login.button"
                 onClick={() => setLoginOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold text-white transition-all duration-200 hover:scale-[1.03] shadow-sm"
-                style={{
-                  background: "linear-gradient(135deg, #1E3A8A, #F97316)",
-                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold text-white transition-all duration-200 hover:scale-[1.03] shadow-sm brand-gradient"
               >
                 <User className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Login</span>
@@ -250,7 +250,7 @@ export default function Header() {
             {/* Mobile menu toggle */}
             <button
               type="button"
-              className="md:hidden text-gray-700 hover:text-gray-900 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              className="md:hidden text-white/70 hover:text-white p-2 rounded-lg hover:bg-white/8 transition-colors"
               onClick={() => setMobileOpen(!mobileOpen)}
               aria-label={mobileOpen ? "Close menu" : "Open menu"}
             >
@@ -267,8 +267,9 @@ export default function Header() {
         <div
           className="w-full h-0.5"
           style={{
-            background: "linear-gradient(90deg, #1E3A8A, #F97316, #1E3A8A)",
-            opacity: 0.5,
+            background:
+              "linear-gradient(90deg, #1a5c32, #2d9e5e, #4caf78, #1a5c32)",
+            opacity: 0.7,
           }}
         />
 
@@ -278,7 +279,7 @@ export default function Header() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="md:hidden glass-dark border-t border-gray-200 px-6 py-4 flex flex-col gap-1"
+            className="md:hidden glass-dark border-t border-white/8 px-6 py-4 flex flex-col gap-1"
           >
             {navLinks.map((link) => (
               <a
@@ -289,14 +290,17 @@ export default function Header() {
                   e.preventDefault();
                   handleNavClick(link.href);
                 }}
-                className="px-4 py-3 text-sm font-medium text-gray-700 hover:text-gray-900 rounded-lg hover:bg-gray-100 transition-all duration-200"
+                className="px-4 py-3 text-sm font-medium text-white/70 hover:text-white rounded-lg hover:bg-white/8 transition-all duration-200"
               >
                 {link.label}
               </a>
             ))}
 
             {/* Mobile language switcher */}
-            <div className="flex items-center gap-1 rounded-lg bg-gray-100 border border-gray-200 p-1 mt-2 self-start">
+            <div
+              className="flex items-center gap-1 rounded-lg border border-white/12 p-1 mt-2 self-start"
+              style={{ background: "rgba(255,255,255,0.05)" }}
+            >
               {LANGUAGES.map((l) => (
                 <button
                   key={l.code}
@@ -305,8 +309,8 @@ export default function Header() {
                   onClick={() => setLang(l.code)}
                   className={`w-8 h-7 rounded-md text-xs font-bold transition-all duration-200 ${
                     lang === l.code
-                      ? "brand-gradient text-black shadow-sm"
-                      : "text-gray-500 hover:text-gray-800 hover:bg-gray-200"
+                      ? "brand-gradient text-white shadow-sm"
+                      : "text-white/50 hover:text-white/80 hover:bg-white/10"
                   }`}
                   title={l.label}
                 >
@@ -317,21 +321,19 @@ export default function Header() {
 
             {/* Mobile login / user */}
             {customer ? (
-              <div className="flex items-center justify-between px-4 py-3 bg-gray-50 rounded-xl mt-1">
+              <div
+                className="flex items-center justify-between px-4 py-3 rounded-xl mt-1 border border-white/10"
+                style={{ background: "rgba(45,158,94,0.12)" }}
+              >
                 <div className="flex items-center gap-2">
-                  <div
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold"
-                    style={{
-                      background: "linear-gradient(135deg, #1E3A8A, #F97316)",
-                    }}
-                  >
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold brand-gradient">
                     {initials}
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-gray-900">
+                    <p className="text-sm font-semibold text-white/90">
                       {customer.name}
                     </p>
-                    <p className="text-xs text-gray-400">{customer.mobile}</p>
+                    <p className="text-xs text-white/40">{customer.mobile}</p>
                   </div>
                 </div>
                 <button
@@ -341,7 +343,7 @@ export default function Header() {
                     handleLogout();
                     setMobileOpen(false);
                   }}
-                  className="flex items-center gap-1 text-xs text-red-500 hover:text-red-600 font-semibold"
+                  className="flex items-center gap-1 text-xs text-red-400 hover:text-red-300 font-semibold"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                   Logout
@@ -355,10 +357,7 @@ export default function Header() {
                   setLoginOpen(true);
                   setMobileOpen(false);
                 }}
-                className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl text-sm font-bold text-white mt-1 transition-all duration-200"
-                style={{
-                  background: "linear-gradient(135deg, #1E3A8A, #F97316)",
-                }}
+                className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl text-sm font-bold text-white mt-1 transition-all duration-200 brand-gradient"
               >
                 <LogIn className="w-4 h-4" />
                 Sign In

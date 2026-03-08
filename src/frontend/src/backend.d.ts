@@ -29,6 +29,13 @@ export interface SiteSettings {
     address: string;
     phone: string;
 }
+export interface PromoSettings {
+    discountCode: string;
+    offerDescription: string;
+    discountPercent: string;
+    isActive: boolean;
+    offerTitle: string;
+}
 export interface Quote {
     id: bigint;
     service: ServiceType;
@@ -70,6 +77,7 @@ export interface backendInterface {
     getCustomerByMobile(mobile: string): Promise<Customer>;
     getCustomers(): Promise<Array<Customer>>;
     getPhotos(): Promise<Array<Photo>>;
+    getPromoSettings(): Promise<PromoSettings>;
     getQuoteById(id: bigint): Promise<Quote>;
     getQuotes(): Promise<Array<Quote>>;
     getQuotesByMobile(mobile: string): Promise<Array<Quote>>;
@@ -80,6 +88,7 @@ export interface backendInterface {
     submitQuote(name: string, mobile: string, service: ServiceType, details: string): Promise<bigint>;
     submitReview(name: string, rating: bigint, message: string): Promise<bigint>;
     updatePhotoTitle(id: bigint, newTitle: string): Promise<boolean>;
+    updatePromoSettings(settings: PromoSettings): Promise<boolean>;
     updateQuoteStatus(id: bigint, status: QuoteStatus): Promise<boolean>;
     updateSiteSettings(settings: SiteSettings): Promise<boolean>;
 }

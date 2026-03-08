@@ -40,7 +40,7 @@ export default function MobileBottomNav() {
       <div
         className="absolute top-0 left-0 right-0 h-0.5"
         style={{
-          background: "linear-gradient(90deg, #1E3A8A, #F97316)",
+          background: "linear-gradient(90deg, #059669, #16a34a)",
         }}
       />
       <div className="flex items-center justify-around px-2 py-2">
@@ -63,7 +63,7 @@ export default function MobileBottomNav() {
               >
                 <Icon
                   style={{ width: "18px", height: "18px" }}
-                  className={isActive ? "text-black" : ""}
+                  className={isActive ? "text-white" : ""}
                 />
               </div>
               <span

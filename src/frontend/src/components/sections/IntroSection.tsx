@@ -10,23 +10,23 @@ const stats = [
   {
     icon: Clock,
     label: "12+ Years Experience",
-    color: "text-red-500",
-    bg: "bg-red-50",
-    border: "border-red-200",
+    colorText: "text-brand-green",
+    bg: "rgba(26,92,50,0.08)",
+    border: "rgba(26,92,50,0.20)",
   },
   {
     icon: Users,
     label: "10,000+ Happy Clients",
-    color: "text-blue-500",
-    bg: "bg-blue-50",
-    border: "border-blue-200",
+    colorText: "text-brand-emerald",
+    bg: "rgba(45,158,94,0.08)",
+    border: "rgba(45,158,94,0.20)",
   },
   {
     icon: Zap,
     label: "Same-Day Delivery Available",
-    color: "text-violet-500",
-    bg: "bg-violet-50",
-    border: "border-violet-200",
+    colorText: "text-brand-leaf",
+    bg: "rgba(76,175,120,0.08)",
+    border: "rgba(76,175,120,0.20)",
   },
 ];
 
@@ -76,12 +76,12 @@ export default function IntroSection() {
       className="py-16 px-6 relative overflow-hidden"
       aria-label="About Magic Advertising"
     >
-      {/* Subtle navy-saffron background accent */}
+      {/* Subtle brand background accent */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            "linear-gradient(180deg, rgba(30,58,138,0.03) 0%, rgba(249,115,22,0.02) 50%, rgba(255,255,255,0) 100%)",
+            "linear-gradient(180deg, rgba(45,158,94,0.05) 0%, rgba(26,92,50,0.03) 50%, rgba(255,255,255,0) 100%)",
         }}
       />
 
@@ -96,7 +96,7 @@ export default function IntroSection() {
           {/* Main headline */}
           <motion.h2
             variants={itemVariants}
-            className="font-display font-black text-3xl sm:text-4xl md:text-5xl text-gray-900 leading-tight mb-6"
+            className="font-display font-black text-3xl sm:text-4xl md:text-5xl text-foreground leading-tight mb-6"
           >
             {headline.includes("Trusted") ? (
               <>
@@ -112,9 +112,9 @@ export default function IntroSection() {
           {/* Description paragraph */}
           <motion.p
             variants={itemVariants}
-            className="text-gray-600 text-base sm:text-lg leading-relaxed max-w-2xl mx-auto mb-10"
+            className="text-muted-foreground text-base sm:text-lg leading-relaxed max-w-2xl mx-auto mb-10"
           >
-            At <strong className="text-gray-900">Magic Advertising</strong>,{" "}
+            At <strong className="text-foreground">Magic Advertising</strong>,{" "}
             {desc.replace(/^At Magic Advertising,?\s*/i, "")}
           </motion.p>
 
@@ -128,10 +128,14 @@ export default function IntroSection() {
               return (
                 <div
                   key={stat.label}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full border ${stat.bg} ${stat.border} shadow-sm`}
+                  className="flex items-center gap-2 px-4 py-2 rounded-full shadow-sm border"
+                  style={{
+                    background: stat.bg,
+                    borderColor: stat.border,
+                  }}
                 >
-                  <Icon className={`w-4 h-4 ${stat.color} flex-shrink-0`} />
-                  <span className="text-sm font-semibold text-gray-800 whitespace-nowrap">
+                  <Icon className={`w-4 h-4 ${stat.colorText} flex-shrink-0`} />
+                  <span className="text-sm font-semibold text-white/85 whitespace-nowrap">
                     {stat.label}
                   </span>
                 </div>
@@ -144,19 +148,30 @@ export default function IntroSection() {
             variants={itemVariants}
             className="flex items-center justify-center gap-3"
           >
-            <div className="h-px w-16 bg-gradient-to-r from-transparent to-blue-900" />
+            <div
+              className="h-px w-16"
+              style={{
+                background: "linear-gradient(90deg, transparent, #2d9e5e)",
+              }}
+            />
             <div className="w-2 h-2 rounded-full brand-gradient" />
             <div
               className="rounded-full"
               style={{
                 height: "2px",
                 width: "96px",
-                background: "linear-gradient(90deg, #1E3A8A, #F97316)",
-                opacity: 0.6,
+                background:
+                  "linear-gradient(90deg, #1a5c32, #2d9e5e, #4caf78, #1a5c32)",
+                opacity: 0.7,
               }}
             />
             <div className="w-2 h-2 rounded-full brand-gradient" />
-            <div className="h-px w-16 bg-gradient-to-l from-transparent to-orange-400" />
+            <div
+              className="h-px w-16"
+              style={{
+                background: "linear-gradient(90deg, #4caf78, transparent)",
+              }}
+            />
           </motion.div>
         </motion.div>
       </div>

@@ -45,7 +45,7 @@ export default function PostGalleryCTA() {
           className="rounded-3xl p-10 sm:p-14 text-center relative overflow-hidden shadow-lg"
           style={{
             background:
-              "linear-gradient(135deg, #1E3A8A 0%, #2D5BB5 40%, #F97316 100%)",
+              "linear-gradient(135deg, #1a5c32 0%, #2d9e5e 50%, #4caf78 100%)",
           }}
         >
           {/* Noise texture overlay */}
@@ -97,7 +97,7 @@ export default function PostGalleryCTA() {
                 type="button"
                 data-ocid="postgallery.primary_button"
                 onClick={scrollToQuote}
-                className="group inline-flex items-center gap-2.5 px-8 py-4 bg-white rounded-full text-blue-900 font-bold text-base hover:scale-105 hover:bg-gray-100 transition-all duration-300 shadow-lg"
+                className="group inline-flex items-center gap-2.5 px-8 py-4 bg-white rounded-full text-gray-900 font-bold text-base hover:scale-105 hover:bg-white/90 transition-all duration-300 shadow-lg"
               >
                 Start Your Order
                 <span className="group-hover:translate-x-1 transition-transform duration-200">

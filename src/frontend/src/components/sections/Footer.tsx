@@ -36,13 +36,14 @@ export default function Footer() {
     typeof window !== "undefined" ? window.location.hostname : "";
 
   return (
-    <footer className="bg-white border-t border-gray-200">
+    <footer className="bg-card border-t border-border">
       {/* Brand gradient stripe */}
       <div
         className="w-full h-1"
         style={{
-          background: "linear-gradient(90deg, #1E3A8A, #F97316)",
-          opacity: 0.8,
+          background:
+            "linear-gradient(90deg, #1a5c32, #2d9e5e, #4caf78, #1a5c32)",
+          opacity: 0.9,
         }}
       />
       <div className="max-w-7xl mx-auto px-6 py-12">
@@ -50,15 +51,15 @@ export default function Footer() {
           {/* Logo */}
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-lg brand-gradient flex items-center justify-center">
-              <PrinterCheck className="w-5 h-5 text-black" />
+              <PrinterCheck className="w-5 h-5 text-white" />
             </div>
-            <span className="font-display font-bold text-lg text-gray-900">
+            <span className="font-display font-bold text-lg text-foreground">
               Nellore <span className="brand-gradient-text">Print Hub</span>
             </span>
           </div>
 
           {/* Tagline */}
-          <p className="text-gray-500 text-sm text-center max-w-xs">
+          <p className="text-muted-foreground text-sm text-center max-w-xs">
             {t.footer.tagline}
           </p>
 
@@ -71,7 +72,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={social.name}
-                className="opacity-60 hover:opacity-100 transition-opacity duration-200 hover:scale-110 transform"
+                className="opacity-50 hover:opacity-100 transition-opacity duration-200 hover:scale-110 transform"
               >
                 <img
                   src={social.icon}
@@ -84,10 +85,10 @@ export default function Footer() {
           </div>
 
           {/* Divider */}
-          <div className="w-full h-px bg-gray-200" />
+          <div className="w-full h-px bg-border" />
 
           {/* Bottom row */}
-          <div className="flex flex-col sm:flex-row items-center justify-between w-full gap-3 text-xs text-gray-400">
+          <div className="flex flex-col sm:flex-row items-center justify-between w-full gap-3 text-xs text-muted-foreground">
             <p>
               © {year} {t.footer.copyright}
             </p>
@@ -97,7 +98,7 @@ export default function Footer() {
                 href={`https://caffeine.ai?utm_source=caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(hostname)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-600 hover:text-gray-900 transition-colors"
+                className="text-brand-emerald hover:text-brand-green transition-colors"
               >
                 caffeine.ai
               </a>

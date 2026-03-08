@@ -6,59 +6,59 @@ import { useLang } from "../../lib/i18n";
 const SERVICE_ICONS = [IdCard, Signpost, Tag, Shirt, Package, Palette];
 
 const SERVICE_STYLES = [
-  // Business Cards — red
+  // Business Cards — deep forest green
   {
-    gradient: "from-red-50 to-red-100/60",
-    iconBg: "bg-red-100",
-    iconColor: "text-red-600",
-    border: "border-red-200",
-    glow: "rgba(255,50,0,0.12)",
-    hoverBorder: "group-hover:border-red-400",
+    iconColor: "#1a5c32",
+    iconBg: "rgba(26,92,50,0.15)",
+    border: "rgba(26,92,50,0.20)",
+    hoverBorder: "rgba(26,92,50,0.55)",
+    glow: "rgba(26,92,50,0.18)",
+    cardBg: "rgba(26,92,50,0.06)",
   },
-  // Flex Banners — orange
+  // Flex Banners — emerald
   {
-    gradient: "from-orange-50 to-orange-100/60",
-    iconBg: "bg-orange-100",
-    iconColor: "text-orange-600",
-    border: "border-orange-200",
-    glow: "rgba(255,120,0,0.12)",
-    hoverBorder: "group-hover:border-orange-400",
+    iconColor: "#2d9e5e",
+    iconBg: "rgba(45,158,94,0.15)",
+    border: "rgba(45,158,94,0.20)",
+    hoverBorder: "rgba(45,158,94,0.55)",
+    glow: "rgba(45,158,94,0.18)",
+    cardBg: "rgba(45,158,94,0.06)",
   },
-  // Sticker Printing — amber/yellow
+  // Sticker Printing — leaf green
   {
-    gradient: "from-yellow-50 to-yellow-100/60",
-    iconBg: "bg-yellow-100",
-    iconColor: "text-yellow-600",
-    border: "border-yellow-200",
-    glow: "rgba(255,180,0,0.12)",
-    hoverBorder: "group-hover:border-yellow-400",
+    iconColor: "#4caf78",
+    iconBg: "rgba(76,175,120,0.15)",
+    border: "rgba(76,175,120,0.20)",
+    hoverBorder: "rgba(76,175,120,0.55)",
+    glow: "rgba(76,175,120,0.18)",
+    cardBg: "rgba(76,175,120,0.06)",
   },
-  // T-Shirt Printing — green
+  // T-Shirt Printing — dark forest
   {
-    gradient: "from-green-50 to-green-100/60",
-    iconBg: "bg-green-100",
-    iconColor: "text-green-600",
-    border: "border-green-200",
-    glow: "rgba(0,180,80,0.12)",
-    hoverBorder: "group-hover:border-green-400",
+    iconColor: "#0f3320",
+    iconBg: "rgba(15,51,32,0.18)",
+    border: "rgba(15,51,32,0.20)",
+    hoverBorder: "rgba(15,51,32,0.55)",
+    glow: "rgba(15,51,32,0.18)",
+    cardBg: "rgba(15,51,32,0.05)",
   },
-  // Packaging Boxes — blue
+  // Packaging Boxes — medium emerald
   {
-    gradient: "from-blue-50 to-blue-100/60",
-    iconBg: "bg-blue-100",
-    iconColor: "text-blue-600",
-    border: "border-blue-200",
-    glow: "rgba(0,100,255,0.12)",
-    hoverBorder: "group-hover:border-blue-400",
+    iconColor: "#268050",
+    iconBg: "rgba(38,128,80,0.15)",
+    border: "rgba(38,128,80,0.20)",
+    hoverBorder: "rgba(38,128,80,0.55)",
+    glow: "rgba(38,128,80,0.18)",
+    cardBg: "rgba(38,128,80,0.06)",
   },
-  // Graphic Design — violet
+  // Graphic Design — bright leaf
   {
-    gradient: "from-violet-50 to-violet-100/60",
-    iconBg: "bg-violet-100",
-    iconColor: "text-violet-600",
-    border: "border-violet-200",
-    glow: "rgba(120,0,255,0.12)",
-    hoverBorder: "group-hover:border-violet-400",
+    iconColor: "#3d9464",
+    iconBg: "rgba(61,148,100,0.15)",
+    border: "rgba(61,148,100,0.20)",
+    hoverBorder: "rgba(61,148,100,0.55)",
+    glow: "rgba(61,148,100,0.18)",
+    cardBg: "rgba(61,148,100,0.06)",
   },
 ];
 
@@ -86,10 +86,10 @@ export default function ServicesSection() {
     <section id="services" className="py-16 px-6 relative">
       {/* Background decoration */}
       <div
-        className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl opacity-08"
+        className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl opacity-05 pointer-events-none"
         style={{
           background:
-            "radial-gradient(circle, rgba(119,0,255,0.08), transparent 70%)",
+            "radial-gradient(circle, rgba(45,158,94,0.18), transparent 70%)",
         }}
       />
 
@@ -102,14 +102,14 @@ export default function ServicesSection() {
           transition={{ duration: 0.5 }}
           className="text-center mb-10"
         >
-          <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold tracking-widest uppercase brand-gradient text-black mb-4">
+          <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold tracking-widest uppercase brand-gradient text-white mb-4">
             {t.services.badge}
           </span>
           <div className="section-divider mb-6" />
-          <h2 className="font-display font-black text-3xl sm:text-4xl text-gray-900 mb-4">
+          <h2 className="font-display font-black text-3xl sm:text-4xl text-white mb-4">
             {t.services.heading}
           </h2>
-          <p className="text-gray-500 text-lg max-w-xl mx-auto">
+          <p className="text-white/45 text-lg max-w-xl mx-auto">
             {t.services.subtitle}
           </p>
         </motion.div>
@@ -134,34 +134,40 @@ export default function ServicesSection() {
                 data-ocid={ocid}
                 onMouseEnter={() => setHoveredIdx(index)}
                 onMouseLeave={() => setHoveredIdx(null)}
-                className={`card-hover bg-white rounded-2xl p-4 group cursor-default relative overflow-hidden border ${style.border} ${style.hoverBorder} transition-all duration-300 shadow-xs`}
+                className="card-hover rounded-2xl p-4 group cursor-default relative overflow-hidden border transition-all duration-300"
                 style={{
-                  boxShadow: isHovered ? `0 8px 40px ${style.glow}` : undefined,
+                  background: isHovered
+                    ? style.cardBg
+                    : "rgba(255,255,255,0.03)",
+                  borderColor: isHovered ? style.hoverBorder : style.border,
+                  boxShadow: isHovered
+                    ? `0 8px 40px ${style.glow}`
+                    : "0 2px 8px rgba(0,0,0,0.20)",
                 }}
               >
-                {/* Background gradient */}
-                <div
-                  className={`absolute inset-0 bg-gradient-to-br ${style.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl`}
-                />
                 {/* Icon */}
                 <div className="relative z-10 mb-3">
                   <div
-                    className={`w-10 h-10 rounded-xl ${style.iconBg} flex items-center justify-center transition-colors duration-300`}
+                    className="w-10 h-10 rounded-xl flex items-center justify-center transition-colors duration-300"
+                    style={{ background: style.iconBg }}
                   >
-                    <Icon className={`w-5 h-5 ${style.iconColor}`} />
+                    <Icon
+                      className="w-5 h-5"
+                      style={{ color: style.iconColor }}
+                    />
                   </div>
                 </div>
                 {/* Text */}
                 <div className="relative z-10">
-                  <h3 className="font-display font-bold text-base text-gray-900 mb-2">
+                  <h3 className="font-display font-bold text-base text-white mb-2">
                     {service.title}
                   </h3>
-                  <p className="text-gray-500 text-xs leading-relaxed">
+                  <p className="text-white/45 text-xs leading-relaxed">
                     {service.description}
                   </p>
                 </div>
                 {/* Corner accent */}
-                <div className="absolute top-0 right-0 w-16 h-16 brand-gradient opacity-0 group-hover:opacity-10 rounded-bl-3xl transition-opacity duration-300" />
+                <div className="absolute top-0 right-0 w-16 h-16 brand-gradient opacity-0 group-hover:opacity-8 rounded-bl-3xl transition-opacity duration-300" />
               </motion.div>
             );
           })}

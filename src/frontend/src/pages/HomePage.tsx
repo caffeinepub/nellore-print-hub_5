@@ -1,3 +1,4 @@
+import WelcomeBanner from "../components/WelcomeBanner";
 import ContactSection from "../components/sections/ContactSection";
 import FloatingSocial from "../components/sections/FloatingSocial";
 import Footer from "../components/sections/Footer";
@@ -15,6 +16,18 @@ import WhatsAppButton from "../components/sections/WhatsAppButton";
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-background text-foreground print-bg">
+      {/* Fixed CMYK printing watermark background */}
+      <div
+        className="fixed inset-0 -z-10"
+        style={{
+          backgroundImage:
+            "url('/assets/generated/cmyk-site-bg.dim_1920x1080.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundAttachment: "fixed",
+          opacity: 0.08,
+        }}
+      />
       <Header />
       <main className="pb-20 md:pb-0">
         <HeroSection />
@@ -30,6 +43,7 @@ export default function HomePage() {
       <WhatsAppButton />
       <FloatingSocial />
       <MobileBottomNav />
+      <WelcomeBanner />
     </div>
   );
 }

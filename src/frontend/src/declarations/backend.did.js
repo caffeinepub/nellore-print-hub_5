@@ -35,6 +35,13 @@ export const Photo = IDL.Record({
   'blob' : ExternalBlob,
   'timestamp' : IDL.Int,
 });
+export const PromoSettings = IDL.Record({
+  'discountCode' : IDL.Text,
+  'offerDescription' : IDL.Text,
+  'discountPercent' : IDL.Text,
+  'isActive' : IDL.Bool,
+  'offerTitle' : IDL.Text,
+});
 export const ServiceType = IDL.Variant({
   'flexBanner' : IDL.Null,
   'digitalPrinting' : IDL.Null,
@@ -103,6 +110,7 @@ export const idlService = IDL.Service({
   'getCustomerByMobile' : IDL.Func([IDL.Text], [Customer], ['query']),
   'getCustomers' : IDL.Func([], [IDL.Vec(Customer)], ['query']),
   'getPhotos' : IDL.Func([], [IDL.Vec(Photo)], ['query']),
+  'getPromoSettings' : IDL.Func([], [PromoSettings], ['query']),
   'getQuoteById' : IDL.Func([IDL.Nat], [Quote], ['query']),
   'getQuotes' : IDL.Func([], [IDL.Vec(Quote)], ['query']),
   'getQuotesByMobile' : IDL.Func([IDL.Text], [IDL.Vec(Quote)], ['query']),
@@ -117,6 +125,7 @@ export const idlService = IDL.Service({
     ),
   'submitReview' : IDL.Func([IDL.Text, IDL.Nat, IDL.Text], [IDL.Nat], []),
   'updatePhotoTitle' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Bool], []),
+  'updatePromoSettings' : IDL.Func([PromoSettings], [IDL.Bool], []),
   'updateQuoteStatus' : IDL.Func([IDL.Nat, QuoteStatus], [IDL.Bool], []),
   'updateSiteSettings' : IDL.Func([SiteSettings], [IDL.Bool], []),
 });
@@ -150,6 +159,13 @@ export const idlFactory = ({ IDL }) => {
     'order' : IDL.Nat,
     'blob' : ExternalBlob,
     'timestamp' : IDL.Int,
+  });
+  const PromoSettings = IDL.Record({
+    'discountCode' : IDL.Text,
+    'offerDescription' : IDL.Text,
+    'discountPercent' : IDL.Text,
+    'isActive' : IDL.Bool,
+    'offerTitle' : IDL.Text,
   });
   const ServiceType = IDL.Variant({
     'flexBanner' : IDL.Null,
@@ -216,6 +232,7 @@ export const idlFactory = ({ IDL }) => {
     'getCustomerByMobile' : IDL.Func([IDL.Text], [Customer], ['query']),
     'getCustomers' : IDL.Func([], [IDL.Vec(Customer)], ['query']),
     'getPhotos' : IDL.Func([], [IDL.Vec(Photo)], ['query']),
+    'getPromoSettings' : IDL.Func([], [PromoSettings], ['query']),
     'getQuoteById' : IDL.Func([IDL.Nat], [Quote], ['query']),
     'getQuotes' : IDL.Func([], [IDL.Vec(Quote)], ['query']),
     'getQuotesByMobile' : IDL.Func([IDL.Text], [IDL.Vec(Quote)], ['query']),
@@ -230,6 +247,7 @@ export const idlFactory = ({ IDL }) => {
       ),
     'submitReview' : IDL.Func([IDL.Text, IDL.Nat, IDL.Text], [IDL.Nat], []),
     'updatePhotoTitle' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Bool], []),
+    'updatePromoSettings' : IDL.Func([PromoSettings], [IDL.Bool], []),
     'updateQuoteStatus' : IDL.Func([IDL.Nat, QuoteStatus], [IDL.Bool], []),
     'updateSiteSettings' : IDL.Func([SiteSettings], [IDL.Bool], []),
   });

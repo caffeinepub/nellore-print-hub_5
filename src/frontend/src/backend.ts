@@ -104,6 +104,13 @@ export interface SiteSettings {
     address: string;
     phone: string;
 }
+export interface PromoSettings {
+    discountCode: string;
+    offerDescription: string;
+    discountPercent: string;
+    isActive: boolean;
+    offerTitle: string;
+}
 export interface _CaffeineStorageRefillInformation {
     proposed_top_up_amount?: bigint;
 }
@@ -162,6 +169,7 @@ export interface backendInterface {
     getCustomerByMobile(mobile: string): Promise<Customer>;
     getCustomers(): Promise<Array<Customer>>;
     getPhotos(): Promise<Array<Photo>>;
+    getPromoSettings(): Promise<PromoSettings>;
     getQuoteById(id: bigint): Promise<Quote>;
     getQuotes(): Promise<Array<Quote>>;
     getQuotesByMobile(mobile: string): Promise<Array<Quote>>;
@@ -172,6 +180,7 @@ export interface backendInterface {
     submitQuote(name: string, mobile: string, service: ServiceType, details: string): Promise<bigint>;
     submitReview(name: string, rating: bigint, message: string): Promise<bigint>;
     updatePhotoTitle(id: bigint, newTitle: string): Promise<boolean>;
+    updatePromoSettings(settings: PromoSettings): Promise<boolean>;
     updateQuoteStatus(id: bigint, status: QuoteStatus): Promise<boolean>;
     updateSiteSettings(settings: SiteSettings): Promise<boolean>;
 }
@@ -346,6 +355,20 @@ export class Backend implements backendInterface {
             return from_candid_vec_n9(this._uploadFile, this._downloadFile, result);
         }
     }
+    async getPromoSettings(): Promise<PromoSettings> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getPromoSettings();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getPromoSettings();
+            return result;
+        }
+    }
     async getQuoteById(arg0: bigint): Promise<Quote> {
         if (this.processError) {
             try {
@@ -483,6 +506,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.updatePhotoTitle(arg0, arg1);
+            return result;
+        }
+    }
+    async updatePromoSettings(arg0: PromoSettings): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.updatePromoSettings(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.updatePromoSettings(arg0);
             return result;
         }
     }

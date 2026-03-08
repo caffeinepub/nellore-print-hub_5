@@ -3,6 +3,7 @@ import { ExternalBlob, QuoteStatus, ServiceType } from "../backend";
 import type {
   Customer,
   Photo,
+  PromoSettings,
   Quote,
   Review,
   SiteSettings,
@@ -285,5 +286,31 @@ export function useRegisterOrLoginCustomer() {
   });
 }
 
+export function useGetPromoSettings() {
+  const { actor, isFetching } = useActor();
+  return useQuery<PromoSettings>({
+    queryKey: ["promoSettings"],
+    queryFn: async () => {
+      if (!actor) throw new Error("No actor available");
+      return actor.getPromoSettings();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useUpdatePromoSettings() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (settings: PromoSettings) => {
+      if (!actor) throw new Error("No actor available");
+      return actor.updatePromoSettings(settings);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["promoSettings"] });
+    },
+  });
+}
+
 export { ExternalBlob, QuoteStatus, ServiceType };
-export type { Customer, Photo, Quote, Review, SiteSettings };
+export type { Customer, Photo, PromoSettings, Quote, Review, SiteSettings };

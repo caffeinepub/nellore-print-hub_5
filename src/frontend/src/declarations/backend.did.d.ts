@@ -26,6 +26,13 @@ export interface Photo {
   'blob' : ExternalBlob,
   'timestamp' : bigint,
 }
+export interface PromoSettings {
+  'discountCode' : string,
+  'offerDescription' : string,
+  'discountPercent' : string,
+  'isActive' : boolean,
+  'offerTitle' : string,
+}
 export interface Quote {
   'id' : bigint,
   'service' : ServiceType,
@@ -89,6 +96,7 @@ export interface _SERVICE {
   'getCustomerByMobile' : ActorMethod<[string], Customer>,
   'getCustomers' : ActorMethod<[], Array<Customer>>,
   'getPhotos' : ActorMethod<[], Array<Photo>>,
+  'getPromoSettings' : ActorMethod<[], PromoSettings>,
   'getQuoteById' : ActorMethod<[bigint], Quote>,
   'getQuotes' : ActorMethod<[], Array<Quote>>,
   'getQuotesByMobile' : ActorMethod<[string], Array<Quote>>,
@@ -99,6 +107,7 @@ export interface _SERVICE {
   'submitQuote' : ActorMethod<[string, string, ServiceType, string], bigint>,
   'submitReview' : ActorMethod<[string, bigint, string], bigint>,
   'updatePhotoTitle' : ActorMethod<[bigint, string], boolean>,
+  'updatePromoSettings' : ActorMethod<[PromoSettings], boolean>,
   'updateQuoteStatus' : ActorMethod<[bigint, QuoteStatus], boolean>,
   'updateSiteSettings' : ActorMethod<[SiteSettings], boolean>,
 }

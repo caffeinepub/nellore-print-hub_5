@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -17,8 +18,12 @@ import {
   ArrowLeft,
   CheckCircle2,
   ChevronDown,
+  Download,
   Eye,
   EyeOff,
+  FileText,
+  FileUp,
+  Gift,
   Images,
   List,
   Loader2,
@@ -41,7 +46,13 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { SiWhatsapp } from "react-icons/si";
 import { toast } from "sonner";
-import type { Customer, Photo, Quote, Review } from "../backend.d";
+import type {
+  Customer,
+  Photo,
+  PromoSettings,
+  Quote,
+  Review,
+} from "../backend.d";
 import {
   QuoteStatus,
   ServiceType,
@@ -50,10 +61,12 @@ import {
   useDeleteReview,
   useGetCustomers,
   useGetPhotos,
+  useGetPromoSettings,
   useGetQuotes,
   useGetReviews,
   useGetSiteSettings,
   useUpdatePhotoTitle,
+  useUpdatePromoSettings,
   useUpdateQuoteStatus,
   useUpdateSiteSettings,
 } from "../hooks/useQueries";
@@ -69,13 +82,13 @@ const SERVICE_LABELS: Record<string, string> = {
 
 const SERVICE_COLORS: Record<string, string> = {
   [ServiceType.digitalPrinting]:
-    "bg-blue-500/15 text-blue-300 border-blue-500/30",
+    "bg-brand-emerald/12 text-brand-green border-brand-emerald/30",
   [ServiceType.flexBanner]:
-    "bg-amber-500/15 text-amber-300 border-amber-500/30",
+    "bg-brand-emerald/12 text-brand-green border-brand-emerald/30",
   [ServiceType.stickerPrinting]:
-    "bg-pink-500/15 text-pink-300 border-pink-500/30",
+    "bg-brand-leaf/12 text-brand-green border-brand-leaf/30",
   [ServiceType.tShirtPrinting]:
-    "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
+    "bg-brand-leaf/12 text-brand-green border-brand-leaf/30",
 };
 
 function formatTimestamp(ts: bigint): string {
@@ -104,7 +117,17 @@ function QuoteRow({
   onToggle: () => void;
 }) {
   const updateStatus = useUpdateQuoteStatus();
+  const addPhoto = useAddPhotoWithProgress();
   const isNew = quote.status === QuoteStatus.new_;
+
+  // PDF upload state
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [pdfUploading, setPdfUploading] = useState(false);
+  const [pdfProgress, setPdfProgress] = useState(0);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(
+    () => localStorage.getItem(`nph_quote_pdf_${quote.id}`) || null,
+  );
+  const pdfInputRef = useRef<HTMLInputElement>(null);
 
   const whatsappMsg = encodeURIComponent(
     `Hi ${quote.name}, regarding your ${SERVICE_LABELS[quote.service] ?? quote.service} quote — we're happy to assist! Please let us know your availability.`,
@@ -119,6 +142,32 @@ function QuoteRow({
       );
     } catch {
       toast.error("Failed to update status. Please try again.");
+    }
+  };
+
+  const handlePdfUpload = async () => {
+    if (!pdfFile) return;
+    setPdfUploading(true);
+    setPdfProgress(0);
+    try {
+      const arrayBuffer = await pdfFile.arrayBuffer();
+      const bytes = new Uint8Array(arrayBuffer) as Uint8Array<ArrayBuffer>;
+      const resultId = await addPhoto.mutateAsync({
+        bytes,
+        title: `quotation_${quote.id}_${Date.now()}`,
+        order: 999n,
+        onProgress: (pct) => setPdfProgress(pct),
+      });
+      const blobUrl = `/api/blob/${resultId}`;
+      localStorage.setItem(`nph_quote_pdf_${quote.id}`, blobUrl);
+      setPdfUrl(blobUrl);
+      setPdfFile(null);
+      toast.success("Quotation PDF uploaded!");
+    } catch {
+      toast.error("Failed to upload PDF. Please try again.");
+    } finally {
+      setPdfUploading(false);
+      setPdfProgress(0);
     }
   };
 
@@ -137,31 +186,56 @@ function QuoteRow({
           <a
             href={`tel:${quote.mobile}`}
             onClick={(e) => e.stopPropagation()}
-            className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors"
+            className="text-brand-emerald hover:text-brand-green text-sm font-medium transition-colors"
           >
             {quote.mobile}
           </a>
         </TableCell>
         <TableCell>
           <span
-            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${SERVICE_COLORS[quote.service] ?? "bg-white/10 text-white/70 border-white/20"}`}
+            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${SERVICE_COLORS[quote.service] ?? "bg-brand-emerald/10 text-brand-green border-brand-emerald/20"}`}
           >
             {SERVICE_LABELS[quote.service] ?? String(quote.service)}
           </span>
         </TableCell>
         <TableCell>
-          <span
-            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${
-              isNew
-                ? "bg-amber-500/15 text-amber-300 border-amber-500/30"
-                : "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
-            }`}
-          >
+          <div className="flex items-center gap-2">
             <span
-              className={`w-1.5 h-1.5 rounded-full ${isNew ? "bg-amber-400" : "bg-emerald-400"}`}
-            />
-            {isNew ? "New" : "Replied"}
-          </span>
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${
+                isNew
+                  ? "bg-amber-500/15 text-amber-700 border-amber-500/30"
+                  : "bg-brand-emerald/15 text-brand-green border-brand-emerald/30"
+              }`}
+            >
+              <span
+                className={`w-1.5 h-1.5 rounded-full ${isNew ? "bg-amber-500" : "bg-brand-emerald"}`}
+              />
+              {isNew ? "New" : "Replied"}
+            </span>
+            <button
+              type="button"
+              data-ocid={`admin.quote.status.toggle.${idx + 1}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleToggleStatus();
+              }}
+              disabled={updateStatus.isPending}
+              title={isNew ? "Mark as Replied" : "Mark as New"}
+              className={`px-2 py-1 rounded-lg text-xs font-medium transition-all border ${
+                isNew
+                  ? "bg-brand-emerald/15 text-brand-green border-brand-emerald/30 hover:bg-brand-emerald/25"
+                  : "bg-amber-500/15 text-amber-700 border-amber-500/30 hover:bg-amber-500/25"
+              } disabled:opacity-50`}
+            >
+              {updateStatus.isPending ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : isNew ? (
+                "Mark Replied"
+              ) : (
+                "Mark New"
+              )}
+            </button>
+          </div>
         </TableCell>
         <TableCell className="text-muted-foreground text-sm hidden lg:table-cell whitespace-nowrap">
           {formatTimestamp(quote.timestamp)}
@@ -189,13 +263,13 @@ function QuoteRow({
                 transition={{ duration: 0.25, ease: "easeInOut" }}
                 className="overflow-hidden"
               >
-                <div className="px-4 pb-5 pt-2 bg-white/3 border-b border-white/6">
+                <div className="px-4 pb-5 pt-2 bg-brand-emerald/3 border-b border-brand-emerald/10">
                   {/* Project details */}
                   <div className="mb-4">
                     <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1.5">
                       Project Details
                     </p>
-                    <p className="text-white/90 text-sm leading-relaxed glass rounded-xl p-4">
+                    <p className="text-foreground text-sm leading-relaxed glass rounded-xl p-4">
                       {quote.details || (
                         <span className="text-muted-foreground italic">
                           No details provided.
@@ -214,7 +288,7 @@ function QuoteRow({
                       <Button
                         variant="outline"
                         size="sm"
-                        className="gap-2 bg-emerald-500/10 border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/20 hover:text-emerald-200 hover:border-emerald-400/50"
+                        className="gap-2 bg-brand-emerald/10 border-brand-emerald/30 text-brand-green hover:bg-brand-emerald/20 hover:border-brand-emerald/40"
                       >
                         <Phone className="w-3.5 h-3.5" />
                         Call {quote.name}
@@ -249,8 +323,8 @@ function QuoteRow({
                       }}
                       className={`gap-2 ${
                         isNew
-                          ? "bg-blue-500/10 border-blue-500/30 text-blue-300 hover:bg-blue-500/20 hover:border-blue-400/50"
-                          : "bg-white/8 border-white/15 text-white/60 hover:bg-white/12 hover:text-white/80"
+                          ? "bg-brand-emerald/10 border-brand-emerald/30 text-brand-green hover:bg-brand-emerald/20 hover:border-brand-emerald/40"
+                          : "bg-white/8 border-white/15 text-foreground/60 hover:bg-white/12 hover:text-foreground/80"
                       }`}
                     >
                       {updateStatus.isPending ? (
@@ -266,6 +340,145 @@ function QuoteRow({
                           ? "Mark as Replied"
                           : "Mark as New"}
                     </Button>
+                  </div>
+
+                  {/* PDF Quotation Reply */}
+                  <div className="mt-4 pt-4 border-t border-black/8">
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider mb-3">
+                      Quotation PDF Reply
+                    </p>
+
+                    {pdfUrl ? (
+                      <div className="flex items-center gap-3 p-3 bg-brand-emerald/10 rounded-xl border border-brand-emerald/25">
+                        <FileText className="w-5 h-5 text-brand-green flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-brand-green text-sm font-semibold">
+                            Quotation PDF attached
+                          </p>
+                          <p className="text-muted-foreground text-xs truncate">
+                            {pdfUrl}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <a
+                            href={pdfUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="gap-1.5 text-brand-green border-brand-emerald/40 hover:bg-brand-emerald/10"
+                            >
+                              <Eye className="w-3.5 h-3.5" /> View
+                            </Button>
+                          </a>
+                          <a
+                            href={pdfUrl}
+                            download
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="gap-1.5 text-brand-green border-brand-emerald/40 hover:bg-brand-emerald/10"
+                            >
+                              <Download className="w-3.5 h-3.5" /> Download
+                            </Button>
+                          </a>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="text-muted-foreground hover:text-red-500"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              localStorage.removeItem(
+                                `nph_quote_pdf_${quote.id}`,
+                              );
+                              setPdfUrl(null);
+                            }}
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <label
+                          htmlFor={`pdf-input-${quote.id}`}
+                          className="flex items-center gap-3 p-3 border-2 border-dashed border-black/15 hover:border-brand-emerald/50 rounded-xl cursor-pointer transition-all bg-white/50 hover:bg-brand-emerald/5"
+                          onClick={(e) => e.stopPropagation()}
+                          onKeyDown={(e) => e.stopPropagation()}
+                        >
+                          <FileUp className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                          {pdfFile ? (
+                            <div>
+                              <p className="text-sm font-medium text-foreground">
+                                {pdfFile.name}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {(pdfFile.size / 1024).toFixed(0)} KB
+                              </p>
+                            </div>
+                          ) : (
+                            <div>
+                              <p className="text-sm text-muted-foreground">
+                                Upload quotation PDF
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                Click to select PDF file
+                              </p>
+                            </div>
+                          )}
+                        </label>
+                        <input
+                          id={`pdf-input-${quote.id}`}
+                          type="file"
+                          accept=".pdf,application/pdf"
+                          className="hidden"
+                          ref={pdfInputRef}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            const f = e.target.files?.[0];
+                            if (f) setPdfFile(f);
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                        {pdfFile && (
+                          <>
+                            {pdfUploading && (
+                              <Progress
+                                value={pdfProgress}
+                                className="h-1.5 bg-black/10 [&>div]:bg-brand-emerald"
+                              />
+                            )}
+                            <Button
+                              size="sm"
+                              disabled={pdfUploading}
+                              data-ocid={`admin.quote.pdf.upload_button.${idx + 1}`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handlePdfUpload();
+                              }}
+                              className="gap-2 bg-brand-green text-white hover:bg-brand-emerald font-semibold rounded-lg"
+                            >
+                              {pdfUploading ? (
+                                <>
+                                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                  {Math.round(pdfProgress)}%
+                                </>
+                              ) : (
+                                <>
+                                  <FileUp className="w-3.5 h-3.5" />
+                                  Send Quotation PDF
+                                </>
+                              )}
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               </motion.div>
@@ -310,7 +523,7 @@ function QuotesPanel() {
       key: "replied",
       label: "Replied",
       count: repliedCount,
-      color: "text-emerald-300",
+      color: "text-brand-emerald",
     },
   ];
 
@@ -356,12 +569,12 @@ function QuotesPanel() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-          className="glass rounded-xl p-4 flex flex-col gap-1 border border-emerald-500/20"
+          className="glass rounded-xl p-4 flex flex-col gap-1 border border-brand-emerald/20"
         >
-          <span className="text-emerald-400/70 text-xs uppercase tracking-wider">
+          <span className="text-brand-emerald/70 text-xs uppercase tracking-wider">
             Replied
           </span>
-          <span className="font-display font-black text-3xl text-emerald-300">
+          <span className="font-display font-black text-3xl text-brand-emerald">
             {isLoading ? (
               <Skeleton className="h-8 w-12 bg-white/5" />
             ) : (
@@ -510,7 +723,8 @@ function SiteSettingsPanel() {
   // Logo upload state
   const [currentLogoSrc, setCurrentLogoSrc] = useState<string>(
     () =>
-      localStorage.getItem("nph_logo_url") || "/assets/uploads/IMG_0675-1.png",
+      localStorage.getItem("nph_logo_url") ||
+      "/assets/generated/nellore-print-hub-logo-transparent.dim_600x200.png",
   );
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(null);
@@ -639,14 +853,14 @@ function SiteSettingsPanel() {
   }
 
   const inputClass =
-    "bg-white/5 border-white/12 text-white placeholder:text-white/30 h-11 focus:border-blue-500/50 focus:ring-blue-500/20 rounded-xl";
+    "bg-white/5 border-white/12 text-white placeholder:text-white/30 h-11 focus:border-brand-emerald/50 focus:ring-brand-emerald/20 rounded-xl";
 
   return (
     <div className="space-y-8">
       {/* Business Information */}
       <div className="glass rounded-2xl p-6 space-y-6">
         <h3 className="font-display font-bold text-white text-lg flex items-center gap-2">
-          <Settings className="w-5 h-5 text-blue-400" />
+          <Settings className="w-5 h-5 text-brand-emerald" />
           Business Information
         </h3>
 
@@ -731,7 +945,7 @@ function SiteSettingsPanel() {
               onChange={handleField("address")}
               placeholder="Full business address"
               rows={2}
-              className="bg-white/5 border-white/12 text-white placeholder:text-white/30 focus:border-blue-500/50 focus:ring-blue-500/20 rounded-xl resize-none"
+              className="bg-white/5 border-white/12 text-white placeholder:text-white/30 focus:border-brand-emerald/50 focus:ring-brand-emerald/20 rounded-xl resize-none"
             />
           </div>
         </div>
@@ -740,7 +954,7 @@ function SiteSettingsPanel() {
       {/* Logo Upload Section */}
       <div className="glass rounded-2xl p-6 space-y-4">
         <h3 className="font-display font-bold text-white text-lg flex items-center gap-2">
-          <Printer className="w-5 h-5 text-blue-400" />
+          <Printer className="w-5 h-5 text-brand-emerald" />
           Company Logo
         </h3>
 
@@ -753,7 +967,7 @@ function SiteSettingsPanel() {
               className="max-h-14 max-w-20 object-contain"
               onError={(e) => {
                 (e.target as HTMLImageElement).src =
-                  "/assets/uploads/IMG_0675-1.png";
+                  "/assets/generated/nellore-print-hub-logo-transparent.dim_600x200.png";
               }}
             />
           </div>
@@ -772,11 +986,11 @@ function SiteSettingsPanel() {
           <label
             data-ocid="admin.logo.dropzone"
             htmlFor="logo-file-input"
-            className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-white/15 hover:border-blue-500/40 rounded-xl p-6 cursor-pointer transition-all duration-200 bg-white/3 hover:bg-white/6"
+            className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-white/15 hover:border-brand-emerald/40 rounded-xl p-6 cursor-pointer transition-all duration-200 bg-white/3 hover:bg-white/6"
           >
             {logoFile ? (
               <>
-                <CheckCircle2 className="w-8 h-8 text-blue-400" />
+                <CheckCircle2 className="w-8 h-8 text-brand-emerald" />
                 <p className="text-white font-medium text-sm">
                   {logoFile.name}
                 </p>
@@ -808,7 +1022,7 @@ function SiteSettingsPanel() {
 
           {/* Preview new logo */}
           {logoPreviewUrl && (
-            <div className="flex items-center gap-4 p-3 bg-blue-500/10 rounded-xl border border-blue-500/20">
+            <div className="flex items-center gap-4 p-3 bg-brand-emerald/10 rounded-xl border border-brand-emerald/20">
               <div className="w-20 h-14 rounded-lg bg-white flex items-center justify-center overflow-hidden">
                 <img
                   src={logoPreviewUrl}
@@ -817,17 +1031,19 @@ function SiteSettingsPanel() {
                 />
               </div>
               <div className="flex-1">
-                <p className="text-blue-300 text-sm font-medium">
+                <p className="text-brand-green text-sm font-medium">
                   New logo ready to upload
                 </p>
-                <p className="text-blue-400/60 text-xs">{logoFile?.name}</p>
+                <p className="text-brand-emerald/70 text-xs">
+                  {logoFile?.name}
+                </p>
               </div>
               <Button
                 data-ocid="admin.logo.save_button"
                 onClick={handleLogoUpload}
                 disabled={logoUploading}
                 size="sm"
-                className="brand-gradient text-black font-bold rounded-xl gap-2 flex-shrink-0"
+                className="brand-gradient text-white font-bold rounded-xl gap-2 flex-shrink-0"
               >
                 {logoUploading ? (
                   <>
@@ -856,7 +1072,7 @@ function SiteSettingsPanel() {
       {/* Company Intro Text Section */}
       <div className="glass rounded-2xl p-6 space-y-5">
         <h3 className="font-display font-bold text-white text-lg flex items-center gap-2">
-          <Pencil className="w-5 h-5 text-blue-400" />
+          <Pencil className="w-5 h-5 text-brand-emerald" />
           Company Intro Text
         </h3>
         <p className="text-muted-foreground text-sm">
@@ -890,7 +1106,7 @@ function SiteSettingsPanel() {
             onChange={(e) => setIntroDesc(e.target.value)}
             placeholder="At Magic Advertising, we don't just print — we craft your brand's first impression..."
             rows={4}
-            className="bg-white/5 border-white/12 text-white placeholder:text-white/30 focus:border-blue-500/50 focus:ring-blue-500/20 rounded-xl resize-none"
+            className="bg-white/5 border-white/12 text-white placeholder:text-white/30 focus:border-brand-emerald/50 focus:ring-brand-emerald/20 rounded-xl resize-none"
           />
           <p className="text-xs text-muted-foreground">
             Leave blank to use default description.
@@ -903,7 +1119,7 @@ function SiteSettingsPanel() {
         data-ocid="admin.settings.save.button"
         onClick={handleSave}
         disabled={updateSettings.isPending}
-        className="w-full h-12 brand-gradient text-black font-bold rounded-xl hover:scale-[1.01] transition-all duration-200 disabled:opacity-60 disabled:scale-100 text-base gap-2"
+        className="w-full h-12 brand-gradient text-white font-bold rounded-xl hover:scale-[1.01] transition-all duration-200 disabled:opacity-60 disabled:scale-100 text-base gap-2"
       >
         {updateSettings.isPending ? (
           <>
@@ -1039,7 +1255,7 @@ function PhotoCard({
                 setIsEditing(false);
               }
             }}
-            className="flex-1 bg-white/10 border border-white/20 rounded-lg px-2 py-1 text-white text-sm focus:outline-none focus:border-blue-500/60 min-w-0"
+            className="flex-1 bg-white/10 border border-white/20 rounded-lg px-2 py-1 text-white text-sm focus:outline-none focus:border-brand-emerald/50 min-w-0"
           />
         ) : (
           <button
@@ -1054,13 +1270,13 @@ function PhotoCard({
         <button
           type="button"
           onClick={handleEditStart}
-          className="text-white/30 hover:text-blue-400 transition-colors flex-shrink-0"
+          className="text-white/30 hover:text-brand-emerald transition-colors flex-shrink-0"
           aria-label="Edit title"
         >
           <Pencil className="w-3.5 h-3.5" />
         </button>
         {updateTitle.isPending && (
-          <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-400 flex-shrink-0" />
+          <Loader2 className="w-3.5 h-3.5 animate-spin text-brand-emerald flex-shrink-0" />
         )}
       </div>
     </motion.div>
@@ -1135,7 +1351,7 @@ function GalleryPanel() {
   };
 
   const inputClass =
-    "bg-white/5 border-white/12 text-white placeholder:text-white/30 h-11 focus:border-blue-500/50 focus:ring-blue-500/20 rounded-xl";
+    "bg-white/5 border-white/12 text-white placeholder:text-white/30 h-11 focus:border-brand-emerald/50 focus:ring-brand-emerald/20 rounded-xl";
 
   return (
     <div className="space-y-6">
@@ -1174,9 +1390,9 @@ function GalleryPanel() {
             transition={{ duration: 0.25, ease: "easeInOut" }}
             className="overflow-hidden"
           >
-            <div className="glass rounded-2xl p-6 border border-blue-500/20 space-y-4">
+            <div className="glass rounded-2xl p-6 border border-brand-emerald/20 space-y-4">
               <h3 className="font-display font-bold text-white text-base flex items-center gap-2">
-                <Upload className="w-4 h-4 text-blue-400" />
+                <Upload className="w-4 h-4 text-brand-emerald" />
                 Upload New Project Photo
               </h3>
 
@@ -1188,11 +1404,11 @@ function GalleryPanel() {
                 <label
                   data-ocid="gallery.dropzone"
                   htmlFor="gallery-file-input"
-                  className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-white/15 hover:border-blue-500/40 rounded-xl p-6 cursor-pointer transition-all duration-200 bg-white/3 hover:bg-white/6"
+                  className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-white/15 hover:border-brand-emerald/40 rounded-xl p-6 cursor-pointer transition-all duration-200 bg-white/3 hover:bg-white/6"
                 >
                   {selectedFile ? (
                     <>
-                      <CheckCircle2 className="w-8 h-8 text-blue-400" />
+                      <CheckCircle2 className="w-8 h-8 text-brand-emerald" />
                       <p className="text-white font-medium text-sm">
                         {selectedFile.name}
                       </p>
@@ -1538,12 +1754,12 @@ function ReviewsPanel() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
-            className="glass rounded-xl p-4 flex flex-col gap-1 border border-blue-500/20 sm:col-span-1 col-span-2"
+            className="glass rounded-xl p-4 flex flex-col gap-1 border border-brand-emerald/20 sm:col-span-1 col-span-2"
           >
-            <span className="text-blue-400/70 text-xs uppercase tracking-wider">
+            <span className="text-brand-emerald/70 text-xs uppercase tracking-wider">
               5-Star Reviews
             </span>
-            <span className="font-display font-black text-3xl text-blue-300">
+            <span className="font-display font-black text-3xl text-brand-emerald">
               {reviews.filter((r) => Number(r.rating) === 5).length}
             </span>
           </motion.div>
@@ -1629,7 +1845,7 @@ function VisitorRow({ customer, idx }: { customer: Customer; idx: number }) {
       <TableCell>
         <a
           href={`tel:${customer.mobile}`}
-          className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors"
+          className="text-brand-emerald hover:text-brand-green text-sm font-medium transition-colors"
         >
           {customer.mobile}
         </a>
@@ -1641,7 +1857,7 @@ function VisitorRow({ customer, idx }: { customer: Customer; idx: number }) {
         {formatTimestamp(customer.lastVisit)}
       </TableCell>
       <TableCell>
-        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-purple-500/15 text-purple-300 border border-purple-500/30">
+        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-brand-emerald/12 text-brand-green border border-brand-emerald/30">
           <UserCheck className="w-3 h-3" />
           {String(customer.visitCount)}
         </span>
@@ -1652,7 +1868,7 @@ function VisitorRow({ customer, idx }: { customer: Customer; idx: number }) {
             <button
               type="button"
               title="Call"
-              className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 flex items-center justify-center transition-all duration-200"
+              className="w-7 h-7 rounded-lg bg-brand-emerald/10 border border-brand-emerald/30 text-brand-green hover:bg-brand-emerald/20 flex items-center justify-center transition-all duration-200"
             >
               <Phone className="w-3.5 h-3.5" />
             </button>
@@ -1720,12 +1936,12 @@ function VisitorsPanel() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="glass rounded-xl p-4 flex flex-col gap-1 border border-purple-500/20"
+          className="glass rounded-xl p-4 flex flex-col gap-1 border border-brand-emerald/20"
         >
-          <span className="text-purple-400/70 text-xs uppercase tracking-wider">
+          <span className="text-brand-emerald/70 text-xs uppercase tracking-wider">
             New Today
           </span>
-          <span className="font-display font-black text-3xl text-purple-300">
+          <span className="font-display font-black text-3xl text-brand-emerald">
             {isLoading ? (
               <Skeleton className="h-8 w-12 bg-white/5" />
             ) : (
@@ -1819,9 +2035,290 @@ function VisitorsPanel() {
   );
 }
 
+// ─── Promo Panel ───────────────────────────────────────────────────────────────
+
+function PromoPanel() {
+  const { data: promo, isLoading, isError } = useGetPromoSettings();
+  const updatePromo = useUpdatePromoSettings();
+
+  const [form, setForm] = useState<PromoSettings>({
+    offerTitle: "",
+    offerDescription: "",
+    discountPercent: "",
+    discountCode: "",
+    isActive: true,
+  });
+  const [initialized, setInitialized] = useState(false);
+
+  useEffect(() => {
+    if (promo && !initialized) {
+      setForm({
+        offerTitle: promo.offerTitle,
+        offerDescription: promo.offerDescription,
+        discountPercent: promo.discountPercent,
+        discountCode: promo.discountCode,
+        isActive: promo.isActive,
+      });
+      setInitialized(true);
+    }
+  }, [promo, initialized]);
+
+  const handleSave = async () => {
+    try {
+      await updatePromo.mutateAsync(form);
+      window.dispatchEvent(new Event("promo-updated"));
+      toast.success("Promo saved! Welcome banner updated.");
+    } catch {
+      toast.error("Failed to save promo settings. Please try again.");
+    }
+  };
+
+  const inputClass =
+    "bg-white/5 border-white/12 text-white placeholder:text-white/30 h-11 focus:border-brand-emerald/50 focus:ring-brand-emerald/20 rounded-xl";
+
+  if (isLoading) {
+    return (
+      <div
+        data-ocid="admin.promo.loading_state"
+        className="space-y-4 max-w-2xl"
+      >
+        {[1, 2, 3, 4, 5].map((i) => (
+          <div key={i} className="space-y-2">
+            <Skeleton className="h-4 w-28 bg-white/5" />
+            <Skeleton className="h-11 w-full bg-white/5 rounded-xl" />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div
+        data-ocid="admin.promo.error_state"
+        className="flex items-center gap-3 p-5 glass rounded-2xl border border-red-500/20 text-red-400 max-w-2xl"
+      >
+        <AlertCircle className="w-5 h-5 flex-shrink-0" />
+        <p className="text-sm">
+          Failed to load promo settings. Please refresh.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6 max-w-2xl">
+      {/* Live preview badge */}
+      <div className="flex items-center gap-3 p-4 glass rounded-2xl border border-brand-emerald/20">
+        <div className="w-9 h-9 rounded-xl bg-brand-emerald/20 flex items-center justify-center flex-shrink-0">
+          <Gift className="w-4 h-4 text-brand-green" />
+        </div>
+        <div>
+          <p className="text-white/90 text-sm font-semibold">
+            Welcome Popup Promo
+          </p>
+          <p className="text-muted-foreground text-xs">
+            Edit the promotional offer shown to customers when they first log
+            in.
+          </p>
+        </div>
+      </div>
+
+      {/* Main form card */}
+      <div className="glass rounded-2xl p-6 space-y-6 border border-white/8">
+        {/* Active toggle */}
+        <div className="flex items-center justify-between py-2 border-b border-white/8 pb-5">
+          <div>
+            <Label className="text-white font-semibold text-base">
+              Show Promo Popup
+            </Label>
+            <p className="text-muted-foreground text-xs mt-0.5">
+              Enable or disable the promotional popup for all visitors
+            </p>
+          </div>
+          <Switch
+            data-ocid="admin.promo.switch"
+            checked={form.isActive}
+            onCheckedChange={(checked) =>
+              setForm((prev) => ({ ...prev, isActive: checked }))
+            }
+            className="data-[state=checked]:bg-brand-emerald"
+          />
+        </div>
+
+        <div className="space-y-5">
+          {/* Offer Title */}
+          <div className="space-y-2">
+            <Label className="text-white/80 text-sm font-medium">
+              Offer Title
+            </Label>
+            <Input
+              data-ocid="admin.promo.title.input"
+              value={form.offerTitle}
+              onChange={(e) =>
+                setForm((prev) => ({ ...prev, offerTitle: e.target.value }))
+              }
+              placeholder="e.g. 🎁 Special Offer For You"
+              className={inputClass}
+            />
+          </div>
+
+          {/* Offer Description */}
+          <div className="space-y-2">
+            <Label className="text-white/80 text-sm font-medium">
+              Offer Description
+            </Label>
+            <Textarea
+              data-ocid="admin.promo.description.textarea"
+              value={form.offerDescription}
+              onChange={(e) =>
+                setForm((prev) => ({
+                  ...prev,
+                  offerDescription: e.target.value,
+                }))
+              }
+              placeholder="e.g. Get 10% OFF on your first order! Premium business cards, banners, t-shirts & more — all under one roof."
+              rows={3}
+              className="bg-white/5 border-white/12 text-white placeholder:text-white/30 focus:border-brand-emerald/50 focus:ring-brand-emerald/20 rounded-xl resize-none"
+            />
+            <p className="text-xs text-muted-foreground">
+              Shown as the main promo message to customers.
+            </p>
+          </div>
+
+          {/* Discount percent + code in a 2-col grid */}
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className="text-white/80 text-sm font-medium">
+                Discount Percent
+              </Label>
+              <Input
+                data-ocid="admin.promo.percent.input"
+                value={form.discountPercent}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    discountPercent: e.target.value,
+                  }))
+                }
+                placeholder="e.g. 10"
+                className={inputClass}
+              />
+              <p className="text-xs text-muted-foreground">
+                Just the number — "10" shows as 10% OFF
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-white/80 text-sm font-medium">
+                Discount Code
+              </Label>
+              <Input
+                data-ocid="admin.promo.code.input"
+                value={form.discountCode}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    discountCode: e.target.value.toUpperCase(),
+                  }))
+                }
+                placeholder="e.g. WELCOME10"
+                className={inputClass}
+              />
+              <p className="text-xs text-muted-foreground">
+                Shown as a promo code pill in the popup
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Live preview */}
+      {form.isActive && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="glass rounded-2xl p-5 border border-brand-emerald/20"
+        >
+          <p className="text-muted-foreground text-xs uppercase tracking-wider mb-3 font-semibold">
+            Preview — how it looks to customers
+          </p>
+          <div
+            className="rounded-xl overflow-hidden"
+            style={{
+              background: "rgba(45,158,94,0.08)",
+              border: "1px solid rgba(45,158,94,0.20)",
+            }}
+          >
+            <div
+              className="h-1 w-full"
+              style={{
+                background:
+                  "linear-gradient(90deg, #1a5c32 0%, #2d9e5e 50%, #4caf78 100%)",
+              }}
+            />
+            <div className="p-4">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 brand-gradient">
+                  <Gift className="w-4 h-4 text-white" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-white/90 text-sm mb-1">
+                    {form.offerTitle || "Special Offer For You"}
+                  </p>
+                  <p className="text-white/55 text-xs leading-relaxed">
+                    {form.offerDescription ||
+                      "Get 10% OFF on your first order! Premium business cards, banners & more."}
+                  </p>
+                </div>
+              </div>
+              {form.discountCode && (
+                <div className="mt-3 flex justify-center">
+                  <span
+                    className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold tracking-wider brand-gradient"
+                    style={{ color: "white" }}
+                  >
+                    ✨ Use code: {form.discountCode}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Save button */}
+      <Button
+        data-ocid="admin.promo.save_button"
+        onClick={handleSave}
+        disabled={updatePromo.isPending}
+        className="w-full h-12 brand-gradient text-white font-bold rounded-xl hover:scale-[1.01] transition-all duration-200 disabled:opacity-60 disabled:scale-100 text-base gap-2"
+      >
+        {updatePromo.isPending ? (
+          <>
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Saving...
+          </>
+        ) : (
+          <>
+            <Save className="w-4 h-4" />
+            Save Promo Settings
+          </>
+        )}
+      </Button>
+    </div>
+  );
+}
+
 // ─── Dashboard (after login) ───────────────────────────────────────────────────
 
-type AdminTab = "quotes" | "settings" | "gallery" | "reviews" | "visitors";
+type AdminTab =
+  | "quotes"
+  | "settings"
+  | "gallery"
+  | "reviews"
+  | "visitors"
+  | "promo";
 
 function Dashboard() {
   const [activeTab, setActiveTab] = useState<AdminTab>("quotes");
@@ -1911,6 +2408,19 @@ function Dashboard() {
               <Users className="w-4 h-4" />
               <span className="hidden sm:inline">Visitors</span>
             </button>
+            <button
+              type="button"
+              data-ocid="admin.promo.tab"
+              onClick={() => setActiveTab("promo")}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                activeTab === "promo"
+                  ? "brand-gradient text-white font-bold"
+                  : "text-white/60 hover:text-white"
+              }`}
+            >
+              <Gift className="w-4 h-4" />
+              <span className="hidden sm:inline">Promo</span>
+            </button>
           </div>
 
           {/* Back to site */}
@@ -1923,12 +2433,12 @@ function Dashboard() {
           </a>
         </div>
 
-        {/* Indian tricolor stripe */}
+        {/* Brand gradient stripe */}
         <div
-          className="w-full h-0.5 opacity-40"
+          className="w-full h-0.5 opacity-60"
           style={{
             background:
-              "linear-gradient(90deg, #FF6B00 33%, #FFFFFF 33% 66%, #138808 66%)",
+              "linear-gradient(90deg, #1a5c32, #2d9e5e, #4caf78, #1a5c32)",
           }}
         />
       </header>
@@ -1946,7 +2456,7 @@ function Dashboard() {
             >
               <div className="mb-6">
                 <h2 className="font-display font-bold text-2xl text-white flex items-center gap-2">
-                  <MessageSquare className="w-6 h-6 text-blue-400" />
+                  <MessageSquare className="w-6 h-6 text-brand-emerald" />
                   Quote Requests
                 </h2>
                 <p className="text-muted-foreground text-sm mt-0.5">
@@ -1965,7 +2475,7 @@ function Dashboard() {
             >
               <div className="mb-6">
                 <h2 className="font-display font-bold text-2xl text-white flex items-center gap-2">
-                  <Settings className="w-6 h-6 text-blue-400" />
+                  <Settings className="w-6 h-6 text-brand-emerald" />
                   Site Settings
                 </h2>
                 <p className="text-muted-foreground text-sm mt-0.5">
@@ -1986,7 +2496,7 @@ function Dashboard() {
             >
               <div className="mb-6">
                 <h2 className="font-display font-bold text-2xl text-white flex items-center gap-2">
-                  <Images className="w-6 h-6 text-blue-400" />
+                  <Images className="w-6 h-6 text-brand-emerald" />
                   Project Gallery
                 </h2>
                 <p className="text-muted-foreground text-sm mt-0.5">
@@ -2014,7 +2524,7 @@ function Dashboard() {
               </div>
               <ReviewsPanel />
             </motion.div>
-          ) : (
+          ) : activeTab === "visitors" ? (
             <motion.div
               key="visitors"
               initial={{ opacity: 0, x: 16 }}
@@ -2024,7 +2534,7 @@ function Dashboard() {
             >
               <div className="mb-6">
                 <h2 className="font-display font-bold text-2xl text-white flex items-center gap-2">
-                  <Users className="w-6 h-6 text-purple-400" />
+                  <Users className="w-6 h-6 text-brand-emerald" />
                   Site Visitors
                 </h2>
                 <p className="text-muted-foreground text-sm mt-0.5">
@@ -2032,6 +2542,26 @@ function Dashboard() {
                 </p>
               </div>
               <VisitorsPanel />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="promo"
+              initial={{ opacity: 0, x: 16 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -16 }}
+              transition={{ duration: 0.22 }}
+            >
+              <div className="mb-6">
+                <h2 className="font-display font-bold text-2xl text-white flex items-center gap-2">
+                  <Gift className="w-6 h-6 text-brand-emerald" />
+                  Promo Settings
+                </h2>
+                <p className="text-muted-foreground text-sm mt-0.5">
+                  Edit the welcome popup promo offer shown to customers after
+                  login.
+                </p>
+              </div>
+              <PromoPanel />
             </motion.div>
           )}
         </AnimatePresence>
@@ -2072,7 +2602,7 @@ export default function AdminPage() {
       <div
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full blur-3xl opacity-10 pointer-events-none"
         style={{
-          background: "radial-gradient(circle, #1A56DB, transparent 70%)",
+          background: "radial-gradient(circle, #2d9e5e, transparent 70%)",
         }}
       />
 
@@ -2118,7 +2648,7 @@ export default function AdminPage() {
                   className={`bg-white/5 border-white/12 text-white placeholder:text-white/30 h-11 pr-10 ${
                     error
                       ? "border-red-500/50 focus:border-red-500/50"
-                      : "focus:border-blue-500/50"
+                      : "focus:border-brand-emerald/50"
                   }`}
                 />
                 <button
