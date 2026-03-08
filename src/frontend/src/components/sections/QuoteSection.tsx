@@ -116,7 +116,7 @@ function QuotePrintArea({ quote }: { quote: QuoteData }) {
         <a
           href="tel:+919390535070"
           className="font-medium"
-          style={{ color: "#2d9e5e" }}
+          style={{ color: "#e1306c" }}
         >
           +91 93905 35070
         </a>
@@ -213,7 +213,7 @@ export default function QuoteSection() {
   };
 
   const inputClass =
-    "bg-white/5 border-white/12 text-white placeholder:text-white/30 h-11 focus:border-brand-emerald/50 focus:ring-brand-emerald/20 rounded-xl";
+    "bg-white/5 border-white/12 text-white placeholder:text-white/30 h-11 focus:border-[#e1306c]/50 focus:ring-[#e1306c]/20 rounded-xl";
 
   return (
     <section id="quote" className="py-24 px-6 relative">
@@ -222,7 +222,7 @@ export default function QuoteSection() {
         className="absolute bottom-0 left-0 w-80 h-80 rounded-full blur-3xl opacity-05 pointer-events-none"
         style={{
           background:
-            "radial-gradient(circle, rgba(192,40,106,0.20), transparent 70%)",
+            "radial-gradient(circle, rgba(225,48,108,0.25), transparent 70%)",
         }}
       />
 
@@ -350,7 +350,7 @@ export default function QuoteSection() {
                 >
                   <SelectTrigger
                     data-ocid="quote.select"
-                    className="bg-white/5 border-white/12 text-white focus:border-brand-emerald/50 h-11"
+                    className="bg-white/5 border-white/12 text-white focus:border-[#e1306c]/50 h-11"
                   >
                     <SelectValue
                       placeholder={t.quote.form.servicePlaceholder}
@@ -358,7 +358,7 @@ export default function QuoteSection() {
                   </SelectTrigger>
                   <SelectContent
                     className="border-white/12"
-                    style={{ background: "rgba(20,12,28,0.97)" }}
+                    style={{ background: "rgba(10,5,15,0.97)" }}
                   >
                     {SERVICE_OPTIONS.map((opt) => (
                       <SelectItem
@@ -390,7 +390,7 @@ export default function QuoteSection() {
                   onChange={(e) => setDetails(e.target.value)}
                   required
                   rows={4}
-                  className="bg-white/5 border-white/12 text-white placeholder:text-white/30 focus:border-brand-emerald/50 focus:ring-brand-emerald/20 resize-none rounded-xl"
+                  className="bg-white/5 border-white/12 text-white placeholder:text-white/30 focus:border-[#e1306c]/50 focus:ring-[#e1306c]/20 resize-none rounded-xl"
                 />
               </div>
 

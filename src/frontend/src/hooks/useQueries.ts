@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ExternalBlob, QuoteStatus, ServiceType } from "../backend";
 import type {
+  AdminMessage,
   Customer,
   Photo,
   PromoSettings,
@@ -312,5 +313,92 @@ export function useUpdatePromoSettings() {
   });
 }
 
+export function useGetMessagesForCustomer(mobile: string) {
+  const { actor, isFetching } = useActor();
+  return useQuery<AdminMessage[]>({
+    queryKey: ["messages", mobile],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getMessagesForCustomer(mobile);
+    },
+    enabled: !!actor && !isFetching && !!mobile,
+  });
+}
+
+export function useMarkMessageRead() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: bigint) => {
+      if (!actor) throw new Error("No actor available");
+      return actor.markMessageRead(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["messages"] });
+    },
+  });
+}
+
+export function useSendMessageToCustomer() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      toMobile,
+      toName,
+      subject,
+      body,
+    }: {
+      toMobile: string;
+      toName: string;
+      subject: string;
+      body: string;
+    }) => {
+      if (!actor) throw new Error("No actor available");
+      return actor.sendMessageToCustomer(toMobile, toName, subject, body);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["adminMessages"] });
+    },
+  });
+}
+
+export function useGetAllAdminMessages() {
+  const { actor, isFetching } = useActor();
+  return useQuery<AdminMessage[]>({
+    queryKey: ["adminMessages"],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getAllAdminMessages();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useDeleteAdminMessage() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: bigint) => {
+      if (!actor) throw new Error("No actor available");
+      return actor.deleteAdminMessage(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["adminMessages"] });
+    },
+  });
+}
+
 export { ExternalBlob, QuoteStatus, ServiceType };
-export type { Customer, Photo, PromoSettings, Quote, Review, SiteSettings };
+export type {
+  AdminMessage,
+  Customer,
+  Photo,
+  PromoSettings,
+  Quote,
+  Review,
+  SiteSettings,
+};

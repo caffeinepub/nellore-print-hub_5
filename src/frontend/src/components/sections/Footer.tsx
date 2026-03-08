@@ -42,8 +42,8 @@ export default function Footer() {
         className="w-full h-1"
         style={{
           background:
-            "linear-gradient(90deg, #1a5c32, #2d9e5e, #4caf78, #1a5c32)",
-          opacity: 0.9,
+            "linear-gradient(90deg, #833ab4, #e1306c, #fd1d1d, #f56040, #fcb045)",
+          opacity: 0.95,
         }}
       />
       <div className="max-w-7xl mx-auto px-6 py-12">
@@ -98,7 +98,7 @@ export default function Footer() {
                 href={`https://caffeine.ai?utm_source=caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(hostname)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-brand-emerald hover:text-brand-green transition-colors"
+                className="text-[#e1306c] hover:text-[#fcb045] transition-colors"
               >
                 caffeine.ai
               </a>

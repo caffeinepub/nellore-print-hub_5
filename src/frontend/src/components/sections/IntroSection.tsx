@@ -10,23 +10,23 @@ const stats = [
   {
     icon: Clock,
     label: "12+ Years Experience",
-    colorText: "text-brand-green",
-    bg: "rgba(26,92,50,0.08)",
-    border: "rgba(26,92,50,0.20)",
+    colorText: "text-[#833ab4]",
+    bg: "rgba(131,58,180,0.08)",
+    border: "rgba(131,58,180,0.22)",
   },
   {
     icon: Users,
     label: "10,000+ Happy Clients",
-    colorText: "text-brand-emerald",
-    bg: "rgba(45,158,94,0.08)",
-    border: "rgba(45,158,94,0.20)",
+    colorText: "text-[#e1306c]",
+    bg: "rgba(225,48,108,0.08)",
+    border: "rgba(225,48,108,0.22)",
   },
   {
     icon: Zap,
     label: "Same-Day Delivery Available",
-    colorText: "text-brand-leaf",
-    bg: "rgba(76,175,120,0.08)",
-    border: "rgba(76,175,120,0.20)",
+    colorText: "text-[#fcb045]",
+    bg: "rgba(252,176,69,0.08)",
+    border: "rgba(252,176,69,0.22)",
   },
 ];
 
@@ -81,7 +81,7 @@ export default function IntroSection() {
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            "linear-gradient(180deg, rgba(45,158,94,0.05) 0%, rgba(26,92,50,0.03) 50%, rgba(255,255,255,0) 100%)",
+            "linear-gradient(180deg, rgba(131,58,180,0.04) 0%, rgba(225,48,108,0.02) 50%, rgba(0,0,0,0) 100%)",
         }}
       />
 
@@ -151,7 +151,7 @@ export default function IntroSection() {
             <div
               className="h-px w-16"
               style={{
-                background: "linear-gradient(90deg, transparent, #2d9e5e)",
+                background: "linear-gradient(90deg, transparent, #833ab4)",
               }}
             />
             <div className="w-2 h-2 rounded-full brand-gradient" />
@@ -161,7 +161,7 @@ export default function IntroSection() {
                 height: "2px",
                 width: "96px",
                 background:
-                  "linear-gradient(90deg, #1a5c32, #2d9e5e, #4caf78, #1a5c32)",
+                  "linear-gradient(90deg, #833ab4, #e1306c, #fd1d1d, #fcb045)",
                 opacity: 0.7,
               }}
             />
@@ -169,7 +169,7 @@ export default function IntroSection() {
             <div
               className="h-px w-16"
               style={{
-                background: "linear-gradient(90deg, #4caf78, transparent)",
+                background: "linear-gradient(90deg, #fcb045, transparent)",
               }}
             />
           </motion.div>

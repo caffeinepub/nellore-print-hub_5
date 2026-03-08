@@ -176,7 +176,7 @@ function ReviewForm() {
   };
 
   const inputClass =
-    "bg-white/5 border-white/12 text-white placeholder:text-white/30 h-11 focus:border-brand-emerald/50 focus:ring-brand-emerald/20 rounded-xl";
+    "bg-white/5 border-white/12 text-white placeholder:text-white/30 h-11 focus:border-[#e1306c]/50 focus:ring-[#e1306c]/20 rounded-xl";
 
   return (
     <div className="mt-12">
@@ -270,7 +270,7 @@ function ReviewForm() {
                   }}
                   placeholder="Tell others about your printing experience with us..."
                   rows={4}
-                  className={`bg-white/5 border-white/12 text-white placeholder:text-white/30 focus:border-brand-emerald/50 focus:ring-brand-emerald/20 rounded-xl resize-none ${errors.message ? "border-red-400" : ""}`}
+                  className={`bg-white/5 border-white/12 text-white placeholder:text-white/30 focus:border-[#e1306c]/50 focus:ring-[#e1306c]/20 rounded-xl resize-none ${errors.message ? "border-red-400" : ""}`}
                 />
                 <div className="flex items-center justify-between">
                   {errors.message ? (
@@ -347,7 +347,7 @@ export default function ReviewsSection() {
         className="absolute top-1/2 right-1/4 -translate-y-1/2 w-80 h-80 rounded-full blur-3xl opacity-08 pointer-events-none"
         style={{
           background:
-            "radial-gradient(circle, rgba(139,63,168,0.10) 0%, rgba(192,40,106,0.07) 50%, transparent 70%)",
+            "radial-gradient(circle, rgba(131,58,180,0.15) 0%, rgba(225,48,108,0.10) 50%, transparent 70%)",
         }}
       />
 

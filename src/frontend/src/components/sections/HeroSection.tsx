@@ -48,12 +48,12 @@ export default function HeroSection() {
             "url('/assets/generated/cmyk-hero-bg.dim_1920x1080.jpg')",
         }}
       />
-      {/* Dark overlay over CMYK background — green-tinted */}
+      {/* Dark overlay — deep black tint */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(135deg, rgba(10,32,18,0.90) 0%, rgba(15,51,32,0.83) 50%, rgba(8,28,15,0.88) 100%)",
+            "linear-gradient(135deg, rgba(0,0,0,0.92) 0%, rgba(10,5,20,0.88) 50%, rgba(0,0,0,0.92) 100%)",
         }}
       />
       {/* Brand gradient stripe at top */}
@@ -61,17 +61,17 @@ export default function HeroSection() {
         className="absolute top-0 left-0 right-0 h-1.5"
         style={{
           background:
-            "linear-gradient(90deg, #1a5c32, #2d9e5e, #4caf78, #1a5c32)",
+            "linear-gradient(90deg, #833ab4, #e1306c, #fd1d1d, #f56040, #fcb045)",
         }}
       />
       {/* Bottom gradient fade to background */}
       <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-background to-transparent" />
-      {/* Subtle brand glow */}
+      {/* Subtle Instagram brand glow */}
       <div
-        className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] rounded-full blur-3xl opacity-15 pointer-events-none"
+        className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] rounded-full blur-3xl opacity-20 pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse, rgba(45,158,94,0.30) 0%, rgba(26,92,50,0.20) 40%, rgba(76,175,120,0.10) 70%, transparent 100%)",
+            "radial-gradient(ellipse, rgba(131,58,180,0.25) 0%, rgba(225,48,108,0.20) 40%, rgba(252,176,69,0.08) 70%, transparent 100%)",
         }}
       />
 
@@ -83,7 +83,7 @@ export default function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
           className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium mb-8 border border-white/15 text-white/80 shadow-xs"
-          style={{ background: "rgba(45,158,94,0.15)" }}
+          style={{ background: "rgba(131,58,180,0.15)" }}
         >
           <span className="w-2 h-2 rounded-full brand-gradient animate-pulse" />
           {t.hero.badge}

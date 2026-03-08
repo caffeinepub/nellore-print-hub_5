@@ -114,6 +114,15 @@ export interface PromoSettings {
 export interface _CaffeineStorageRefillInformation {
     proposed_top_up_amount?: bigint;
 }
+export interface AdminMessage {
+    id: bigint;
+    subject: string;
+    body: string;
+    isRead: boolean;
+    toName: string;
+    timestamp: bigint;
+    toMobile: string;
+}
 export interface Quote {
     id: bigint;
     service: ServiceType;
@@ -164,10 +173,13 @@ export interface backendInterface {
     _caffeineStorageRefillCashier(refillInformation: _CaffeineStorageRefillInformation | null): Promise<_CaffeineStorageRefillResult>;
     _caffeineStorageUpdateGatewayPrincipals(): Promise<void>;
     addPhoto(blob: ExternalBlob, title: string, order: bigint): Promise<bigint>;
+    deleteAdminMessage(id: bigint): Promise<boolean>;
     deletePhoto(id: bigint): Promise<boolean>;
     deleteReview(id: bigint): Promise<boolean>;
+    getAllAdminMessages(): Promise<Array<AdminMessage>>;
     getCustomerByMobile(mobile: string): Promise<Customer>;
     getCustomers(): Promise<Array<Customer>>;
+    getMessagesForCustomer(mobile: string): Promise<Array<AdminMessage>>;
     getPhotos(): Promise<Array<Photo>>;
     getPromoSettings(): Promise<PromoSettings>;
     getQuoteById(id: bigint): Promise<Quote>;
@@ -176,7 +188,9 @@ export interface backendInterface {
     getQuotesByService(service: ServiceType): Promise<Array<Quote>>;
     getReviews(): Promise<Array<Review>>;
     getSiteSettings(): Promise<SiteSettings>;
+    markMessageRead(id: bigint): Promise<boolean>;
     registerOrLoginCustomer(name: string, mobile: string): Promise<Customer>;
+    sendMessageToCustomer(toMobile: string, toName: string, subject: string, body: string): Promise<bigint>;
     submitQuote(name: string, mobile: string, service: ServiceType, details: string): Promise<bigint>;
     submitReview(name: string, rating: bigint, message: string): Promise<bigint>;
     updatePhotoTitle(id: bigint, newTitle: string): Promise<boolean>;
@@ -285,6 +299,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async deleteAdminMessage(arg0: bigint): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.deleteAdminMessage(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.deleteAdminMessage(arg0);
+            return result;
+        }
+    }
     async deletePhoto(arg0: bigint): Promise<boolean> {
         if (this.processError) {
             try {
@@ -313,6 +341,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async getAllAdminMessages(): Promise<Array<AdminMessage>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getAllAdminMessages();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getAllAdminMessages();
+            return result;
+        }
+    }
     async getCustomerByMobile(arg0: string): Promise<Customer> {
         if (this.processError) {
             try {
@@ -338,6 +380,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.getCustomers();
+            return result;
+        }
+    }
+    async getMessagesForCustomer(arg0: string): Promise<Array<AdminMessage>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getMessagesForCustomer(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getMessagesForCustomer(arg0);
             return result;
         }
     }
@@ -453,6 +509,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async markMessageRead(arg0: bigint): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.markMessageRead(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.markMessageRead(arg0);
+            return result;
+        }
+    }
     async registerOrLoginCustomer(arg0: string, arg1: string): Promise<Customer> {
         if (this.processError) {
             try {
@@ -464,6 +534,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.registerOrLoginCustomer(arg0, arg1);
+            return result;
+        }
+    }
+    async sendMessageToCustomer(arg0: string, arg1: string, arg2: string, arg3: string): Promise<bigint> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.sendMessageToCustomer(arg0, arg1, arg2, arg3);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.sendMessageToCustomer(arg0, arg1, arg2, arg3);
             return result;
         }
     }

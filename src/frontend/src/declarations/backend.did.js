@@ -20,6 +20,15 @@ export const _CaffeineStorageRefillResult = IDL.Record({
   'topped_up_amount' : IDL.Opt(IDL.Nat),
 });
 export const ExternalBlob = IDL.Vec(IDL.Nat8);
+export const AdminMessage = IDL.Record({
+  'id' : IDL.Nat,
+  'subject' : IDL.Text,
+  'body' : IDL.Text,
+  'isRead' : IDL.Bool,
+  'toName' : IDL.Text,
+  'timestamp' : IDL.Int,
+  'toMobile' : IDL.Text,
+});
 export const Customer = IDL.Record({
   'id' : IDL.Nat,
   'visitCount' : IDL.Nat,
@@ -105,10 +114,17 @@ export const idlService = IDL.Service({
     ),
   '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
   'addPhoto' : IDL.Func([ExternalBlob, IDL.Text, IDL.Nat], [IDL.Nat], []),
+  'deleteAdminMessage' : IDL.Func([IDL.Nat], [IDL.Bool], []),
   'deletePhoto' : IDL.Func([IDL.Nat], [IDL.Bool], []),
   'deleteReview' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+  'getAllAdminMessages' : IDL.Func([], [IDL.Vec(AdminMessage)], ['query']),
   'getCustomerByMobile' : IDL.Func([IDL.Text], [Customer], ['query']),
   'getCustomers' : IDL.Func([], [IDL.Vec(Customer)], ['query']),
+  'getMessagesForCustomer' : IDL.Func(
+      [IDL.Text],
+      [IDL.Vec(AdminMessage)],
+      ['query'],
+    ),
   'getPhotos' : IDL.Func([], [IDL.Vec(Photo)], ['query']),
   'getPromoSettings' : IDL.Func([], [PromoSettings], ['query']),
   'getQuoteById' : IDL.Func([IDL.Nat], [Quote], ['query']),
@@ -117,7 +133,13 @@ export const idlService = IDL.Service({
   'getQuotesByService' : IDL.Func([ServiceType], [IDL.Vec(Quote)], ['query']),
   'getReviews' : IDL.Func([], [IDL.Vec(Review)], ['query']),
   'getSiteSettings' : IDL.Func([], [SiteSettings], ['query']),
+  'markMessageRead' : IDL.Func([IDL.Nat], [IDL.Bool], []),
   'registerOrLoginCustomer' : IDL.Func([IDL.Text, IDL.Text], [Customer], []),
+  'sendMessageToCustomer' : IDL.Func(
+      [IDL.Text, IDL.Text, IDL.Text, IDL.Text],
+      [IDL.Nat],
+      [],
+    ),
   'submitQuote' : IDL.Func(
       [IDL.Text, IDL.Text, ServiceType, IDL.Text],
       [IDL.Nat],
@@ -145,6 +167,15 @@ export const idlFactory = ({ IDL }) => {
     'topped_up_amount' : IDL.Opt(IDL.Nat),
   });
   const ExternalBlob = IDL.Vec(IDL.Nat8);
+  const AdminMessage = IDL.Record({
+    'id' : IDL.Nat,
+    'subject' : IDL.Text,
+    'body' : IDL.Text,
+    'isRead' : IDL.Bool,
+    'toName' : IDL.Text,
+    'timestamp' : IDL.Int,
+    'toMobile' : IDL.Text,
+  });
   const Customer = IDL.Record({
     'id' : IDL.Nat,
     'visitCount' : IDL.Nat,
@@ -227,10 +258,17 @@ export const idlFactory = ({ IDL }) => {
       ),
     '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
     'addPhoto' : IDL.Func([ExternalBlob, IDL.Text, IDL.Nat], [IDL.Nat], []),
+    'deleteAdminMessage' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'deletePhoto' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'deleteReview' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+    'getAllAdminMessages' : IDL.Func([], [IDL.Vec(AdminMessage)], ['query']),
     'getCustomerByMobile' : IDL.Func([IDL.Text], [Customer], ['query']),
     'getCustomers' : IDL.Func([], [IDL.Vec(Customer)], ['query']),
+    'getMessagesForCustomer' : IDL.Func(
+        [IDL.Text],
+        [IDL.Vec(AdminMessage)],
+        ['query'],
+      ),
     'getPhotos' : IDL.Func([], [IDL.Vec(Photo)], ['query']),
     'getPromoSettings' : IDL.Func([], [PromoSettings], ['query']),
     'getQuoteById' : IDL.Func([IDL.Nat], [Quote], ['query']),
@@ -239,7 +277,13 @@ export const idlFactory = ({ IDL }) => {
     'getQuotesByService' : IDL.Func([ServiceType], [IDL.Vec(Quote)], ['query']),
     'getReviews' : IDL.Func([], [IDL.Vec(Review)], ['query']),
     'getSiteSettings' : IDL.Func([], [SiteSettings], ['query']),
+    'markMessageRead' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'registerOrLoginCustomer' : IDL.Func([IDL.Text, IDL.Text], [Customer], []),
+    'sendMessageToCustomer' : IDL.Func(
+        [IDL.Text, IDL.Text, IDL.Text, IDL.Text],
+        [IDL.Nat],
+        [],
+      ),
     'submitQuote' : IDL.Func(
         [IDL.Text, IDL.Text, ServiceType, IDL.Text],
         [IDL.Nat],

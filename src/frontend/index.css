@@ -20,62 +20,66 @@
   :root {
     --radius: 0.75rem;
 
-    /* Nellore Print Hub — Green & Fresh Premium Theme */
-    /* Emerald/forest green with clean white */
+    /* Nellore Print Hub — Instagram Dark Theme */
+    /* Pure black background with Instagram gradient accents */
 
-    /* Light near-white background with a subtle green tint */
-    --background: 0.98 0.008 145;
-    --foreground: 0.15 0.040 145;
+    /* Pure black / near-black background */
+    --background: 0.05 0.000 0;
+    --foreground: 0.97 0.000 0;
 
-    /* Pure white cards */
-    --card: 1.00 0.000 0;
-    --card-foreground: 0.15 0.040 145;
+    /* Dark gray cards */
+    --card: 0.10 0.000 0;
+    --card-foreground: 0.97 0.000 0;
 
-    --popover: 1.00 0.000 0;
-    --popover-foreground: 0.15 0.040 145;
+    --popover: 0.10 0.000 0;
+    --popover-foreground: 0.97 0.000 0;
 
-    /* Primary = deep forest green */
-    --primary: 0.40 0.150 145;
-    --primary-foreground: 0.98 0.005 145;
+    /* Primary = Instagram magenta-pink */
+    --primary: 0.62 0.230 350;
+    --primary-foreground: 0.97 0.000 0;
 
-    /* Secondary = light sage */
-    --secondary: 0.93 0.025 145;
-    --secondary-foreground: 0.30 0.100 145;
+    /* Secondary = dark surface */
+    --secondary: 0.15 0.000 0;
+    --secondary-foreground: 0.75 0.000 0;
 
-    --muted: 0.95 0.015 145;
-    --muted-foreground: 0.50 0.060 145;
+    --muted: 0.13 0.000 0;
+    --muted-foreground: 0.55 0.000 0;
 
-    /* Accent = vivid emerald */
-    --accent: 0.55 0.175 152;
-    --accent-foreground: 0.98 0.005 145;
+    /* Accent = Instagram orange-gold */
+    --accent: 0.80 0.170 60;
+    --accent-foreground: 0.05 0.000 0;
 
     --destructive: 0.577 0.245 27.325;
     --destructive-foreground: 0.97 0 0;
 
-    --border: 0.88 0.040 145;
-    --input: 0.88 0.040 145;
-    --ring: 0.40 0.150 145;
+    --border: 0.20 0.000 0;
+    --input: 0.20 0.000 0;
+    --ring: 0.62 0.230 350;
 
-    --chart-1: 0.40 0.150 145;
-    --chart-2: 0.55 0.175 152;
-    --chart-3: 0.65 0.150 160;
-    --chart-4: 0.30 0.120 138;
-    --chart-5: 0.70 0.130 170;
+    --chart-1: 0.62 0.230 350;
+    --chart-2: 0.55 0.240 295;
+    --chart-3: 0.80 0.170 60;
+    --chart-4: 0.55 0.190 15;
+    --chart-5: 0.70 0.200 330;
 
-    --sidebar: 0.96 0.015 145;
-    --sidebar-foreground: 0.15 0.040 145;
-    --sidebar-primary: 0.40 0.150 145;
-    --sidebar-primary-foreground: 0.98 0.005 145;
-    --sidebar-accent: 0.93 0.025 145;
-    --sidebar-accent-foreground: 0.30 0.100 145;
-    --sidebar-border: 0.88 0.040 145;
-    --sidebar-ring: 0.40 0.150 145;
+    --sidebar: 0.08 0.000 0;
+    --sidebar-foreground: 0.97 0.000 0;
+    --sidebar-primary: 0.62 0.230 350;
+    --sidebar-primary-foreground: 0.97 0.000 0;
+    --sidebar-accent: 0.15 0.000 0;
+    --sidebar-accent-foreground: 0.75 0.000 0;
+    --sidebar-border: 0.20 0.000 0;
+    --sidebar-ring: 0.62 0.230 350;
 
-    /* Brand palette — forest green spectrum */
-    --brand-green: #1a5c32;
-    --brand-emerald: #2d9e5e;
-    --brand-leaf: #4caf78;
-    --brand-dark: #0f3320;
+    /* Instagram brand palette */
+    --ig-purple: #833ab4;
+    --ig-pink: #e1306c;
+    --ig-red: #fd1d1d;
+    --ig-orange: #f56040;
+    --ig-gold: #fcb045;
+    --ig-dark: #0a0a0a;
+    --ig-surface: #1a1a1a;
+    --ig-border: #2a2a2a;
     --whatsapp: #25d366;
   }
 
@@ -106,13 +110,13 @@
 }
 
 @layer utilities {
-  /* Green forest gradient */
+  /* Instagram signature gradient */
   .brand-gradient {
-    background: linear-gradient(135deg, #1a5c32 0%, #2d9e5e 60%, #4caf78 100%);
+    background: linear-gradient(135deg, #833ab4 0%, #e1306c 40%, #fd1d1d 65%, #f56040 80%, #fcb045 100%);
   }
 
   .brand-gradient-text {
-    background: linear-gradient(135deg, #1a5c32 0%, #2d9e5e 60%, #4caf78 100%);
+    background: linear-gradient(135deg, #833ab4 0%, #e1306c 40%, #fd1d1d 65%, #fcb045 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -120,44 +124,44 @@
 
   /* Alias kept for backward compat */
   .brand-text {
-    background: linear-gradient(135deg, #1a5c32 0%, #2d9e5e 60%, #4caf78 100%);
+    background: linear-gradient(135deg, #833ab4 0%, #e1306c 40%, #fd1d1d 65%, #fcb045 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  /* Light glass — for surface overlays on light bg */
+  /* Dark glass — for overlays on black bg */
   .glass {
-    background: rgba(255, 255, 255, 0.75);
+    background: rgba(26, 26, 26, 0.90);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(45, 158, 94, 0.20);
-    box-shadow: 0 2px 12px rgba(26, 92, 50, 0.10);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.40);
   }
 
   .glass-dark {
-    background: rgba(15, 51, 32, 0.92);
+    background: rgba(10, 10, 10, 0.95);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(45, 158, 94, 0.25);
-    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.20);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.50);
   }
 
-  /* Emerald glow */
+  /* Instagram gradient glow */
   .fire-glow {
     box-shadow:
-      0 0 24px rgba(45, 158, 94, 0.35),
-      0 0 48px rgba(26, 92, 50, 0.20);
+      0 0 24px rgba(225, 48, 108, 0.35),
+      0 0 48px rgba(131, 58, 180, 0.20);
   }
 
   .text-glow {
-    text-shadow: 0 2px 20px rgba(45, 158, 94, 0.30);
+    text-shadow: 0 2px 20px rgba(225, 48, 108, 0.30);
   }
 
   .saffron-glow {
     box-shadow:
-      0 0 16px rgba(45, 158, 94, 0.30),
-      0 0 32px rgba(26, 92, 50, 0.20);
+      0 0 16px rgba(252, 176, 69, 0.30),
+      0 0 32px rgba(253, 29, 29, 0.20);
   }
 
   .card-hover {
@@ -170,11 +174,11 @@
   .card-hover:hover {
     transform: translateY(-8px);
     box-shadow:
-      0 16px 48px rgba(45, 158, 94, 0.18),
-      0 6px 20px rgba(26, 92, 50, 0.12);
+      0 16px 48px rgba(225, 48, 108, 0.15),
+      0 6px 20px rgba(131, 58, 180, 0.10);
   }
 
-  /* Halftone dot background — green printing aesthetic */
+  /* Halftone dot background — dark Instagram aesthetic */
   .print-bg {
     position: relative;
   }
@@ -186,16 +190,16 @@
     pointer-events: none;
     z-index: 0;
     background-image:
-      radial-gradient(circle, rgba(45, 158, 94, 0.05) 1px, transparent 1px),
-      radial-gradient(circle, rgba(26, 92, 50, 0.03) 1px, transparent 1px),
-      radial-gradient(circle, rgba(76, 175, 120, 0.03) 1px, transparent 1px),
-      radial-gradient(circle, rgba(15, 51, 32, 0.03) 1px, transparent 1px);
+      radial-gradient(circle, rgba(225, 48, 108, 0.04) 1px, transparent 1px),
+      radial-gradient(circle, rgba(131, 58, 180, 0.03) 1px, transparent 1px),
+      radial-gradient(circle, rgba(252, 176, 69, 0.03) 1px, transparent 1px),
+      radial-gradient(circle, rgba(253, 29, 29, 0.02) 1px, transparent 1px);
     background-size: 30px 30px, 20px 20px, 40px 40px, 15px 15px;
     background-position: 0 0, 8px 8px, 15px 15px, 5px 20px;
     opacity: 0.8;
   }
 
-  /* Ornamental border — green gradient */
+  /* Instagram gradient border */
   .india-border {
     border: 2px solid transparent;
     background-clip: padding-box;
@@ -207,15 +211,15 @@
     position: absolute;
     inset: -2px;
     border-radius: inherit;
-    background: linear-gradient(135deg, #1a5c32, #2d9e5e, #4caf78, #0f3320);
+    background: linear-gradient(135deg, #833ab4, #e1306c, #fd1d1d, #fcb045);
     z-index: -1;
-    opacity: 0.40;
+    opacity: 0.35;
   }
 
   /* Decorative section divider */
   .section-divider {
     height: 3px;
-    background: linear-gradient(90deg, transparent, #1a5c32, #2d9e5e, #4caf78, transparent);
+    background: linear-gradient(90deg, transparent, #833ab4, #e1306c, #fcb045, transparent);
     margin: 0 auto;
     width: 120px;
     border-radius: 2px;

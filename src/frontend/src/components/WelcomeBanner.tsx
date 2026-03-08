@@ -63,15 +63,15 @@ export default function WelcomeBanner({ onClose }: WelcomeBannerProps) {
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogContent
             data-ocid="welcome.dialog"
-            className="max-w-lg w-full p-0 overflow-hidden border-brand-emerald/20 shadow-2xl rounded-2xl"
-            style={{ background: "rgba(15,51,32,0.98)", fontFamily: "inherit" }}
+            className="max-w-lg w-full p-0 overflow-hidden border-[#833ab4]/30 shadow-2xl rounded-2xl"
+            style={{ background: "rgba(10,5,20,0.98)", fontFamily: "inherit" }}
           >
-            {/* Brand gradient top bar */}
+            {/* Instagram gradient top bar */}
             <div
               className="h-2 w-full"
               style={{
                 background:
-                  "linear-gradient(90deg, #1a5c32 0%, #2d9e5e 50%, #4caf78 100%)",
+                  "linear-gradient(90deg, #833ab4 0%, #e1306c 40%, #fd1d1d 65%, #f56040 80%, #fcb045 100%)",
               }}
             />
 
@@ -122,15 +122,15 @@ export default function WelcomeBanner({ onClose }: WelcomeBannerProps) {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: 0.2 }}
-                  className="rounded-xl overflow-hidden border border-brand-emerald/20"
-                  style={{ background: "rgba(45,158,94,0.10)" }}
+                  className="rounded-xl overflow-hidden border border-[#833ab4]/25"
+                  style={{ background: "rgba(131,58,180,0.10)" }}
                 >
-                  {/* Brand color bar inside promo */}
+                  {/* Instagram gradient bar inside promo */}
                   <div
                     className="h-1 w-full"
                     style={{
                       background:
-                        "linear-gradient(90deg, #1a5c32 0%, #2d9e5e 50%, #4caf78 100%)",
+                        "linear-gradient(90deg, #833ab4 0%, #e1306c 40%, #fcb045 100%)",
                     }}
                   />
                   <div className="p-4">
@@ -182,20 +182,20 @@ export default function WelcomeBanner({ onClose }: WelcomeBannerProps) {
                   {
                     icon: Truck,
                     label: "Same-Day Delivery",
-                    color: "#4caf78",
-                    bg: "rgba(76,175,120,0.12)",
+                    color: "#fcb045",
+                    bg: "rgba(252,176,69,0.12)",
                   },
                   {
                     icon: Palette,
                     label: "Expert Design Team",
-                    color: "#2d9e5e",
-                    bg: "rgba(45,158,94,0.12)",
+                    color: "#e1306c",
+                    bg: "rgba(225,48,108,0.12)",
                   },
                   {
                     icon: Users,
                     label: "10,000+ Happy Clients",
-                    color: "#1a5c32",
-                    bg: "rgba(26,92,50,0.12)",
+                    color: "#833ab4",
+                    bg: "rgba(131,58,180,0.12)",
                   },
                 ].map(({ icon: Icon, label, color, bg }) => (
                   <div

@@ -6,59 +6,59 @@ import { useLang } from "../../lib/i18n";
 const SERVICE_ICONS = [IdCard, Signpost, Tag, Shirt, Package, Palette];
 
 const SERVICE_STYLES = [
-  // Business Cards — deep forest green
+  // Business Cards — Instagram purple
   {
-    iconColor: "#1a5c32",
-    iconBg: "rgba(26,92,50,0.15)",
-    border: "rgba(26,92,50,0.20)",
-    hoverBorder: "rgba(26,92,50,0.55)",
-    glow: "rgba(26,92,50,0.18)",
-    cardBg: "rgba(26,92,50,0.06)",
+    iconColor: "#833ab4",
+    iconBg: "rgba(131,58,180,0.18)",
+    border: "rgba(131,58,180,0.22)",
+    hoverBorder: "rgba(131,58,180,0.60)",
+    glow: "rgba(131,58,180,0.20)",
+    cardBg: "rgba(131,58,180,0.07)",
   },
-  // Flex Banners — emerald
+  // Flex Banners — Instagram pink-red
   {
-    iconColor: "#2d9e5e",
-    iconBg: "rgba(45,158,94,0.15)",
-    border: "rgba(45,158,94,0.20)",
-    hoverBorder: "rgba(45,158,94,0.55)",
-    glow: "rgba(45,158,94,0.18)",
-    cardBg: "rgba(45,158,94,0.06)",
+    iconColor: "#e1306c",
+    iconBg: "rgba(225,48,108,0.18)",
+    border: "rgba(225,48,108,0.22)",
+    hoverBorder: "rgba(225,48,108,0.60)",
+    glow: "rgba(225,48,108,0.20)",
+    cardBg: "rgba(225,48,108,0.07)",
   },
-  // Sticker Printing — leaf green
+  // Sticker Printing — Instagram red
   {
-    iconColor: "#4caf78",
-    iconBg: "rgba(76,175,120,0.15)",
-    border: "rgba(76,175,120,0.20)",
-    hoverBorder: "rgba(76,175,120,0.55)",
-    glow: "rgba(76,175,120,0.18)",
-    cardBg: "rgba(76,175,120,0.06)",
+    iconColor: "#fd1d1d",
+    iconBg: "rgba(253,29,29,0.18)",
+    border: "rgba(253,29,29,0.22)",
+    hoverBorder: "rgba(253,29,29,0.60)",
+    glow: "rgba(253,29,29,0.20)",
+    cardBg: "rgba(253,29,29,0.07)",
   },
-  // T-Shirt Printing — dark forest
+  // T-Shirt Printing — Instagram orange
   {
-    iconColor: "#0f3320",
-    iconBg: "rgba(15,51,32,0.18)",
-    border: "rgba(15,51,32,0.20)",
-    hoverBorder: "rgba(15,51,32,0.55)",
-    glow: "rgba(15,51,32,0.18)",
-    cardBg: "rgba(15,51,32,0.05)",
+    iconColor: "#f56040",
+    iconBg: "rgba(245,96,64,0.18)",
+    border: "rgba(245,96,64,0.22)",
+    hoverBorder: "rgba(245,96,64,0.60)",
+    glow: "rgba(245,96,64,0.20)",
+    cardBg: "rgba(245,96,64,0.07)",
   },
-  // Packaging Boxes — medium emerald
+  // Packaging Boxes — Instagram gold
   {
-    iconColor: "#268050",
-    iconBg: "rgba(38,128,80,0.15)",
-    border: "rgba(38,128,80,0.20)",
-    hoverBorder: "rgba(38,128,80,0.55)",
-    glow: "rgba(38,128,80,0.18)",
-    cardBg: "rgba(38,128,80,0.06)",
+    iconColor: "#fcb045",
+    iconBg: "rgba(252,176,69,0.18)",
+    border: "rgba(252,176,69,0.22)",
+    hoverBorder: "rgba(252,176,69,0.60)",
+    glow: "rgba(252,176,69,0.20)",
+    cardBg: "rgba(252,176,69,0.07)",
   },
-  // Graphic Design — bright leaf
+  // Graphic Design — deep purple to pink mid
   {
-    iconColor: "#3d9464",
-    iconBg: "rgba(61,148,100,0.15)",
-    border: "rgba(61,148,100,0.20)",
-    hoverBorder: "rgba(61,148,100,0.55)",
-    glow: "rgba(61,148,100,0.18)",
-    cardBg: "rgba(61,148,100,0.06)",
+    iconColor: "#c13584",
+    iconBg: "rgba(193,53,132,0.18)",
+    border: "rgba(193,53,132,0.22)",
+    hoverBorder: "rgba(193,53,132,0.60)",
+    glow: "rgba(193,53,132,0.20)",
+    cardBg: "rgba(193,53,132,0.07)",
   },
 ];
 
@@ -89,7 +89,7 @@ export default function ServicesSection() {
         className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl opacity-05 pointer-events-none"
         style={{
           background:
-            "radial-gradient(circle, rgba(45,158,94,0.18), transparent 70%)",
+            "radial-gradient(circle, rgba(131,58,180,0.22), transparent 70%)",
         }}
       />
 

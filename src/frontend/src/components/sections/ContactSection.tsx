@@ -17,24 +17,24 @@ export default function ContactSection() {
       label: t.contact.phone,
       value: phone,
       href: `tel:${phone.replace(/\s/g, "")}`,
-      iconColor: "#1a5c32",
-      iconBg: "rgba(26,92,50,0.12)",
+      iconColor: "#833ab4",
+      iconBg: "rgba(131,58,180,0.14)",
     },
     {
       icon: Mail,
       label: t.contact.email,
       value: email,
       href: `mailto:${email}`,
-      iconColor: "#2d9e5e",
-      iconBg: "rgba(45,158,94,0.12)",
+      iconColor: "#e1306c",
+      iconBg: "rgba(225,48,108,0.14)",
     },
     {
       icon: MapPin,
       label: t.contact.address,
       value: address,
       href: "https://maps.app.goo.gl/gXba56vXmLXL1eFp7?g_st=ic",
-      iconColor: "#4caf78",
-      iconBg: "rgba(76,175,120,0.12)",
+      iconColor: "#fcb045",
+      iconBg: "rgba(252,176,69,0.14)",
     },
   ];
 
@@ -123,9 +123,9 @@ export default function ContactSection() {
               transition={{ delay: 0.3 }}
               className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border rounded-lg font-medium mt-1 transition-all duration-200"
               style={{
-                color: "#2d9e5e",
-                borderColor: "rgba(45,158,94,0.35)",
-                background: "rgba(45,158,94,0.08)",
+                color: "#e1306c",
+                borderColor: "rgba(225,48,108,0.35)",
+                background: "rgba(225,48,108,0.08)",
               }}
             >
               <MapPin className="w-3.5 h-3.5" />
@@ -166,7 +166,7 @@ export default function ContactSection() {
                 {t.contact.viewOnMap}
                 <ExternalLink
                   className="w-3.5 h-3.5"
-                  style={{ color: "#2d9e5e" }}
+                  style={{ color: "#e1306c" }}
                 />
               </a>
             </div>
@@ -175,7 +175,7 @@ export default function ContactSection() {
               className="absolute inset-0 opacity-10"
               style={{
                 backgroundImage:
-                  "radial-gradient(circle, rgba(45,158,94,0.5) 1px, transparent 1px), radial-gradient(circle, rgba(26,92,50,0.4) 1px, transparent 1px)",
+                  "radial-gradient(circle, rgba(225,48,108,0.4) 1px, transparent 1px), radial-gradient(circle, rgba(131,58,180,0.3) 1px, transparent 1px)",
                 backgroundSize: "20px 20px, 10px 10px",
               }}
             />

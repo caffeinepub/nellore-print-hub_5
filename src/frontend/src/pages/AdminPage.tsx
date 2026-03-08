@@ -28,12 +28,14 @@ import {
   List,
   Loader2,
   Lock,
+  Mail,
   MessageSquare,
   Pencil,
   Phone,
   Printer,
   RefreshCw,
   Save,
+  Send,
   Settings,
   Star,
   Trash2,
@@ -47,6 +49,7 @@ import { useEffect, useRef, useState } from "react";
 import { SiWhatsapp } from "react-icons/si";
 import { toast } from "sonner";
 import type {
+  AdminMessage,
   Customer,
   Photo,
   PromoSettings,
@@ -57,14 +60,17 @@ import {
   QuoteStatus,
   ServiceType,
   useAddPhotoWithProgress,
+  useDeleteAdminMessage,
   useDeletePhoto,
   useDeleteReview,
+  useGetAllAdminMessages,
   useGetCustomers,
   useGetPhotos,
   useGetPromoSettings,
   useGetQuotes,
   useGetReviews,
   useGetSiteSettings,
+  useSendMessageToCustomer,
   useUpdatePhotoTitle,
   useUpdatePromoSettings,
   useUpdateQuoteStatus,
@@ -82,13 +88,13 @@ const SERVICE_LABELS: Record<string, string> = {
 
 const SERVICE_COLORS: Record<string, string> = {
   [ServiceType.digitalPrinting]:
-    "bg-brand-emerald/12 text-brand-green border-brand-emerald/30",
+    "bg-[#e1306c]/12 text-[#fcb045] border-[#e1306c]/30",
   [ServiceType.flexBanner]:
-    "bg-brand-emerald/12 text-brand-green border-brand-emerald/30",
+    "bg-[#e1306c]/12 text-[#fcb045] border-[#e1306c]/30",
   [ServiceType.stickerPrinting]:
-    "bg-brand-leaf/12 text-brand-green border-brand-leaf/30",
+    "bg-[#fcb045]/12 text-[#fcb045] border-[#fcb045]/30",
   [ServiceType.tShirtPrinting]:
-    "bg-brand-leaf/12 text-brand-green border-brand-leaf/30",
+    "bg-[#fcb045]/12 text-[#fcb045] border-[#fcb045]/30",
 };
 
 function formatTimestamp(ts: bigint): string {
@@ -118,6 +124,7 @@ function QuoteRow({
 }) {
   const updateStatus = useUpdateQuoteStatus();
   const addPhoto = useAddPhotoWithProgress();
+  const sendMsg = useSendMessageToCustomer();
   const isNew = quote.status === QuoteStatus.new_;
 
   // PDF upload state
@@ -162,7 +169,33 @@ function QuoteRow({
       localStorage.setItem(`nph_quote_pdf_${quote.id}`, blobUrl);
       setPdfUrl(blobUrl);
       setPdfFile(null);
-      toast.success("Quotation PDF uploaded!");
+
+      // Send message to customer's website inbox
+      await sendMsg.mutateAsync({
+        toMobile: quote.mobile,
+        toName: quote.name,
+        subject: `Quotation for your ${SERVICE_LABELS[quote.service] ?? "print"} request`,
+        body: `Dear ${quote.name}, your quotation is ready. You can view and download it here: ${window.location.origin}${blobUrl}`,
+      });
+
+      // Auto-mark as replied
+      await updateStatus.mutateAsync({
+        id: quote.id,
+        status: QuoteStatus.replied,
+      });
+
+      // Open WhatsApp with pre-filled quotation message
+      const waText = encodeURIComponent(
+        `Hi ${quote.name}! 📄 Your quotation is ready.\n\nTap the link below to view your PDF immediately:\n👉 ${window.location.origin}${blobUrl}\n\n(Opens directly as PDF)\n\nThank you — Nellore Print Hub`,
+      );
+      window.open(
+        `https://wa.me/${quote.mobile.replace(/[^0-9]/g, "")}?text=${waText}`,
+        "_blank",
+      );
+
+      toast.success(
+        "Quotation sent! Customer inbox updated & WhatsApp opened.",
+      );
     } catch {
       toast.error("Failed to upload PDF. Please try again.");
     } finally {
@@ -186,14 +219,14 @@ function QuoteRow({
           <a
             href={`tel:${quote.mobile}`}
             onClick={(e) => e.stopPropagation()}
-            className="text-brand-emerald hover:text-brand-green text-sm font-medium transition-colors"
+            className="text-[#e1306c] hover:text-[#fcb045] text-sm font-medium transition-colors"
           >
             {quote.mobile}
           </a>
         </TableCell>
         <TableCell>
           <span
-            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${SERVICE_COLORS[quote.service] ?? "bg-brand-emerald/10 text-brand-green border-brand-emerald/20"}`}
+            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${SERVICE_COLORS[quote.service] ?? "bg-[#e1306c]/10 text-[#fcb045] border-[#e1306c]/20"}`}
           >
             {SERVICE_LABELS[quote.service] ?? String(quote.service)}
           </span>
@@ -204,11 +237,11 @@ function QuoteRow({
               className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${
                 isNew
                   ? "bg-amber-500/15 text-amber-700 border-amber-500/30"
-                  : "bg-brand-emerald/15 text-brand-green border-brand-emerald/30"
+                  : "bg-[#e1306c]/15 text-[#fcb045] border-[#e1306c]/30"
               }`}
             >
               <span
-                className={`w-1.5 h-1.5 rounded-full ${isNew ? "bg-amber-500" : "bg-brand-emerald"}`}
+                className={`w-1.5 h-1.5 rounded-full ${isNew ? "bg-amber-500" : "bg-[#e1306c]"}`}
               />
               {isNew ? "New" : "Replied"}
             </span>
@@ -223,7 +256,7 @@ function QuoteRow({
               title={isNew ? "Mark as Replied" : "Mark as New"}
               className={`px-2 py-1 rounded-lg text-xs font-medium transition-all border ${
                 isNew
-                  ? "bg-brand-emerald/15 text-brand-green border-brand-emerald/30 hover:bg-brand-emerald/25"
+                  ? "bg-[#e1306c]/15 text-[#fcb045] border-[#e1306c]/30 hover:bg-[#e1306c]/25"
                   : "bg-amber-500/15 text-amber-700 border-amber-500/30 hover:bg-amber-500/25"
               } disabled:opacity-50`}
             >
@@ -263,7 +296,7 @@ function QuoteRow({
                 transition={{ duration: 0.25, ease: "easeInOut" }}
                 className="overflow-hidden"
               >
-                <div className="px-4 pb-5 pt-2 bg-brand-emerald/3 border-b border-brand-emerald/10">
+                <div className="px-4 pb-5 pt-2 bg-[#e1306c]/3 border-b border-[#e1306c]/10">
                   {/* Project details */}
                   <div className="mb-4">
                     <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1.5">
@@ -288,7 +321,7 @@ function QuoteRow({
                       <Button
                         variant="outline"
                         size="sm"
-                        className="gap-2 bg-brand-emerald/10 border-brand-emerald/30 text-brand-green hover:bg-brand-emerald/20 hover:border-brand-emerald/40"
+                        className="gap-2 bg-[#e1306c]/10 border-[#e1306c]/30 text-[#fcb045] hover:bg-[#e1306c]/20 hover:border-[#e1306c]/40"
                       >
                         <Phone className="w-3.5 h-3.5" />
                         Call {quote.name}
@@ -323,7 +356,7 @@ function QuoteRow({
                       }}
                       className={`gap-2 ${
                         isNew
-                          ? "bg-brand-emerald/10 border-brand-emerald/30 text-brand-green hover:bg-brand-emerald/20 hover:border-brand-emerald/40"
+                          ? "bg-[#e1306c]/10 border-[#e1306c]/30 text-[#fcb045] hover:bg-[#e1306c]/20 hover:border-[#e1306c]/40"
                           : "bg-white/8 border-white/15 text-foreground/60 hover:bg-white/12 hover:text-foreground/80"
                       }`}
                     >
@@ -349,10 +382,10 @@ function QuoteRow({
                     </p>
 
                     {pdfUrl ? (
-                      <div className="flex items-center gap-3 p-3 bg-brand-emerald/10 rounded-xl border border-brand-emerald/25">
-                        <FileText className="w-5 h-5 text-brand-green flex-shrink-0" />
+                      <div className="flex items-center gap-3 p-3 bg-[#e1306c]/10 rounded-xl border border-[#e1306c]/25">
+                        <FileText className="w-5 h-5 text-[#fcb045] flex-shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <p className="text-brand-green text-sm font-semibold">
+                          <p className="text-[#fcb045] text-sm font-semibold">
                             Quotation PDF attached
                           </p>
                           <p className="text-muted-foreground text-xs truncate">
@@ -369,7 +402,7 @@ function QuoteRow({
                             <Button
                               size="sm"
                               variant="outline"
-                              className="gap-1.5 text-brand-green border-brand-emerald/40 hover:bg-brand-emerald/10"
+                              className="gap-1.5 text-[#fcb045] border-[#e1306c]/40 hover:bg-[#e1306c]/10"
                             >
                               <Eye className="w-3.5 h-3.5" /> View
                             </Button>
@@ -382,11 +415,30 @@ function QuoteRow({
                             <Button
                               size="sm"
                               variant="outline"
-                              className="gap-1.5 text-brand-green border-brand-emerald/40 hover:bg-brand-emerald/10"
+                              className="gap-1.5 text-[#fcb045] border-[#e1306c]/40 hover:bg-[#e1306c]/10"
                             >
                               <Download className="w-3.5 h-3.5" /> Download
                             </Button>
                           </a>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            data-ocid={`admin.quote.resend.button.${idx + 1}`}
+                            className="gap-1.5 text-[#25D366] border-[#25D366]/40 hover:bg-[#25D366]/10"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const waResendText = encodeURIComponent(
+                                `Hi ${quote.name}! 📄 Your quotation is ready.\n\nTap the link below to view your PDF immediately:\n👉 ${window.location.origin}${pdfUrl}\n\n(Opens directly as PDF)\n\nThank you — Nellore Print Hub`,
+                              );
+                              window.open(
+                                `https://wa.me/${quote.mobile.replace(/[^0-9]/g, "")}?text=${waResendText}`,
+                                "_blank",
+                              );
+                            }}
+                          >
+                            <SiWhatsapp className="w-3.5 h-3.5" /> Re-send on
+                            WhatsApp
+                          </Button>
                           <Button
                             size="sm"
                             variant="ghost"
@@ -407,7 +459,7 @@ function QuoteRow({
                       <div className="space-y-2">
                         <label
                           htmlFor={`pdf-input-${quote.id}`}
-                          className="flex items-center gap-3 p-3 border-2 border-dashed border-black/15 hover:border-brand-emerald/50 rounded-xl cursor-pointer transition-all bg-white/50 hover:bg-brand-emerald/5"
+                          className="flex items-center gap-3 p-3 border-2 border-dashed border-black/15 hover:border-[#e1306c]/50 rounded-xl cursor-pointer transition-all bg-white/50 hover:bg-[#e1306c]/5"
                           onClick={(e) => e.stopPropagation()}
                           onKeyDown={(e) => e.stopPropagation()}
                         >
@@ -450,7 +502,7 @@ function QuoteRow({
                             {pdfUploading && (
                               <Progress
                                 value={pdfProgress}
-                                className="h-1.5 bg-black/10 [&>div]:bg-brand-emerald"
+                                className="h-1.5 bg-black/10 [&>div]:bg-[#e1306c]"
                               />
                             )}
                             <Button
@@ -461,7 +513,7 @@ function QuoteRow({
                                 e.stopPropagation();
                                 handlePdfUpload();
                               }}
-                              className="gap-2 bg-brand-green text-white hover:bg-brand-emerald font-semibold rounded-lg"
+                              className="gap-2 bg-[#833ab4] text-white hover:bg-[#e1306c] font-semibold rounded-lg"
                             >
                               {pdfUploading ? (
                                 <>
@@ -471,7 +523,7 @@ function QuoteRow({
                               ) : (
                                 <>
                                   <FileUp className="w-3.5 h-3.5" />
-                                  Send Quotation PDF
+                                  Send Quotation to Customer
                                 </>
                               )}
                             </Button>
@@ -523,7 +575,7 @@ function QuotesPanel() {
       key: "replied",
       label: "Replied",
       count: repliedCount,
-      color: "text-brand-emerald",
+      color: "text-[#e1306c]",
     },
   ];
 
@@ -569,12 +621,12 @@ function QuotesPanel() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-          className="glass rounded-xl p-4 flex flex-col gap-1 border border-brand-emerald/20"
+          className="glass rounded-xl p-4 flex flex-col gap-1 border border-[#e1306c]/20"
         >
-          <span className="text-brand-emerald/70 text-xs uppercase tracking-wider">
+          <span className="text-[#e1306c]/70 text-xs uppercase tracking-wider">
             Replied
           </span>
-          <span className="font-display font-black text-3xl text-brand-emerald">
+          <span className="font-display font-black text-3xl text-[#e1306c]">
             {isLoading ? (
               <Skeleton className="h-8 w-12 bg-white/5" />
             ) : (
@@ -853,14 +905,14 @@ function SiteSettingsPanel() {
   }
 
   const inputClass =
-    "bg-white/5 border-white/12 text-white placeholder:text-white/30 h-11 focus:border-brand-emerald/50 focus:ring-brand-emerald/20 rounded-xl";
+    "bg-white/5 border-white/12 text-white placeholder:text-white/30 h-11 focus:border-[#e1306c]/50 focus:ring-[#e1306c]/20 rounded-xl";
 
   return (
     <div className="space-y-8">
       {/* Business Information */}
       <div className="glass rounded-2xl p-6 space-y-6">
         <h3 className="font-display font-bold text-white text-lg flex items-center gap-2">
-          <Settings className="w-5 h-5 text-brand-emerald" />
+          <Settings className="w-5 h-5 text-[#e1306c]" />
           Business Information
         </h3>
 
@@ -945,7 +997,7 @@ function SiteSettingsPanel() {
               onChange={handleField("address")}
               placeholder="Full business address"
               rows={2}
-              className="bg-white/5 border-white/12 text-white placeholder:text-white/30 focus:border-brand-emerald/50 focus:ring-brand-emerald/20 rounded-xl resize-none"
+              className="bg-white/5 border-white/12 text-white placeholder:text-white/30 focus:border-[#e1306c]/50 focus:ring-[#e1306c]/20 rounded-xl resize-none"
             />
           </div>
         </div>
@@ -954,7 +1006,7 @@ function SiteSettingsPanel() {
       {/* Logo Upload Section */}
       <div className="glass rounded-2xl p-6 space-y-4">
         <h3 className="font-display font-bold text-white text-lg flex items-center gap-2">
-          <Printer className="w-5 h-5 text-brand-emerald" />
+          <Printer className="w-5 h-5 text-[#e1306c]" />
           Company Logo
         </h3>
 
@@ -986,11 +1038,11 @@ function SiteSettingsPanel() {
           <label
             data-ocid="admin.logo.dropzone"
             htmlFor="logo-file-input"
-            className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-white/15 hover:border-brand-emerald/40 rounded-xl p-6 cursor-pointer transition-all duration-200 bg-white/3 hover:bg-white/6"
+            className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-white/15 hover:border-[#e1306c]/40 rounded-xl p-6 cursor-pointer transition-all duration-200 bg-white/3 hover:bg-white/6"
           >
             {logoFile ? (
               <>
-                <CheckCircle2 className="w-8 h-8 text-brand-emerald" />
+                <CheckCircle2 className="w-8 h-8 text-[#e1306c]" />
                 <p className="text-white font-medium text-sm">
                   {logoFile.name}
                 </p>
@@ -1022,7 +1074,7 @@ function SiteSettingsPanel() {
 
           {/* Preview new logo */}
           {logoPreviewUrl && (
-            <div className="flex items-center gap-4 p-3 bg-brand-emerald/10 rounded-xl border border-brand-emerald/20">
+            <div className="flex items-center gap-4 p-3 bg-[#e1306c]/10 rounded-xl border border-[#e1306c]/20">
               <div className="w-20 h-14 rounded-lg bg-white flex items-center justify-center overflow-hidden">
                 <img
                   src={logoPreviewUrl}
@@ -1031,12 +1083,10 @@ function SiteSettingsPanel() {
                 />
               </div>
               <div className="flex-1">
-                <p className="text-brand-green text-sm font-medium">
+                <p className="text-[#fcb045] text-sm font-medium">
                   New logo ready to upload
                 </p>
-                <p className="text-brand-emerald/70 text-xs">
-                  {logoFile?.name}
-                </p>
+                <p className="text-[#e1306c]/70 text-xs">{logoFile?.name}</p>
               </div>
               <Button
                 data-ocid="admin.logo.save_button"
@@ -1072,7 +1122,7 @@ function SiteSettingsPanel() {
       {/* Company Intro Text Section */}
       <div className="glass rounded-2xl p-6 space-y-5">
         <h3 className="font-display font-bold text-white text-lg flex items-center gap-2">
-          <Pencil className="w-5 h-5 text-brand-emerald" />
+          <Pencil className="w-5 h-5 text-[#e1306c]" />
           Company Intro Text
         </h3>
         <p className="text-muted-foreground text-sm">
@@ -1106,7 +1156,7 @@ function SiteSettingsPanel() {
             onChange={(e) => setIntroDesc(e.target.value)}
             placeholder="At Magic Advertising, we don't just print — we craft your brand's first impression..."
             rows={4}
-            className="bg-white/5 border-white/12 text-white placeholder:text-white/30 focus:border-brand-emerald/50 focus:ring-brand-emerald/20 rounded-xl resize-none"
+            className="bg-white/5 border-white/12 text-white placeholder:text-white/30 focus:border-[#e1306c]/50 focus:ring-[#e1306c]/20 rounded-xl resize-none"
           />
           <p className="text-xs text-muted-foreground">
             Leave blank to use default description.
@@ -1255,7 +1305,7 @@ function PhotoCard({
                 setIsEditing(false);
               }
             }}
-            className="flex-1 bg-white/10 border border-white/20 rounded-lg px-2 py-1 text-white text-sm focus:outline-none focus:border-brand-emerald/50 min-w-0"
+            className="flex-1 bg-white/10 border border-white/20 rounded-lg px-2 py-1 text-white text-sm focus:outline-none focus:border-[#e1306c]/50 min-w-0"
           />
         ) : (
           <button
@@ -1270,13 +1320,13 @@ function PhotoCard({
         <button
           type="button"
           onClick={handleEditStart}
-          className="text-white/30 hover:text-brand-emerald transition-colors flex-shrink-0"
+          className="text-white/30 hover:text-[#e1306c] transition-colors flex-shrink-0"
           aria-label="Edit title"
         >
           <Pencil className="w-3.5 h-3.5" />
         </button>
         {updateTitle.isPending && (
-          <Loader2 className="w-3.5 h-3.5 animate-spin text-brand-emerald flex-shrink-0" />
+          <Loader2 className="w-3.5 h-3.5 animate-spin text-[#e1306c] flex-shrink-0" />
         )}
       </div>
     </motion.div>
@@ -1351,7 +1401,7 @@ function GalleryPanel() {
   };
 
   const inputClass =
-    "bg-white/5 border-white/12 text-white placeholder:text-white/30 h-11 focus:border-brand-emerald/50 focus:ring-brand-emerald/20 rounded-xl";
+    "bg-white/5 border-white/12 text-white placeholder:text-white/30 h-11 focus:border-[#e1306c]/50 focus:ring-[#e1306c]/20 rounded-xl";
 
   return (
     <div className="space-y-6">
@@ -1390,9 +1440,9 @@ function GalleryPanel() {
             transition={{ duration: 0.25, ease: "easeInOut" }}
             className="overflow-hidden"
           >
-            <div className="glass rounded-2xl p-6 border border-brand-emerald/20 space-y-4">
+            <div className="glass rounded-2xl p-6 border border-[#e1306c]/20 space-y-4">
               <h3 className="font-display font-bold text-white text-base flex items-center gap-2">
-                <Upload className="w-4 h-4 text-brand-emerald" />
+                <Upload className="w-4 h-4 text-[#e1306c]" />
                 Upload New Project Photo
               </h3>
 
@@ -1404,11 +1454,11 @@ function GalleryPanel() {
                 <label
                   data-ocid="gallery.dropzone"
                   htmlFor="gallery-file-input"
-                  className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-white/15 hover:border-brand-emerald/40 rounded-xl p-6 cursor-pointer transition-all duration-200 bg-white/3 hover:bg-white/6"
+                  className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-white/15 hover:border-[#e1306c]/40 rounded-xl p-6 cursor-pointer transition-all duration-200 bg-white/3 hover:bg-white/6"
                 >
                   {selectedFile ? (
                     <>
-                      <CheckCircle2 className="w-8 h-8 text-brand-emerald" />
+                      <CheckCircle2 className="w-8 h-8 text-[#e1306c]" />
                       <p className="text-white font-medium text-sm">
                         {selectedFile.name}
                       </p>
@@ -1754,12 +1804,12 @@ function ReviewsPanel() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
-            className="glass rounded-xl p-4 flex flex-col gap-1 border border-brand-emerald/20 sm:col-span-1 col-span-2"
+            className="glass rounded-xl p-4 flex flex-col gap-1 border border-[#e1306c]/20 sm:col-span-1 col-span-2"
           >
-            <span className="text-brand-emerald/70 text-xs uppercase tracking-wider">
+            <span className="text-[#e1306c]/70 text-xs uppercase tracking-wider">
               5-Star Reviews
             </span>
-            <span className="font-display font-black text-3xl text-brand-emerald">
+            <span className="font-display font-black text-3xl text-[#e1306c]">
               {reviews.filter((r) => Number(r.rating) === 5).length}
             </span>
           </motion.div>
@@ -1826,69 +1876,476 @@ function ReviewsPanel() {
 
 // ─── Visitors Panel ────────────────────────────────────────────────────────────
 
-function VisitorRow({ customer, idx }: { customer: Customer; idx: number }) {
-  const whatsappMsg = encodeURIComponent(
-    `Hi ${customer.name}, thank you for visiting Nellore Print Hub! How can we help you today?`,
+// ─── Compose Message Modal ─────────────────────────────────────────────────────
+
+function ComposeMessageModal({
+  open,
+  onOpenChange,
+  toMobile,
+  toName,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  toMobile: string;
+  toName: string;
+}) {
+  const sendMessage = useSendMessageToCustomer();
+  const [subject, setSubject] = useState("");
+  const [body, setBody] = useState("");
+
+  const handleSend = async () => {
+    if (!subject.trim() || !body.trim()) {
+      toast.error("Please fill in both subject and message.");
+      return;
+    }
+    try {
+      await sendMessage.mutateAsync({
+        toMobile,
+        toName,
+        subject: subject.trim(),
+        body: body.trim(),
+      });
+      toast.success("Message sent!");
+      // Open WhatsApp with pre-filled message
+      const waText = encodeURIComponent(`${subject.trim()}: ${body.trim()}`);
+      const mobileDigits = toMobile.replace(/[^0-9]/g, "");
+      window.open(`https://wa.me/${mobileDigits}?text=${waText}`, "_blank");
+      // Reset and close
+      setSubject("");
+      setBody("");
+      onOpenChange(false);
+    } catch {
+      toast.error("Failed to send message. Please try again.");
+    }
+  };
+
+  const handleClose = () => {
+    setSubject("");
+    setBody("");
+    onOpenChange(false);
+  };
+
+  const inputClass =
+    "bg-white/5 border-white/12 text-white placeholder:text-white/30 focus:border-[#e1306c]/50 focus:ring-[#e1306c]/20 rounded-xl";
+
+  return (
+    <div
+      className={`fixed inset-0 z-50 flex items-center justify-center px-4 transition-all duration-200 ${open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+      style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(4px)" }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) handleClose();
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Escape") handleClose();
+      }}
+      role="presentation"
+    >
+      <motion.div
+        data-ocid="admin.compose.dialog"
+        initial={{ opacity: 0, scale: 0.95, y: 16 }}
+        animate={
+          open
+            ? { opacity: 1, scale: 1, y: 0 }
+            : { opacity: 0, scale: 0.95, y: 16 }
+        }
+        transition={{ duration: 0.2 }}
+        className="w-full max-w-md glass rounded-2xl overflow-hidden border border-white/12 shadow-2xl"
+      >
+        {/* Gradient stripe */}
+        <div
+          className="h-1 w-full"
+          style={{
+            background:
+              "linear-gradient(90deg, #833ab4, #e1306c, #fd1d1d, #f56040, #fcb045)",
+          }}
+        />
+        <div className="p-6 space-y-5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl brand-gradient flex items-center justify-center">
+                <Mail className="w-4 h-4 text-black" />
+              </div>
+              <div>
+                <h3 className="font-display font-bold text-white text-base">
+                  Send Message
+                </h3>
+                <p className="text-muted-foreground text-xs">
+                  To: {toName} ({toMobile})
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              data-ocid="admin.compose.close_button"
+              onClick={handleClose}
+              className="text-white/30 hover:text-white transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Subject */}
+          <div className="space-y-2">
+            <label
+              htmlFor="compose-subject"
+              className="text-white/80 text-sm font-medium block"
+            >
+              Subject
+            </label>
+            <input
+              id="compose-subject"
+              data-ocid="admin.compose.input"
+              type="text"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              placeholder="e.g. Your Quotation is Ready"
+              className={`w-full px-3 h-11 text-sm border ${inputClass}`}
+            />
+          </div>
+
+          {/* Body */}
+          <div className="space-y-2">
+            <label
+              htmlFor="compose-body"
+              className="text-white/80 text-sm font-medium block"
+            >
+              Message
+            </label>
+            <textarea
+              id="compose-body"
+              data-ocid="admin.compose.textarea"
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+              placeholder="Write your message to the customer..."
+              rows={4}
+              className={`w-full px-3 py-2.5 text-sm border resize-none ${inputClass}`}
+            />
+          </div>
+
+          {/* Note about WhatsApp */}
+          <p className="text-muted-foreground text-xs flex items-center gap-1.5">
+            <SiWhatsapp className="w-3.5 h-3.5 text-[#25D366]" />
+            WhatsApp will open automatically after sending.
+          </p>
+
+          {/* Actions */}
+          <div className="flex items-center gap-3 pt-1">
+            <button
+              type="button"
+              data-ocid="admin.compose.cancel_button"
+              onClick={handleClose}
+              className="flex-1 h-10 rounded-xl border border-white/15 text-white/60 hover:text-white hover:bg-white/8 text-sm font-medium transition-all duration-200"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              data-ocid="admin.compose.submit_button"
+              onClick={handleSend}
+              disabled={
+                sendMessage.isPending || !subject.trim() || !body.trim()
+              }
+              className="flex-1 h-10 rounded-xl brand-gradient text-white font-bold text-sm flex items-center justify-center gap-2 hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:scale-100"
+            >
+              {sendMessage.isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Send className="w-4 h-4" />
+                  Send Message
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </motion.div>
+    </div>
   );
+}
+
+// ─── Messages Panel ─────────────────────────────────────────────────────────────
+
+function MessageRow({ msg, idx }: { msg: AdminMessage; idx: number }) {
+  const deleteMsg = useDeleteAdminMessage();
+
+  const handleDelete = async () => {
+    try {
+      await deleteMsg.mutateAsync(msg.id);
+      toast.success("Message deleted.");
+    } catch {
+      toast.error("Failed to delete message.");
+    }
+  };
 
   return (
     <TableRow
-      data-ocid={`admin.visitors.row.${idx + 1}`}
+      data-ocid={`admin.messages.row.${idx + 1}`}
       className="border-white/6 hover:bg-white/4 transition-colors"
     >
       <TableCell className="text-muted-foreground text-sm font-mono w-10">
         {idx + 1}
       </TableCell>
-      <TableCell className="text-white font-semibold">
-        {customer.name}
-      </TableCell>
+      <TableCell className="text-white font-semibold">{msg.toName}</TableCell>
       <TableCell>
-        <a
-          href={`tel:${customer.mobile}`}
-          className="text-brand-emerald hover:text-brand-green text-sm font-medium transition-colors"
-        >
-          {customer.mobile}
-        </a>
+        <span className="text-[#e1306c] text-sm font-medium">
+          {msg.toMobile}
+        </span>
       </TableCell>
-      <TableCell className="text-muted-foreground text-sm hidden lg:table-cell whitespace-nowrap">
-        {formatTimestamp(customer.firstVisit)}
+      <TableCell className="text-white/80 text-sm max-w-[200px] truncate">
+        {msg.subject}
       </TableCell>
       <TableCell className="text-muted-foreground text-sm hidden md:table-cell whitespace-nowrap">
-        {formatTimestamp(customer.lastVisit)}
+        {formatTimestamp(msg.timestamp)}
       </TableCell>
       <TableCell>
-        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-brand-emerald/12 text-brand-green border border-brand-emerald/30">
-          <UserCheck className="w-3 h-3" />
-          {String(customer.visitCount)}
+        <span
+          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold border ${
+            msg.isRead
+              ? "bg-white/8 text-white/50 border-white/12"
+              : "bg-[#e1306c]/12 text-[#e1306c] border-[#e1306c]/30"
+          }`}
+        >
+          <span
+            className={`w-1.5 h-1.5 rounded-full ${msg.isRead ? "bg-white/30" : "bg-[#e1306c]"}`}
+          />
+          {msg.isRead ? "Read" : "Unread"}
         </span>
       </TableCell>
       <TableCell>
-        <div className="flex items-center gap-1.5">
-          <a href={`tel:${customer.mobile}`}>
-            <button
-              type="button"
-              title="Call"
-              className="w-7 h-7 rounded-lg bg-brand-emerald/10 border border-brand-emerald/30 text-brand-green hover:bg-brand-emerald/20 flex items-center justify-center transition-all duration-200"
-            >
-              <Phone className="w-3.5 h-3.5" />
-            </button>
-          </a>
-          <a
-            href={`https://wa.me/${customer.mobile.replace(/[^0-9]/g, "")}?text=${whatsappMsg}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <button
-              type="button"
-              title="WhatsApp"
-              className="w-7 h-7 rounded-lg bg-[#25D366]/10 border border-[#25D366]/30 text-[#25D366] hover:bg-[#25D366]/20 flex items-center justify-center transition-all duration-200"
-            >
-              <SiWhatsapp className="w-3.5 h-3.5" />
-            </button>
-          </a>
-        </div>
+        <button
+          type="button"
+          data-ocid={`admin.messages.delete_button.${idx + 1}`}
+          onClick={handleDelete}
+          disabled={deleteMsg.isPending}
+          className="w-7 h-7 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 flex items-center justify-center transition-all duration-200 disabled:opacity-50"
+          title="Delete message"
+        >
+          {deleteMsg.isPending ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          ) : (
+            <Trash2 className="w-3.5 h-3.5" />
+          )}
+        </button>
       </TableCell>
     </TableRow>
+  );
+}
+
+function MessagesPanel() {
+  const { data: messages, isLoading, isError } = useGetAllAdminMessages();
+
+  const totalCount = messages?.length ?? 0;
+  const unreadCount = messages?.filter((m) => !m.isRead).length ?? 0;
+
+  const sortedMessages = [...(messages ?? [])].sort((a, b) =>
+    Number(b.timestamp - a.timestamp),
+  );
+
+  return (
+    <div className="space-y-6">
+      {/* Stats row */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 max-w-sm">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+          className="glass rounded-xl p-4 flex flex-col gap-1"
+        >
+          <span className="text-muted-foreground text-xs uppercase tracking-wider">
+            Total Sent
+          </span>
+          <span className="font-display font-black text-3xl text-white">
+            {isLoading ? (
+              <Skeleton className="h-8 w-12 bg-white/5" />
+            ) : (
+              totalCount
+            )}
+          </span>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="glass rounded-xl p-4 flex flex-col gap-1 border border-[#e1306c]/20"
+        >
+          <span className="text-[#e1306c]/70 text-xs uppercase tracking-wider">
+            Unread
+          </span>
+          <span className="font-display font-black text-3xl text-[#e1306c]">
+            {isLoading ? (
+              <Skeleton className="h-8 w-12 bg-white/5" />
+            ) : (
+              unreadCount
+            )}
+          </span>
+        </motion.div>
+      </div>
+
+      {/* Loading */}
+      {isLoading && (
+        <div data-ocid="admin.messages.loading_state" className="space-y-2">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <Skeleton key={i} className="h-14 w-full rounded-xl bg-white/5" />
+          ))}
+        </div>
+      )}
+
+      {/* Error */}
+      {isError && (
+        <div
+          data-ocid="admin.messages.error_state"
+          className="flex items-center gap-3 p-5 glass rounded-2xl border border-red-500/20 text-red-400"
+        >
+          <AlertCircle className="w-5 h-5 flex-shrink-0" />
+          <p className="text-sm">Failed to load messages. Please refresh.</p>
+        </div>
+      )}
+
+      {/* Empty state */}
+      {!isLoading && !isError && sortedMessages.length === 0 && (
+        <div
+          data-ocid="admin.messages.empty_state"
+          className="flex flex-col items-center justify-center py-20 text-center glass rounded-2xl"
+        >
+          <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
+            <Mail className="w-7 h-7 text-muted-foreground" />
+          </div>
+          <p className="text-white font-semibold mb-1">No messages sent yet</p>
+          <p className="text-muted-foreground text-sm">
+            Go to the Visitors tab and click "Send Message" to reach out to a
+            customer.
+          </p>
+        </div>
+      )}
+
+      {/* Table */}
+      {!isLoading && !isError && sortedMessages.length > 0 && (
+        <div
+          data-ocid="admin.messages.table"
+          className="glass rounded-2xl overflow-hidden"
+        >
+          <Table>
+            <TableHeader>
+              <TableRow className="border-white/8 hover:bg-transparent">
+                <TableHead className="text-white/60 font-semibold w-10">
+                  #
+                </TableHead>
+                <TableHead className="text-white/60 font-semibold">
+                  Recipient
+                </TableHead>
+                <TableHead className="text-white/60 font-semibold">
+                  Mobile
+                </TableHead>
+                <TableHead className="text-white/60 font-semibold">
+                  Subject
+                </TableHead>
+                <TableHead className="text-white/60 font-semibold hidden md:table-cell">
+                  Date
+                </TableHead>
+                <TableHead className="text-white/60 font-semibold">
+                  Status
+                </TableHead>
+                <TableHead className="w-10" />
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {sortedMessages.map((msg, idx) => (
+                <MessageRow key={String(msg.id)} msg={msg} idx={idx} />
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Visitor Row ────────────────────────────────────────────────────────────────
+
+function VisitorRow({ customer, idx }: { customer: Customer; idx: number }) {
+  const [composeOpen, setComposeOpen] = useState(false);
+  const whatsappMsg = encodeURIComponent(
+    `Hi ${customer.name}, thank you for visiting Nellore Print Hub! How can we help you today?`,
+  );
+
+  return (
+    <>
+      <TableRow
+        data-ocid={`admin.visitors.row.${idx + 1}`}
+        className="border-white/6 hover:bg-white/4 transition-colors"
+      >
+        <TableCell className="text-muted-foreground text-sm font-mono w-10">
+          {idx + 1}
+        </TableCell>
+        <TableCell className="text-white font-semibold">
+          {customer.name}
+        </TableCell>
+        <TableCell>
+          <a
+            href={`tel:${customer.mobile}`}
+            className="text-[#e1306c] hover:text-[#fcb045] text-sm font-medium transition-colors"
+          >
+            {customer.mobile}
+          </a>
+        </TableCell>
+        <TableCell className="text-muted-foreground text-sm hidden lg:table-cell whitespace-nowrap">
+          {formatTimestamp(customer.firstVisit)}
+        </TableCell>
+        <TableCell className="text-muted-foreground text-sm hidden md:table-cell whitespace-nowrap">
+          {formatTimestamp(customer.lastVisit)}
+        </TableCell>
+        <TableCell>
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-[#e1306c]/12 text-[#fcb045] border border-[#e1306c]/30">
+            <UserCheck className="w-3 h-3" />
+            {String(customer.visitCount)}
+          </span>
+        </TableCell>
+        <TableCell>
+          <div className="flex items-center gap-1.5">
+            <a href={`tel:${customer.mobile}`}>
+              <button
+                type="button"
+                title="Call"
+                className="w-7 h-7 rounded-lg bg-[#e1306c]/10 border border-[#e1306c]/30 text-[#fcb045] hover:bg-[#e1306c]/20 flex items-center justify-center transition-all duration-200"
+              >
+                <Phone className="w-3.5 h-3.5" />
+              </button>
+            </a>
+            <a
+              href={`https://wa.me/${customer.mobile.replace(/[^0-9]/g, "")}?text=${whatsappMsg}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <button
+                type="button"
+                title="WhatsApp"
+                className="w-7 h-7 rounded-lg bg-[#25D366]/10 border border-[#25D366]/30 text-[#25D366] hover:bg-[#25D366]/20 flex items-center justify-center transition-all duration-200"
+              >
+                <SiWhatsapp className="w-3.5 h-3.5" />
+              </button>
+            </a>
+            <button
+              type="button"
+              data-ocid={`admin.visitors.message.button.${idx + 1}`}
+              title="Send Message"
+              onClick={() => setComposeOpen(true)}
+              className="w-7 h-7 rounded-lg bg-[#833ab4]/10 border border-[#833ab4]/30 text-[#833ab4] hover:bg-[#833ab4]/20 flex items-center justify-center transition-all duration-200"
+            >
+              <Mail className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </TableCell>
+      </TableRow>
+      <ComposeMessageModal
+        open={composeOpen}
+        onOpenChange={setComposeOpen}
+        toMobile={customer.mobile}
+        toName={customer.name}
+      />
+    </>
   );
 }
 
@@ -1936,12 +2393,12 @@ function VisitorsPanel() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="glass rounded-xl p-4 flex flex-col gap-1 border border-brand-emerald/20"
+          className="glass rounded-xl p-4 flex flex-col gap-1 border border-[#e1306c]/20"
         >
-          <span className="text-brand-emerald/70 text-xs uppercase tracking-wider">
+          <span className="text-[#e1306c]/70 text-xs uppercase tracking-wider">
             New Today
           </span>
-          <span className="font-display font-black text-3xl text-brand-emerald">
+          <span className="font-display font-black text-3xl text-[#e1306c]">
             {isLoading ? (
               <Skeleton className="h-8 w-12 bg-white/5" />
             ) : (
@@ -2074,7 +2531,7 @@ function PromoPanel() {
   };
 
   const inputClass =
-    "bg-white/5 border-white/12 text-white placeholder:text-white/30 h-11 focus:border-brand-emerald/50 focus:ring-brand-emerald/20 rounded-xl";
+    "bg-white/5 border-white/12 text-white placeholder:text-white/30 h-11 focus:border-[#e1306c]/50 focus:ring-[#e1306c]/20 rounded-xl";
 
   if (isLoading) {
     return (
@@ -2109,9 +2566,9 @@ function PromoPanel() {
   return (
     <div className="space-y-6 max-w-2xl">
       {/* Live preview badge */}
-      <div className="flex items-center gap-3 p-4 glass rounded-2xl border border-brand-emerald/20">
-        <div className="w-9 h-9 rounded-xl bg-brand-emerald/20 flex items-center justify-center flex-shrink-0">
-          <Gift className="w-4 h-4 text-brand-green" />
+      <div className="flex items-center gap-3 p-4 glass rounded-2xl border border-[#e1306c]/20">
+        <div className="w-9 h-9 rounded-xl bg-[#e1306c]/20 flex items-center justify-center flex-shrink-0">
+          <Gift className="w-4 h-4 text-[#fcb045]" />
         </div>
         <div>
           <p className="text-white/90 text-sm font-semibold">
@@ -2142,7 +2599,7 @@ function PromoPanel() {
             onCheckedChange={(checked) =>
               setForm((prev) => ({ ...prev, isActive: checked }))
             }
-            className="data-[state=checked]:bg-brand-emerald"
+            className="data-[state=checked]:bg-[#e1306c]"
           />
         </div>
 
@@ -2179,7 +2636,7 @@ function PromoPanel() {
               }
               placeholder="e.g. Get 10% OFF on your first order! Premium business cards, banners, t-shirts & more — all under one roof."
               rows={3}
-              className="bg-white/5 border-white/12 text-white placeholder:text-white/30 focus:border-brand-emerald/50 focus:ring-brand-emerald/20 rounded-xl resize-none"
+              className="bg-white/5 border-white/12 text-white placeholder:text-white/30 focus:border-[#e1306c]/50 focus:ring-[#e1306c]/20 rounded-xl resize-none"
             />
             <p className="text-xs text-muted-foreground">
               Shown as the main promo message to customers.
@@ -2238,7 +2695,7 @@ function PromoPanel() {
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="glass rounded-2xl p-5 border border-brand-emerald/20"
+          className="glass rounded-2xl p-5 border border-[#e1306c]/20"
         >
           <p className="text-muted-foreground text-xs uppercase tracking-wider mb-3 font-semibold">
             Preview — how it looks to customers
@@ -2246,15 +2703,15 @@ function PromoPanel() {
           <div
             className="rounded-xl overflow-hidden"
             style={{
-              background: "rgba(45,158,94,0.08)",
-              border: "1px solid rgba(45,158,94,0.20)",
+              background: "rgba(225,48,108,0.08)",
+              border: "1px solid rgba(225,48,108,0.20)",
             }}
           >
             <div
               className="h-1 w-full"
               style={{
                 background:
-                  "linear-gradient(90deg, #1a5c32 0%, #2d9e5e 50%, #4caf78 100%)",
+                  "linear-gradient(90deg, #833ab4 0%, #e1306c 40%, #fcb045 100%)",
               }}
             />
             <div className="p-4">
@@ -2318,6 +2775,7 @@ type AdminTab =
   | "gallery"
   | "reviews"
   | "visitors"
+  | "messages"
   | "promo";
 
 function Dashboard() {
@@ -2410,6 +2868,19 @@ function Dashboard() {
             </button>
             <button
               type="button"
+              data-ocid="admin.messages.tab"
+              onClick={() => setActiveTab("messages")}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                activeTab === "messages"
+                  ? "brand-gradient text-white font-bold"
+                  : "text-white/60 hover:text-white"
+              }`}
+            >
+              <Mail className="w-4 h-4" />
+              <span className="hidden sm:inline">Messages</span>
+            </button>
+            <button
+              type="button"
               data-ocid="admin.promo.tab"
               onClick={() => setActiveTab("promo")}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
@@ -2438,7 +2909,7 @@ function Dashboard() {
           className="w-full h-0.5 opacity-60"
           style={{
             background:
-              "linear-gradient(90deg, #1a5c32, #2d9e5e, #4caf78, #1a5c32)",
+              "linear-gradient(90deg, #833ab4, #e1306c, #fd1d1d, #f56040, #fcb045)",
           }}
         />
       </header>
@@ -2456,7 +2927,7 @@ function Dashboard() {
             >
               <div className="mb-6">
                 <h2 className="font-display font-bold text-2xl text-white flex items-center gap-2">
-                  <MessageSquare className="w-6 h-6 text-brand-emerald" />
+                  <MessageSquare className="w-6 h-6 text-[#e1306c]" />
                   Quote Requests
                 </h2>
                 <p className="text-muted-foreground text-sm mt-0.5">
@@ -2475,7 +2946,7 @@ function Dashboard() {
             >
               <div className="mb-6">
                 <h2 className="font-display font-bold text-2xl text-white flex items-center gap-2">
-                  <Settings className="w-6 h-6 text-brand-emerald" />
+                  <Settings className="w-6 h-6 text-[#e1306c]" />
                   Site Settings
                 </h2>
                 <p className="text-muted-foreground text-sm mt-0.5">
@@ -2496,7 +2967,7 @@ function Dashboard() {
             >
               <div className="mb-6">
                 <h2 className="font-display font-bold text-2xl text-white flex items-center gap-2">
-                  <Images className="w-6 h-6 text-brand-emerald" />
+                  <Images className="w-6 h-6 text-[#e1306c]" />
                   Project Gallery
                 </h2>
                 <p className="text-muted-foreground text-sm mt-0.5">
@@ -2534,7 +3005,7 @@ function Dashboard() {
             >
               <div className="mb-6">
                 <h2 className="font-display font-bold text-2xl text-white flex items-center gap-2">
-                  <Users className="w-6 h-6 text-brand-emerald" />
+                  <Users className="w-6 h-6 text-[#e1306c]" />
                   Site Visitors
                 </h2>
                 <p className="text-muted-foreground text-sm mt-0.5">
@@ -2542,6 +3013,25 @@ function Dashboard() {
                 </p>
               </div>
               <VisitorsPanel />
+            </motion.div>
+          ) : activeTab === "messages" ? (
+            <motion.div
+              key="messages"
+              initial={{ opacity: 0, x: 16 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -16 }}
+              transition={{ duration: 0.22 }}
+            >
+              <div className="mb-6">
+                <h2 className="font-display font-bold text-2xl text-white flex items-center gap-2">
+                  <Mail className="w-6 h-6 text-[#e1306c]" />
+                  Messages
+                </h2>
+                <p className="text-muted-foreground text-sm mt-0.5">
+                  All messages sent to customers via the website.
+                </p>
+              </div>
+              <MessagesPanel />
             </motion.div>
           ) : (
             <motion.div
@@ -2553,7 +3043,7 @@ function Dashboard() {
             >
               <div className="mb-6">
                 <h2 className="font-display font-bold text-2xl text-white flex items-center gap-2">
-                  <Gift className="w-6 h-6 text-brand-emerald" />
+                  <Gift className="w-6 h-6 text-[#e1306c]" />
                   Promo Settings
                 </h2>
                 <p className="text-muted-foreground text-sm mt-0.5">
@@ -2602,7 +3092,7 @@ export default function AdminPage() {
       <div
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full blur-3xl opacity-10 pointer-events-none"
         style={{
-          background: "radial-gradient(circle, #2d9e5e, transparent 70%)",
+          background: "radial-gradient(circle, #833ab4, transparent 70%)",
         }}
       />
 
@@ -2648,7 +3138,7 @@ export default function AdminPage() {
                   className={`bg-white/5 border-white/12 text-white placeholder:text-white/30 h-11 pr-10 ${
                     error
                       ? "border-red-500/50 focus:border-red-500/50"
-                      : "focus:border-brand-emerald/50"
+                      : "focus:border-[#e1306c]/50"
                   }`}
                 />
                 <button

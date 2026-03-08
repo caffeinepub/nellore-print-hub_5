@@ -36,6 +36,15 @@ export interface PromoSettings {
     isActive: boolean;
     offerTitle: string;
 }
+export interface AdminMessage {
+    id: bigint;
+    subject: string;
+    body: string;
+    isRead: boolean;
+    toName: string;
+    timestamp: bigint;
+    toMobile: string;
+}
 export interface Quote {
     id: bigint;
     service: ServiceType;
@@ -72,10 +81,13 @@ export enum ServiceType {
 }
 export interface backendInterface {
     addPhoto(blob: ExternalBlob, title: string, order: bigint): Promise<bigint>;
+    deleteAdminMessage(id: bigint): Promise<boolean>;
     deletePhoto(id: bigint): Promise<boolean>;
     deleteReview(id: bigint): Promise<boolean>;
+    getAllAdminMessages(): Promise<Array<AdminMessage>>;
     getCustomerByMobile(mobile: string): Promise<Customer>;
     getCustomers(): Promise<Array<Customer>>;
+    getMessagesForCustomer(mobile: string): Promise<Array<AdminMessage>>;
     getPhotos(): Promise<Array<Photo>>;
     getPromoSettings(): Promise<PromoSettings>;
     getQuoteById(id: bigint): Promise<Quote>;
@@ -84,7 +96,9 @@ export interface backendInterface {
     getQuotesByService(service: ServiceType): Promise<Array<Quote>>;
     getReviews(): Promise<Array<Review>>;
     getSiteSettings(): Promise<SiteSettings>;
+    markMessageRead(id: bigint): Promise<boolean>;
     registerOrLoginCustomer(name: string, mobile: string): Promise<Customer>;
+    sendMessageToCustomer(toMobile: string, toName: string, subject: string, body: string): Promise<bigint>;
     submitQuote(name: string, mobile: string, service: ServiceType, details: string): Promise<bigint>;
     submitReview(name: string, rating: bigint, message: string): Promise<bigint>;
     updatePhotoTitle(id: bigint, newTitle: string): Promise<boolean>;

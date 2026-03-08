@@ -84,20 +84,21 @@ export default function LoginModal({ open, onOpenChange }: LoginModalProps) {
   };
 
   const inputClass =
-    "h-11 rounded-xl border-white/12 bg-white/5 text-white placeholder:text-white/30 focus:border-brand-emerald/50 focus:ring-brand-emerald/20";
+    "h-11 rounded-xl border-white/12 bg-white/5 text-white placeholder:text-white/30 focus:border-[#e1306c]/50 focus:ring-[#e1306c]/20";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         data-ocid="login.dialog"
-        className="border-brand-emerald/20 rounded-2xl shadow-2xl max-w-sm w-full p-0 overflow-hidden"
-        style={{ background: "rgba(15,51,32,0.98)" }}
+        className="border-[#833ab4]/30 rounded-2xl shadow-2xl max-w-sm w-full p-0 overflow-hidden"
+        style={{ background: "rgba(10,5,20,0.98)" }}
       >
         {/* Brand gradient top accent bar */}
         <div
           className="h-1.5 w-full"
           style={{
-            background: "linear-gradient(90deg, #1a5c32, #2d9e5e, #4caf78)",
+            background:
+              "linear-gradient(90deg, #833ab4, #e1306c, #fd1d1d, #fcb045)",
           }}
         />
 
@@ -107,7 +108,7 @@ export default function LoginModal({ open, onOpenChange }: LoginModalProps) {
             <span
               className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold text-white tracking-wide shadow-sm"
               style={{
-                background: "linear-gradient(135deg, #1a5c32, #2d9e5e)",
+                background: "linear-gradient(135deg, #833ab4, #e1306c)",
               }}
             >
               ✅ 100% FREE ACCESS — No Charges Ever

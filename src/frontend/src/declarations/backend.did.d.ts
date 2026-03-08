@@ -10,6 +10,15 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
+export interface AdminMessage {
+  'id' : bigint,
+  'subject' : string,
+  'body' : string,
+  'isRead' : boolean,
+  'toName' : string,
+  'timestamp' : bigint,
+  'toMobile' : string,
+}
 export interface Customer {
   'id' : bigint,
   'visitCount' : bigint,
@@ -91,10 +100,13 @@ export interface _SERVICE {
   >,
   '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
   'addPhoto' : ActorMethod<[ExternalBlob, string, bigint], bigint>,
+  'deleteAdminMessage' : ActorMethod<[bigint], boolean>,
   'deletePhoto' : ActorMethod<[bigint], boolean>,
   'deleteReview' : ActorMethod<[bigint], boolean>,
+  'getAllAdminMessages' : ActorMethod<[], Array<AdminMessage>>,
   'getCustomerByMobile' : ActorMethod<[string], Customer>,
   'getCustomers' : ActorMethod<[], Array<Customer>>,
+  'getMessagesForCustomer' : ActorMethod<[string], Array<AdminMessage>>,
   'getPhotos' : ActorMethod<[], Array<Photo>>,
   'getPromoSettings' : ActorMethod<[], PromoSettings>,
   'getQuoteById' : ActorMethod<[bigint], Quote>,
@@ -103,7 +115,12 @@ export interface _SERVICE {
   'getQuotesByService' : ActorMethod<[ServiceType], Array<Quote>>,
   'getReviews' : ActorMethod<[], Array<Review>>,
   'getSiteSettings' : ActorMethod<[], SiteSettings>,
+  'markMessageRead' : ActorMethod<[bigint], boolean>,
   'registerOrLoginCustomer' : ActorMethod<[string, string], Customer>,
+  'sendMessageToCustomer' : ActorMethod<
+    [string, string, string, string],
+    bigint
+  >,
   'submitQuote' : ActorMethod<[string, string, ServiceType, string], bigint>,
   'submitReview' : ActorMethod<[string, bigint, string], bigint>,
   'updatePhotoTitle' : ActorMethod<[bigint, string], boolean>,

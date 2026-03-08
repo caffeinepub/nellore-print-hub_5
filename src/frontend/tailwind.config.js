@@ -71,11 +71,19 @@ export default {
           border: "oklch(var(--sidebar-border))",
           ring: "oklch(var(--sidebar-ring))",
         },
+        // Instagram brand palette
         brand: {
-          green: "#1a5c32",
-          emerald: "#2d9e5e",
-          leaf: "#4caf78",
-          dark: "#0f3320",
+          purple: "#833ab4",
+          pink: "#e1306c",
+          red: "#fd1d1d",
+          orange: "#f56040",
+          gold: "#fcb045",
+          dark: "#0a0a0a",
+          surface: "#1a1a1a",
+          // Legacy green aliases removed — use ig-* names in components
+          green: "#833ab4",
+          emerald: "#e1306c",
+          leaf: "#fcb045",
         },
         whatsapp: "#25d366",
       },
@@ -86,9 +94,9 @@ export default {
       },
       boxShadow: {
         xs: "0 1px 2px 0 rgba(0,0,0,0.08)",
-        fire: "0 4px 20px rgba(45, 158, 94, 0.25), 0 1px 8px rgba(26, 92, 50, 0.15)",
-        "fire-lg": "0 8px 40px rgba(45, 158, 94, 0.30), 0 4px 20px rgba(26, 92, 50, 0.20)",
-        card: "0 4px 20px rgba(26,92,50,0.10), 0 1px 3px rgba(0,0,0,0.06)",
+        fire: "0 4px 20px rgba(225,48,108,0.30), 0 1px 8px rgba(131,58,180,0.20)",
+        "fire-lg": "0 8px 40px rgba(225,48,108,0.35), 0 4px 20px rgba(131,58,180,0.25)",
+        card: "0 4px 20px rgba(0,0,0,0.40), 0 1px 3px rgba(0,0,0,0.30)",
       },
       keyframes: {
         "accordion-down": {
@@ -104,12 +112,17 @@ export default {
           to: { opacity: "1", transform: "translateY(0)" },
         },
         "fire-pulse": {
-          "0%, 100%": { boxShadow: "0 0 20px rgba(45, 158, 94, 0.40)" },
-          "50%": { boxShadow: "0 0 40px rgba(26, 92, 50, 0.55)" },
+          "0%, 100%": { boxShadow: "0 0 20px rgba(225,48,108,0.40)" },
+          "50%": { boxShadow: "0 0 40px rgba(131,58,180,0.55)" },
         },
         "saffron-pulse": {
-          "0%, 100%": { boxShadow: "0 0 20px rgba(76, 175, 120, 0.40)" },
-          "50%": { boxShadow: "0 0 45px rgba(45, 158, 94, 0.55)" },
+          "0%, 100%": { boxShadow: "0 0 20px rgba(252,176,69,0.40)" },
+          "50%": { boxShadow: "0 0 45px rgba(253,29,29,0.55)" },
+        },
+        "ig-spin": {
+          "0%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" },
+          "100%": { backgroundPosition: "0% 50%" },
         },
       },
       animation: {
@@ -118,6 +131,7 @@ export default {
         "fade-up": "fade-up 0.6s ease-out",
         "fire-pulse": "fire-pulse 2s ease-in-out infinite",
         "saffron-pulse": "saffron-pulse 2s ease-in-out infinite",
+        "ig-spin": "ig-spin 3s ease infinite",
       },
     },
   },

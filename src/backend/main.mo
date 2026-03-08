@@ -3,13 +3,12 @@ import Array "mo:core/Array";
 import Order "mo:core/Order";
 import Text "mo:core/Text";
 import Nat "mo:core/Nat";
+import Int "mo:core/Int";
 import Iter "mo:core/Iter";
 import Runtime "mo:core/Runtime";
 import Time "mo:core/Time";
 import Storage "blob-storage/Storage";
 import MixinStorage "blob-storage/Mixin";
-
-
 
 actor {
   include MixinStorage();
@@ -78,15 +77,27 @@ actor {
     isActive : Bool;
   };
 
+  type AdminMessage = {
+    id : Nat;
+    toMobile : Text;
+    toName : Text;
+    subject : Text;
+    body : Text;
+    timestamp : Int;
+    isRead : Bool;
+  };
+
   var nextId = 1;
   var nextPhotoId = 1;
   var nextReviewId = 1;
   var nextCustomerId = 1;
+  var nextMessageId = 1;
 
   let quotes = Map.empty<Nat, Quote>();
   let photos = Map.empty<Nat, Photo>();
   let reviews = Map.empty<Nat, Review>();
   let customers = Map.empty<Nat, Customer>();
+  let messages = Map.empty<Nat, AdminMessage>();
   let customerByMobile = Map.empty<Text, Nat>();
 
   var siteSettings : SiteSettings = {
@@ -98,7 +109,6 @@ actor {
     tagline = "Your Vision Printed to Perfection";
   };
 
-  // *** NEW: Promo Settings ***
   var promoSettings : PromoSettings = {
     offerTitle = "Special Offer For You";
     offerDescription = "Get 10% OFF on your first order! Premium business cards, banners, t-shirts, packaging & more — all under one roof. Nellore's most trusted printing studio since 2012.";
@@ -328,6 +338,66 @@ actor {
           case (null) { Runtime.trap("Customer not found") };
           case (?customer) { customer };
         };
+      };
+    };
+  };
+
+  // ******************** Admin Messaging ********************
+  public shared ({ caller }) func sendMessageToCustomer(
+    toMobile : Text,
+    toName : Text,
+    subject : Text,
+    body : Text,
+  ) : async Nat {
+    let id = nextMessageId;
+    let message : AdminMessage = {
+      id;
+      toMobile;
+      toName;
+      subject;
+      body;
+      timestamp = Time.now();
+      isRead = false; // New messages are unread by default
+    };
+
+    messages.add(id, message);
+    nextMessageId += 1;
+    id;
+  };
+
+  module AdminMessage {
+    public func compareByTimestampDesc(m1 : AdminMessage, m2 : AdminMessage) : Order.Order {
+      Int.compare(m2.timestamp, m1.timestamp);
+    };
+  };
+
+  public query ({ caller }) func getMessagesForCustomer(mobile : Text) : async [AdminMessage] {
+    messages.values().toArray().filter(func(m) { Text.equal(m.toMobile, mobile) }).sort(
+      AdminMessage.compareByTimestampDesc
+    );
+  };
+
+  public shared ({ caller }) func markMessageRead(id : Nat) : async Bool {
+    switch (messages.get(id)) {
+      case (null) { Runtime.trap("Message not found") };
+      case (?message) {
+        let updatedMessage = { message with isRead = true };
+        messages.add(id, updatedMessage);
+        true;
+      };
+    };
+  };
+
+  public query ({ caller }) func getAllAdminMessages() : async [AdminMessage] {
+    messages.values().toArray().sort(AdminMessage.compareByTimestampDesc);
+  };
+
+  public shared ({ caller }) func deleteAdminMessage(id : Nat) : async Bool {
+    switch (messages.get(id)) {
+      case (null) { Runtime.trap("Message not found") };
+      case (?_) {
+        messages.remove(id);
+        true;
       };
     };
   };

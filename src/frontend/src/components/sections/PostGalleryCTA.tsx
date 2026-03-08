@@ -45,7 +45,7 @@ export default function PostGalleryCTA() {
           className="rounded-3xl p-10 sm:p-14 text-center relative overflow-hidden shadow-lg"
           style={{
             background:
-              "linear-gradient(135deg, #1a5c32 0%, #2d9e5e 50%, #4caf78 100%)",
+              "linear-gradient(135deg, #833ab4 0%, #e1306c 40%, #fd1d1d 65%, #f56040 80%, #fcb045 100%)",
           }}
         >
           {/* Noise texture overlay */}

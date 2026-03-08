@@ -30,10 +30,7 @@ const socialLinks = [
 
 export default function FloatingSocial() {
   return (
-    <div
-      className="fixed left-3 z-50 flex flex-col gap-2"
-      style={{ top: "40%" }}
-    >
+    <div className="fixed bottom-20 right-4 z-50 flex flex-col gap-2 items-center">
       {socialLinks.map((social, idx) => (
         <motion.a
           key={social.name}
@@ -42,14 +39,14 @@ export default function FloatingSocial() {
           rel="noopener noreferrer"
           data-ocid={`social.link.${idx + 1}`}
           aria-label={social.name}
-          initial={{ x: -60, opacity: 0 }}
+          initial={{ x: 60, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{
             delay: 1.5 + idx * 0.1,
             type: "spring",
             stiffness: 200,
           }}
-          whileHover={{ x: 4, scale: 1.15 }}
+          whileHover={{ x: -4, scale: 1.15 }}
           className="w-10 h-10 bg-white/80 backdrop-blur-sm rounded-lg flex items-center justify-center opacity-60 hover:opacity-100 transition-opacity duration-200 border border-gray-200 hover:border-gray-400 shadow-xs"
         >
           <img

@@ -36,11 +36,18 @@ export default function MobileBottomNav() {
   };
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-t border-gray-200 shadow-lg">
+    <nav
+      className="md:hidden fixed bottom-0 left-0 right-0 z-50 backdrop-blur-xl border-t shadow-lg"
+      style={{
+        background: "rgba(10,10,10,0.97)",
+        borderTopColor: "rgba(255,255,255,0.08)",
+      }}
+    >
       <div
         className="absolute top-0 left-0 right-0 h-0.5"
         style={{
-          background: "linear-gradient(90deg, #059669, #16a34a)",
+          background:
+            "linear-gradient(90deg, #833ab4, #e1306c, #fd1d1d, #f56040, #fcb045)",
         }}
       />
       <div className="flex items-center justify-around px-2 py-2">
@@ -53,7 +60,7 @@ export default function MobileBottomNav() {
               data-ocid={`mobile_nav.${id}.button`}
               onClick={() => scrollTo(id)}
               className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-200 ${
-                isActive ? "text-gray-900" : "text-gray-400 hover:text-gray-600"
+                isActive ? "text-white" : "text-white/35 hover:text-white/60"
               }`}
             >
               <div
@@ -67,7 +74,7 @@ export default function MobileBottomNav() {
                 />
               </div>
               <span
-                className={`text-[10px] font-medium ${isActive ? "brand-gradient-text" : "text-gray-400"}`}
+                className={`text-[10px] font-medium ${isActive ? "brand-gradient-text" : "text-white/35"}`}
               >
                 {label}
               </span>
