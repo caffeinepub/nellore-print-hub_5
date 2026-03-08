@@ -5,9 +5,17 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Bell, ExternalLink, FileText, Mail } from "lucide-react";
+import {
+  Bell,
+  CheckCircle2,
+  Download,
+  ExternalLink,
+  FileText,
+  Mail,
+  XCircle,
+} from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SiWhatsapp } from "react-icons/si";
 import type { AdminMessage } from "../backend.d";
 import {
@@ -27,6 +35,37 @@ function formatMessageDate(ts: bigint): string {
   }
 }
 
+function forceDownload(url: string, filename: string) {
+  fetch(url)
+    .then((r) => r.blob())
+    .then((blob) => {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(a.href);
+      }, 100);
+    })
+    .catch(() => {
+      // Fallback: open in new tab
+      window.open(url, "_blank");
+    });
+}
+
+function getMessageStyle(
+  subject: string,
+): "accepted" | "rejected" | "normal" | "quotation" {
+  const s = subject.toLowerCase();
+  if (s.includes("accepted")) return "accepted";
+  if (s.includes("rejected") || s.includes("action required"))
+    return "rejected";
+  if (s.includes("quotation")) return "quotation";
+  return "normal";
+}
+
 function MessageCard({
   message,
   idx,
@@ -39,7 +78,78 @@ function MessageCard({
     `Re: ${message.subject} - Hi, I received your message. `,
   );
   const waUrl = `https://wa.me/919390535070?text=${waText}`;
+
+  // Extract URL from body if present
   const urlMatch = message.body.match(/https?:\/\/[^\s]+/);
+  const fileUrl = urlMatch ? urlMatch[0] : null;
+
+  const messageStyle = getMessageStyle(message.subject);
+
+  // Determine if it's an image or document by URL extension
+  const isImage = fileUrl
+    ? /\.(png|jpg|jpeg|gif|webp)(\?|$)/i.test(fileUrl)
+    : false;
+  const filename = fileUrl
+    ? fileUrl.split("/").pop()?.split("?")[0] || "file"
+    : "file";
+
+  const containerStyle = (() => {
+    if (messageStyle === "accepted")
+      return "border-emerald-500/30 bg-emerald-500/6";
+    if (messageStyle === "rejected") return "border-red-500/30 bg-red-500/6";
+    if (!message.isRead) return "border-[#e1306c]/30 bg-[#e1306c]/6";
+    return "border-white/8 bg-white/3";
+  })();
+
+  const iconEl = (() => {
+    if (messageStyle === "accepted")
+      return (
+        <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+        </div>
+      );
+    if (messageStyle === "rejected")
+      return (
+        <div className="w-8 h-8 rounded-lg bg-red-500/20 flex items-center justify-center flex-shrink-0">
+          <XCircle className="w-3.5 h-3.5 text-red-400" />
+        </div>
+      );
+    return (
+      <div className="w-8 h-8 rounded-lg brand-gradient flex items-center justify-center flex-shrink-0">
+        <Mail className="w-3.5 h-3.5 text-black" />
+      </div>
+    );
+  })();
+
+  const statusBadge = (() => {
+    if (messageStyle === "accepted")
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex-shrink-0">
+          <CheckCircle2 className="w-3 h-3" />
+          Accepted
+        </span>
+      );
+    if (messageStyle === "rejected")
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/30 flex-shrink-0">
+          <XCircle className="w-3 h-3" />
+          Rejected
+        </span>
+      );
+    if (!message.isRead)
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-[#e1306c]/20 text-[#e1306c] border border-[#e1306c]/30 flex-shrink-0">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#e1306c] animate-pulse" />
+          Unread
+        </span>
+      );
+    return null;
+  })();
+
+  // Body text: strip the URL if present
+  const cleanBody = fileUrl
+    ? message.body.replace(fileUrl, "").trim()
+    : message.body;
 
   return (
     <motion.div
@@ -48,18 +158,12 @@ function MessageCard({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.96 }}
       transition={{ duration: 0.2, delay: idx * 0.05 }}
-      className={`rounded-2xl p-4 border transition-all duration-200 ${
-        !message.isRead
-          ? "border-[#e1306c]/30 bg-[#e1306c]/6"
-          : "border-white/8 bg-white/3"
-      }`}
+      className={`rounded-2xl p-4 border transition-all duration-200 ${containerStyle}`}
     >
       {/* Header */}
       <div className="flex items-start justify-between gap-3 mb-2">
         <div className="flex items-center gap-2 flex-1 min-w-0">
-          <div className="w-8 h-8 rounded-lg brand-gradient flex items-center justify-center flex-shrink-0">
-            <Mail className="w-3.5 h-3.5 text-black" />
-          </div>
+          {iconEl}
           <div className="flex-1 min-w-0">
             <p className="text-white font-bold text-sm leading-tight truncate">
               {message.subject}
@@ -69,47 +173,63 @@ function MessageCard({
             </p>
           </div>
         </div>
-        {!message.isRead && (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-[#e1306c]/20 text-[#e1306c] border border-[#e1306c]/30 flex-shrink-0">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#e1306c] animate-pulse" />
-            Unread
-          </span>
-        )}
+        {statusBadge}
       </div>
 
-      {/* Body */}
-      <p className="text-white/75 text-sm leading-relaxed pl-10">
-        {message.body}
-      </p>
+      {/* Body text */}
+      <p className="text-white/75 text-sm leading-relaxed pl-10">{cleanBody}</p>
 
-      {/* Inline PDF viewer */}
-      {urlMatch && (
+      {/* File/PDF Card */}
+      {fileUrl && (
         <div
           className="mt-3 w-full"
           data-ocid={`messages.quotation.panel.${idx + 1}`}
         >
-          <div className="flex items-center gap-2 mb-2">
-            <FileText className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />
-            <span className="text-blue-400 text-xs font-semibold">
-              Your Quotation
-            </span>
-            <a
-              href={urlMatch[0]}
-              target="_blank"
-              rel="noopener noreferrer"
-              data-ocid={`messages.quotation.button.${idx + 1}`}
-              className="ml-auto flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold bg-blue-500/12 text-blue-400 border border-blue-500/30 hover:bg-blue-500/20 hover:border-blue-500/50 transition-all duration-200"
-            >
-              <ExternalLink className="w-3 h-3" />
-              Full Screen
-            </a>
+          <div
+            className={`flex items-center gap-2 flex-wrap p-3 rounded-xl border ${
+              messageStyle === "accepted"
+                ? "border-emerald-500/25 bg-emerald-500/8"
+                : "border-[#e1306c]/25 bg-[#e1306c]/8"
+            }`}
+          >
+            <div className="w-9 h-9 rounded-lg bg-[#e1306c]/20 flex items-center justify-center flex-shrink-0">
+              {isImage ? (
+                <img
+                  src={fileUrl}
+                  alt="attachment thumbnail"
+                  className="w-9 h-9 rounded-lg object-cover"
+                />
+              ) : (
+                <FileText className="w-4 h-4 text-[#fcb045]" />
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[#fcb045] text-sm font-bold truncate">
+                {isImage ? "Image Attachment" : "File Attachment"}
+              </p>
+              <p className="text-white/40 text-xs truncate">{filename}</p>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <a
+                href={fileUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-ocid={`messages.quotation.button.${idx + 1}`}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-[#fcb045]/15 text-[#fcb045] border border-[#fcb045]/40 hover:bg-[#fcb045]/25 transition-all duration-200"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                Open
+              </a>
+              <button
+                type="button"
+                onClick={() => forceDownload(fileUrl, filename)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-white/8 text-white/70 border border-white/15 hover:bg-white/15 transition-all duration-200"
+              >
+                <Download className="w-3.5 h-3.5" />
+                Download
+              </button>
+            </div>
           </div>
-          <iframe
-            src={urlMatch[0]}
-            title="Quotation PDF"
-            className="w-full rounded-xl border border-white/10 bg-white"
-            style={{ height: "420px" }}
-          />
         </div>
       )}
 

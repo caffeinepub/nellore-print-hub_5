@@ -44,7 +44,7 @@ function getStoredCustomer(): StoredCustomer | null {
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [logoSrc, setLogoSrc] = useState<string>(getLogoUrl);
+  const [logoSrc, setLogoSrc] = useState<string>(() => getLogoUrl());
   const [loginOpen, setLoginOpen] = useState(false);
   const [messagesOpen, setMessagesOpen] = useState(false);
   const [customer, setCustomer] = useState<StoredCustomer | null>(
@@ -75,16 +75,30 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Sync logo from siteSettings when loaded
+  useEffect(() => {
+    if (settings?.logoUrl) {
+      setLogoSrc(settings.logoUrl);
+      localStorage.setItem("nph_logo_url", settings.logoUrl);
+    }
+  }, [settings?.logoUrl]);
+
   // Listen for logo updates from admin panel
   useEffect(() => {
-    const handleLogoUpdate = () => {
-      setLogoSrc(getLogoUrl());
+    const handleLogoUpdate = (e: Event) => {
+      const detail = (e as CustomEvent<{ url?: string }>).detail;
+      if (detail?.url) {
+        setLogoSrc(detail.url);
+      } else {
+        setLogoSrc(getLogoUrl());
+      }
     };
+    const handleStorage = () => setLogoSrc(getLogoUrl());
     window.addEventListener("logo-updated", handleLogoUpdate);
-    window.addEventListener("storage", handleLogoUpdate);
+    window.addEventListener("storage", handleStorage);
     return () => {
       window.removeEventListener("logo-updated", handleLogoUpdate);
-      window.removeEventListener("storage", handleLogoUpdate);
+      window.removeEventListener("storage", handleStorage);
     };
   }, []);
 

@@ -1,3 +1,5 @@
+import MixinStorage "blob-storage/Mixin";
+import Storage "blob-storage/Storage";
 import Map "mo:core/Map";
 import Array "mo:core/Array";
 import Order "mo:core/Order";
@@ -7,9 +9,9 @@ import Int "mo:core/Int";
 import Iter "mo:core/Iter";
 import Runtime "mo:core/Runtime";
 import Time "mo:core/Time";
-import Storage "blob-storage/Storage";
-import MixinStorage "blob-storage/Mixin";
+import Migration "migration";
 
+(with migration = Migration.run)
 actor {
   include MixinStorage();
 
@@ -23,6 +25,8 @@ actor {
   type QuoteStatus = {
     #new_;
     #replied;
+    #accepted;
+    #rejected;
   };
 
   type Quote = {
@@ -33,6 +37,8 @@ actor {
     details : Text;
     timestamp : Int;
     status : QuoteStatus;
+    attachmentUrl : ?Text;
+    statusReason : ?Text;
   };
 
   type SiteSettings = {
@@ -42,6 +48,7 @@ actor {
     whatsapp : Text;
     siteName : Text;
     tagline : Text;
+    logoUrl : Text;
   };
 
   type Photo = {
@@ -50,12 +57,13 @@ actor {
     title : Text;
     order : Nat;
     timestamp : Int;
+    fileType : Text;
   };
 
   type Review = {
     id : Nat;
     name : Text;
-    rating : Nat; // 1-5
+    rating : Nat;
     message : Text;
     timestamp : Int;
   };
@@ -87,7 +95,7 @@ actor {
     isRead : Bool;
   };
 
-  var nextId = 1;
+  var nextQuoteId = 1;
   var nextPhotoId = 1;
   var nextReviewId = 1;
   var nextCustomerId = 1;
@@ -107,6 +115,7 @@ actor {
     whatsapp = "919390535070";
     siteName = "Nellore Print Hub";
     tagline = "Your Vision Printed to Perfection";
+    logoUrl = "";
   };
 
   var promoSettings : PromoSettings = {
@@ -117,24 +126,16 @@ actor {
     isActive = true;
   };
 
-  public query ({ caller }) func getPromoSettings() : async PromoSettings {
-    promoSettings;
-  };
-
-  public shared ({ caller }) func updatePromoSettings(settings : PromoSettings) : async Bool {
-    promoSettings := settings;
-    true;
-  };
-
-  // Quote Management
+  // ************************ Quote Management ************************
   public shared ({ caller }) func submitQuote(
     name : Text,
     mobile : Text,
     service : ServiceType,
     details : Text,
+    attachmentUrl : ?Text,
   ) : async Nat {
-    let id = nextId;
-    nextId += 1;
+    let id = nextQuoteId;
+    nextQuoteId += 1;
 
     let quote : Quote = {
       id;
@@ -144,6 +145,8 @@ actor {
       details;
       timestamp = Time.now();
       status = #new_;
+      attachmentUrl;
+      statusReason = null;
     };
 
     quotes.add(id, quote);
@@ -151,13 +154,16 @@ actor {
   };
 
   module Quote {
-    public func compareById(quote1 : Quote, quote2 : Quote) : Order.Order {
-      Nat.compare(quote1.id, quote2.id);
+    public func compareById(q1 : Quote, q2 : Quote) : Order.Order {
+      Nat.compare(q1.id, q2.id);
+    };
+    public func compareByTimestampDesc(q1 : Quote, q2 : Quote) : Order.Order {
+      Int.compare(q2.timestamp, q1.timestamp);
     };
   };
 
   public query ({ caller }) func getQuotes() : async [Quote] {
-    quotes.values().toArray().sort(Quote.compareById);
+    quotes.values().toArray().sort(Quote.compareByTimestampDesc);
   };
 
   public query ({ caller }) func getQuoteById(id : Nat) : async Quote {
@@ -168,11 +174,17 @@ actor {
   };
 
   public query ({ caller }) func getQuotesByService(service : ServiceType) : async [Quote] {
-    quotes.values().toArray().filter(func(q) { q.service == service });
+    let filtered = quotes.values().toArray().filter(
+      func(q) { q.service == service }
+    );
+    filtered.sort(Quote.compareByTimestampDesc);
   };
 
   public query ({ caller }) func getQuotesByMobile(mobile : Text) : async [Quote] {
-    quotes.values().toArray().filter(func(q) { Text.equal(q.mobile, mobile) });
+    let filtered = quotes.values().toArray().filter(
+      func(q) { Text.equal(q.mobile, mobile) }
+    );
+    filtered.sort(Quote.compareByTimestampDesc);
   };
 
   public shared ({ caller }) func updateQuoteStatus(id : Nat, status : QuoteStatus) : async Bool {
@@ -186,7 +198,18 @@ actor {
     };
   };
 
-  // Site Settings
+  public shared ({ caller }) func updateQuoteStatusWithReason(id : Nat, status : QuoteStatus, reason : Text) : async Bool {
+    switch (quotes.get(id)) {
+      case (null) { Runtime.trap("Quote not found") };
+      case (?quote) {
+        let updatedQuote = { quote with status; statusReason = ?reason };
+        quotes.add(id, updatedQuote);
+        true;
+      };
+    };
+  };
+
+  // ************************ Site Settings Management ************************
   public query ({ caller }) func getSiteSettings() : async SiteSettings {
     siteSettings;
   };
@@ -196,39 +219,53 @@ actor {
     true;
   };
 
-  // Gallery Photo Management
-  public shared ({ caller }) func addPhoto(blob : Storage.ExternalBlob, title : Text, order : Nat) : async Nat {
+  // ************************ Gallery/File Management ************************
+  public shared ({ caller }) func addPhoto(blob : Storage.ExternalBlob, title : Text, order : Nat, fileType : Text) : async Nat {
     let id = nextPhotoId;
+    nextPhotoId += 1;
+
     let photo : Photo = {
       id;
       blob;
       title;
       order;
       timestamp = Time.now();
+      fileType;
     };
 
     photos.add(id, photo);
-    nextPhotoId += 1;
     id;
   };
 
-  module Photo {
-    public func compareByOrderAndId(photo1 : Photo, photo2 : Photo) : Order.Order {
-      switch (Nat.compare(photo1.order, photo2.order)) {
-        case (#equal) { Nat.compare(photo1.id, photo2.id) };
-        case (other) { other };
-      };
-    };
+  public query ({ caller }) func getPhotos() : async [Photo] {
+    let filtered = photos.values().toArray().filter(
+      func(p) { Text.equal(p.fileType, "gallery") }
+    );
+    filtered.sort(
+      func(a, b) {
+        switch (Nat.compare(a.order, b.order)) {
+          case (#equal) { Nat.compare(a.id, b.id) };
+          case (other) { other };
+        };
+      }
+    );
   };
 
-  public query ({ caller }) func getPhotos() : async [Photo] {
-    photos.values().toArray().sort(Photo.compareByOrderAndId);
+  public query ({ caller }) func getAllFiles() : async [Photo] {
+    photos.values().toArray().sort(
+      func(a, b) {
+        switch (Int.compare(b.timestamp, a.timestamp)) {
+          case (#equal) { Nat.compare(a.id, b.id) };
+          case (other) { other };
+        };
+      }
+    );
   };
 
   public shared ({ caller }) func deletePhoto(id : Nat) : async Bool {
     switch (photos.get(id)) {
       case (null) { Runtime.trap("Photo not found") };
-      case (?_photo) {
+      case (?_) {
         photos.remove(id);
         true;
       };
@@ -246,13 +283,15 @@ actor {
     };
   };
 
-  // Reviews
+  // ************************ Review Management ************************
   public shared ({ caller }) func submitReview(name : Text, rating : Nat, message : Text) : async Nat {
     if (rating < 1 or rating > 5) {
       Runtime.trap("Rating must be between 1 and 5");
     };
 
     let id = nextReviewId;
+    nextReviewId += 1;
+
     let review : Review = {
       id;
       name;
@@ -262,7 +301,6 @@ actor {
     };
 
     reviews.add(id, review);
-    nextReviewId += 1;
     id;
   };
 
@@ -280,13 +318,15 @@ actor {
     };
   };
 
-  // ******************** Customer Management ********************
+  // ************************ Customer Management ************************
   public shared ({ caller }) func registerOrLoginCustomer(name : Text, mobile : Text) : async Customer {
     let now = Time.now();
 
     switch (customerByMobile.get(mobile)) {
       case (null) {
         let id = nextCustomerId;
+        nextCustomerId += 1;
+
         let newCustomer : Customer = {
           id;
           name;
@@ -295,9 +335,9 @@ actor {
           lastVisit = now;
           visitCount = 1;
         };
+
         customers.add(id, newCustomer);
         customerByMobile.add(mobile, id);
-        nextCustomerId += 1;
         newCustomer;
       };
       case (?id) {
@@ -342,7 +382,17 @@ actor {
     };
   };
 
-  // ******************** Admin Messaging ********************
+  // ************************ Promo Settings Management ************************
+  public query ({ caller }) func getPromoSettings() : async PromoSettings {
+    promoSettings;
+  };
+
+  public shared ({ caller }) func updatePromoSettings(settings : PromoSettings) : async Bool {
+    promoSettings := settings;
+    true;
+  };
+
+  // ************************ Admin Messaging ************************
   public shared ({ caller }) func sendMessageToCustomer(
     toMobile : Text,
     toName : Text,
@@ -350,6 +400,8 @@ actor {
     body : Text,
   ) : async Nat {
     let id = nextMessageId;
+    nextMessageId += 1;
+
     let message : AdminMessage = {
       id;
       toMobile;
@@ -357,11 +409,10 @@ actor {
       subject;
       body;
       timestamp = Time.now();
-      isRead = false; // New messages are unread by default
+      isRead = false;
     };
 
     messages.add(id, message);
-    nextMessageId += 1;
     id;
   };
 
@@ -372,9 +423,9 @@ actor {
   };
 
   public query ({ caller }) func getMessagesForCustomer(mobile : Text) : async [AdminMessage] {
-    messages.values().toArray().filter(func(m) { Text.equal(m.toMobile, mobile) }).sort(
-      AdminMessage.compareByTimestampDesc
-    );
+    messages.values().toArray().filter(
+      func(m) { Text.equal(m.toMobile, mobile) }
+    ).sort(AdminMessage.compareByTimestampDesc);
   };
 
   public shared ({ caller }) func markMessageRead(id : Nat) : async Bool {

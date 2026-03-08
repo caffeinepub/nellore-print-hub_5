@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
 import {
   Select,
   SelectContent,
@@ -15,15 +16,21 @@ import {
   CheckCircle2,
   Download,
   Loader2,
+  Paperclip,
   Printer,
   Send,
   Upload,
+  X,
   Zap,
 } from "lucide-react";
 import { motion } from "motion/react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { ServiceType, useSubmitQuote } from "../../hooks/useQueries";
+import {
+  ServiceType,
+  useSubmitQuote,
+  useUploadFileAndGetUrl,
+} from "../../hooks/useQueries";
 import { useLang } from "../../lib/i18n";
 
 const SERVICE_VALUES = [
@@ -156,12 +163,16 @@ export default function QuoteSection() {
     ServiceType.digitalPrinting,
   );
   const [details, setDetails] = useState("");
-  const [fileName, setFileName] = useState("");
+  const [attachedFile, setAttachedFile] = useState<File | null>(null);
+  const [attachUploadProgress, setAttachUploadProgress] = useState(0);
+  const [attachUploading, setAttachUploading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submittedQuote, setSubmittedQuote] = useState<QuoteData | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { mutateAsync: submitQuote, isPending } = useSubmitQuote();
+  const { mutateAsync: submitQuote, isPending: isSubmitting } =
+    useSubmitQuote();
+  const uploadFile = useUploadFileAndGetUrl();
 
   const SERVICE_OPTIONS = t.quote.services.map((label, i) => ({
     label,
@@ -170,8 +181,15 @@ export default function QuoteSection() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) setFileName(file.name);
+    if (file) setAttachedFile(file);
   };
+
+  const handleRemoveFile = () => {
+    setAttachedFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const isPending = isSubmitting || attachUploading;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -192,11 +210,39 @@ export default function QuoteSection() {
     };
 
     try {
+      let attachmentUrl: string | null = null;
+
+      // Upload attachment first if one is selected
+      if (attachedFile) {
+        setAttachUploading(true);
+        setAttachUploadProgress(0);
+        try {
+          const arrayBuffer = await attachedFile.arrayBuffer();
+          const bytes = new Uint8Array(arrayBuffer) as Uint8Array<ArrayBuffer>;
+          const result = await uploadFile.mutateAsync({
+            bytes,
+            title: `quote_attachment_${Date.now()}_${attachedFile.name}`,
+            order: 0n,
+            fileType: "attachment",
+            onProgress: (pct) => setAttachUploadProgress(pct),
+          });
+          attachmentUrl = result.directUrl;
+        } catch {
+          toast.error("Failed to upload attachment. Please try again.");
+          setAttachUploading(false);
+          return;
+        } finally {
+          setAttachUploading(false);
+          setAttachUploadProgress(0);
+        }
+      }
+
       await submitQuote({
         name: quoteSnapshot.name,
         mobile: quoteSnapshot.mobile,
         service: quoteSnapshot.service,
         details: quoteSnapshot.details,
+        attachmentUrl,
       });
       setSubmitted(true);
       setSubmittedQuote(quoteSnapshot);
@@ -205,7 +251,7 @@ export default function QuoteSection() {
       setMobile("");
       setService(ServiceType.digitalPrinting);
       setDetails("");
-      setFileName("");
+      setAttachedFile(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
     } catch {
       toast.error(t.quote.errorFailed);
@@ -394,7 +440,7 @@ export default function QuoteSection() {
                 />
               </div>
 
-              {/* File Upload */}
+              {/* File Upload — any file type */}
               <div className="space-y-2">
                 <Label className="text-white/70 text-sm font-medium">
                   {t.quote.form.fileLabel}{" "}
@@ -402,34 +448,73 @@ export default function QuoteSection() {
                     {t.quote.form.fileOptional}
                   </span>
                 </Label>
-                <button
-                  type="button"
-                  className="relative cursor-pointer w-full text-left"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <div
-                    className="flex items-center gap-3 p-3.5 rounded-xl border border-white/12 border-dashed hover:border-white/25 transition-all duration-200"
-                    style={{ background: "rgba(255,255,255,0.03)" }}
-                  >
-                    <Upload className="w-5 h-5 text-white/30 flex-shrink-0" />
-                    <span className="text-sm text-white/40">
-                      {fileName || t.quote.form.fileUpload}
-                    </span>
+
+                {attachedFile ? (
+                  <div className="flex items-center gap-3 p-3 rounded-xl border border-[#e1306c]/25 bg-[#e1306c]/6">
+                    <Paperclip className="w-4 h-4 text-[#fcb045] flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white/90 text-sm font-medium truncate">
+                        {attachedFile.name}
+                      </p>
+                      <p className="text-white/40 text-xs">
+                        {(attachedFile.size / 1024).toFixed(0)} KB
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleRemoveFile}
+                      className="text-white/40 hover:text-red-400 transition-colors flex-shrink-0"
+                      aria-label="Remove file"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
                   </div>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
+                ) : (
+                  <button
+                    type="button"
+                    className="relative cursor-pointer w-full text-left"
+                    onClick={() => fileInputRef.current?.click()}
                     data-ocid="quote.upload_button"
-                    accept=".pdf,.png,.jpg,.jpeg,.ai,.eps,.svg"
-                    onChange={handleFileChange}
-                    className="sr-only"
-                    aria-label="Upload design file"
-                  />
-                </button>
+                  >
+                    <div
+                      className="flex items-center gap-3 p-3.5 rounded-xl border border-white/12 border-dashed hover:border-white/25 transition-all duration-200"
+                      style={{ background: "rgba(255,255,255,0.03)" }}
+                    >
+                      <Upload className="w-5 h-5 text-white/30 flex-shrink-0" />
+                      <span className="text-sm text-white/40">
+                        {t.quote.form.fileUpload} — any file type accepted
+                      </span>
+                    </div>
+                  </button>
+                )}
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  data-ocid="quote.dropzone"
+                  accept="*"
+                  onChange={handleFileChange}
+                  className="sr-only"
+                  aria-label="Upload design file"
+                />
+
+                {/* Attachment upload progress */}
+                {attachUploading && (
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between text-xs text-white/50">
+                      <span>Uploading attachment…</span>
+                      <span>{Math.round(attachUploadProgress)}%</span>
+                    </div>
+                    <Progress
+                      value={attachUploadProgress}
+                      className="h-1.5 bg-white/10 [&>div]:bg-[#e1306c]"
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Loading state */}
-              {isPending && (
+              {isSubmitting && (
                 <div
                   data-ocid="quote.loading_state"
                   className="flex items-center gap-2 text-white/50 text-sm"
@@ -449,7 +534,9 @@ export default function QuoteSection() {
                 {isPending ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    {t.quote.form.submitting}
+                    {attachUploading
+                      ? `Uploading file… ${Math.round(attachUploadProgress)}%`
+                      : t.quote.form.submitting}
                   </>
                 ) : (
                   <>

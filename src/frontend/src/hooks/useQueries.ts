@@ -33,14 +33,22 @@ export function useSubmitQuote() {
       mobile,
       service,
       details,
+      attachmentUrl,
     }: {
       name: string;
       mobile: string;
       service: ServiceType;
       details: string;
+      attachmentUrl?: string | null;
     }) => {
       if (!actor) throw new Error("No actor available");
-      return actor.submitQuote(name, mobile, service, details);
+      return actor.submitQuote(
+        name,
+        mobile,
+        service,
+        details,
+        attachmentUrl ?? null,
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["quotes"] });
@@ -117,18 +125,21 @@ export function useAddPhoto() {
       bytes,
       title,
       order,
+      fileType = "gallery",
     }: {
       bytes: Uint8Array<ArrayBuffer>;
       title: string;
       order: bigint;
+      fileType?: string;
       onProgress?: (pct: number) => void;
     }) => {
       if (!actor) throw new Error("No actor available");
       const blob = ExternalBlob.fromBytes(bytes);
-      return actor.addPhoto(blob, title, order);
+      return actor.addPhoto(blob, title, order, fileType);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["photos"] });
+      queryClient.invalidateQueries({ queryKey: ["allFiles"] });
     },
   });
 }
@@ -142,11 +153,13 @@ export function useAddPhotoWithProgress() {
       bytes,
       title,
       order,
+      fileType = "gallery",
       onProgress,
     }: {
       bytes: Uint8Array<ArrayBuffer>;
       title: string;
       order: bigint;
+      fileType?: string;
       onProgress?: (pct: number) => void;
     }) => {
       if (!actor) throw new Error("No actor available");
@@ -154,10 +167,84 @@ export function useAddPhotoWithProgress() {
       if (onProgress) {
         blob = blob.withUploadProgress(onProgress);
       }
-      return actor.addPhoto(blob, title, order);
+      return actor.addPhoto(blob, title, order, fileType);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["photos"] });
+      queryClient.invalidateQueries({ queryKey: ["allFiles"] });
+    },
+  });
+}
+
+// Uploads a file and returns the absolute direct URL from the blob
+export function useUploadFileAndGetUrl() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      bytes,
+      title,
+      order,
+      fileType = "document",
+      onProgress,
+    }: {
+      bytes: Uint8Array<ArrayBuffer>;
+      title: string;
+      order: bigint;
+      fileType?: string;
+      onProgress?: (pct: number) => void;
+    }): Promise<{ id: bigint; directUrl: string }> => {
+      if (!actor) throw new Error("No actor available");
+      let blob = ExternalBlob.fromBytes(bytes);
+      if (onProgress) {
+        blob = blob.withUploadProgress(onProgress);
+      }
+      const photoId = await actor.addPhoto(blob, title, order, fileType);
+      // Fetch all files to find the newly uploaded one and get its direct URL
+      const allFiles = await actor.getAllFiles();
+      const found = allFiles.find((p) => p.id === photoId);
+      if (!found) throw new Error("Uploaded file not found");
+      return { id: photoId, directUrl: found.blob.getDirectURL() };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["photos"] });
+      queryClient.invalidateQueries({ queryKey: ["allFiles"] });
+    },
+  });
+}
+
+export function useGetAllFiles() {
+  const { actor, isFetching } = useActor();
+  return useQuery<Photo[]>({
+    queryKey: ["allFiles"],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getAllFiles();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useUpdateQuoteStatusWithReason() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      status,
+      reason,
+    }: {
+      id: bigint;
+      status: QuoteStatus;
+      reason: string;
+    }) => {
+      if (!actor) throw new Error("No actor available");
+      return actor.updateQuoteStatusWithReason(id, status, reason);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["quotes"] });
     },
   });
 }

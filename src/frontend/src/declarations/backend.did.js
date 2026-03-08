@@ -29,6 +29,14 @@ export const AdminMessage = IDL.Record({
   'timestamp' : IDL.Int,
   'toMobile' : IDL.Text,
 });
+export const Photo = IDL.Record({
+  'id' : IDL.Nat,
+  'title' : IDL.Text,
+  'order' : IDL.Nat,
+  'blob' : ExternalBlob,
+  'fileType' : IDL.Text,
+  'timestamp' : IDL.Int,
+});
 export const Customer = IDL.Record({
   'id' : IDL.Nat,
   'visitCount' : IDL.Nat,
@@ -36,13 +44,6 @@ export const Customer = IDL.Record({
   'firstVisit' : IDL.Int,
   'lastVisit' : IDL.Int,
   'mobile' : IDL.Text,
-});
-export const Photo = IDL.Record({
-  'id' : IDL.Nat,
-  'title' : IDL.Text,
-  'order' : IDL.Nat,
-  'blob' : ExternalBlob,
-  'timestamp' : IDL.Int,
 });
 export const PromoSettings = IDL.Record({
   'discountCode' : IDL.Text,
@@ -60,12 +61,16 @@ export const ServiceType = IDL.Variant({
 export const QuoteStatus = IDL.Variant({
   'new' : IDL.Null,
   'replied' : IDL.Null,
+  'rejected' : IDL.Null,
+  'accepted' : IDL.Null,
 });
 export const Quote = IDL.Record({
   'id' : IDL.Nat,
   'service' : ServiceType,
+  'attachmentUrl' : IDL.Opt(IDL.Text),
   'status' : QuoteStatus,
   'name' : IDL.Text,
+  'statusReason' : IDL.Opt(IDL.Text),
   'timestamp' : IDL.Int,
   'details' : IDL.Text,
   'mobile' : IDL.Text,
@@ -82,6 +87,7 @@ export const SiteSettings = IDL.Record({
   'whatsapp' : IDL.Text,
   'email' : IDL.Text,
   'siteName' : IDL.Text,
+  'logoUrl' : IDL.Text,
   'address' : IDL.Text,
   'phone' : IDL.Text,
 });
@@ -113,11 +119,16 @@ export const idlService = IDL.Service({
       [],
     ),
   '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
-  'addPhoto' : IDL.Func([ExternalBlob, IDL.Text, IDL.Nat], [IDL.Nat], []),
+  'addPhoto' : IDL.Func(
+      [ExternalBlob, IDL.Text, IDL.Nat, IDL.Text],
+      [IDL.Nat],
+      [],
+    ),
   'deleteAdminMessage' : IDL.Func([IDL.Nat], [IDL.Bool], []),
   'deletePhoto' : IDL.Func([IDL.Nat], [IDL.Bool], []),
   'deleteReview' : IDL.Func([IDL.Nat], [IDL.Bool], []),
   'getAllAdminMessages' : IDL.Func([], [IDL.Vec(AdminMessage)], ['query']),
+  'getAllFiles' : IDL.Func([], [IDL.Vec(Photo)], ['query']),
   'getCustomerByMobile' : IDL.Func([IDL.Text], [Customer], ['query']),
   'getCustomers' : IDL.Func([], [IDL.Vec(Customer)], ['query']),
   'getMessagesForCustomer' : IDL.Func(
@@ -141,7 +152,7 @@ export const idlService = IDL.Service({
       [],
     ),
   'submitQuote' : IDL.Func(
-      [IDL.Text, IDL.Text, ServiceType, IDL.Text],
+      [IDL.Text, IDL.Text, ServiceType, IDL.Text, IDL.Opt(IDL.Text)],
       [IDL.Nat],
       [],
     ),
@@ -149,6 +160,11 @@ export const idlService = IDL.Service({
   'updatePhotoTitle' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Bool], []),
   'updatePromoSettings' : IDL.Func([PromoSettings], [IDL.Bool], []),
   'updateQuoteStatus' : IDL.Func([IDL.Nat, QuoteStatus], [IDL.Bool], []),
+  'updateQuoteStatusWithReason' : IDL.Func(
+      [IDL.Nat, QuoteStatus, IDL.Text],
+      [IDL.Bool],
+      [],
+    ),
   'updateSiteSettings' : IDL.Func([SiteSettings], [IDL.Bool], []),
 });
 
@@ -176,6 +192,14 @@ export const idlFactory = ({ IDL }) => {
     'timestamp' : IDL.Int,
     'toMobile' : IDL.Text,
   });
+  const Photo = IDL.Record({
+    'id' : IDL.Nat,
+    'title' : IDL.Text,
+    'order' : IDL.Nat,
+    'blob' : ExternalBlob,
+    'fileType' : IDL.Text,
+    'timestamp' : IDL.Int,
+  });
   const Customer = IDL.Record({
     'id' : IDL.Nat,
     'visitCount' : IDL.Nat,
@@ -183,13 +207,6 @@ export const idlFactory = ({ IDL }) => {
     'firstVisit' : IDL.Int,
     'lastVisit' : IDL.Int,
     'mobile' : IDL.Text,
-  });
-  const Photo = IDL.Record({
-    'id' : IDL.Nat,
-    'title' : IDL.Text,
-    'order' : IDL.Nat,
-    'blob' : ExternalBlob,
-    'timestamp' : IDL.Int,
   });
   const PromoSettings = IDL.Record({
     'discountCode' : IDL.Text,
@@ -204,12 +221,19 @@ export const idlFactory = ({ IDL }) => {
     'tShirtPrinting' : IDL.Null,
     'stickerPrinting' : IDL.Null,
   });
-  const QuoteStatus = IDL.Variant({ 'new' : IDL.Null, 'replied' : IDL.Null });
+  const QuoteStatus = IDL.Variant({
+    'new' : IDL.Null,
+    'replied' : IDL.Null,
+    'rejected' : IDL.Null,
+    'accepted' : IDL.Null,
+  });
   const Quote = IDL.Record({
     'id' : IDL.Nat,
     'service' : ServiceType,
+    'attachmentUrl' : IDL.Opt(IDL.Text),
     'status' : QuoteStatus,
     'name' : IDL.Text,
+    'statusReason' : IDL.Opt(IDL.Text),
     'timestamp' : IDL.Int,
     'details' : IDL.Text,
     'mobile' : IDL.Text,
@@ -226,6 +250,7 @@ export const idlFactory = ({ IDL }) => {
     'whatsapp' : IDL.Text,
     'email' : IDL.Text,
     'siteName' : IDL.Text,
+    'logoUrl' : IDL.Text,
     'address' : IDL.Text,
     'phone' : IDL.Text,
   });
@@ -257,11 +282,16 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
-    'addPhoto' : IDL.Func([ExternalBlob, IDL.Text, IDL.Nat], [IDL.Nat], []),
+    'addPhoto' : IDL.Func(
+        [ExternalBlob, IDL.Text, IDL.Nat, IDL.Text],
+        [IDL.Nat],
+        [],
+      ),
     'deleteAdminMessage' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'deletePhoto' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'deleteReview' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'getAllAdminMessages' : IDL.Func([], [IDL.Vec(AdminMessage)], ['query']),
+    'getAllFiles' : IDL.Func([], [IDL.Vec(Photo)], ['query']),
     'getCustomerByMobile' : IDL.Func([IDL.Text], [Customer], ['query']),
     'getCustomers' : IDL.Func([], [IDL.Vec(Customer)], ['query']),
     'getMessagesForCustomer' : IDL.Func(
@@ -285,7 +315,7 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'submitQuote' : IDL.Func(
-        [IDL.Text, IDL.Text, ServiceType, IDL.Text],
+        [IDL.Text, IDL.Text, ServiceType, IDL.Text, IDL.Opt(IDL.Text)],
         [IDL.Nat],
         [],
       ),
@@ -293,6 +323,11 @@ export const idlFactory = ({ IDL }) => {
     'updatePhotoTitle' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Bool], []),
     'updatePromoSettings' : IDL.Func([PromoSettings], [IDL.Bool], []),
     'updateQuoteStatus' : IDL.Func([IDL.Nat, QuoteStatus], [IDL.Bool], []),
+    'updateQuoteStatusWithReason' : IDL.Func(
+        [IDL.Nat, QuoteStatus, IDL.Text],
+        [IDL.Bool],
+        [],
+      ),
     'updateSiteSettings' : IDL.Func([SiteSettings], [IDL.Bool], []),
   });
 };

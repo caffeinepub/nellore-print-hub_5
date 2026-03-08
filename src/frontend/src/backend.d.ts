@@ -19,6 +19,7 @@ export interface Photo {
     title: string;
     order: bigint;
     blob: ExternalBlob;
+    fileType: string;
     timestamp: bigint;
 }
 export interface SiteSettings {
@@ -26,6 +27,7 @@ export interface SiteSettings {
     whatsapp: string;
     email: string;
     siteName: string;
+    logoUrl: string;
     address: string;
     phone: string;
 }
@@ -48,8 +50,10 @@ export interface AdminMessage {
 export interface Quote {
     id: bigint;
     service: ServiceType;
+    attachmentUrl?: string;
     status: QuoteStatus;
     name: string;
+    statusReason?: string;
     timestamp: bigint;
     details: string;
     mobile: string;
@@ -71,7 +75,9 @@ export interface Review {
 }
 export enum QuoteStatus {
     new_ = "new",
-    replied = "replied"
+    replied = "replied",
+    rejected = "rejected",
+    accepted = "accepted"
 }
 export enum ServiceType {
     flexBanner = "flexBanner",
@@ -80,11 +86,12 @@ export enum ServiceType {
     stickerPrinting = "stickerPrinting"
 }
 export interface backendInterface {
-    addPhoto(blob: ExternalBlob, title: string, order: bigint): Promise<bigint>;
+    addPhoto(blob: ExternalBlob, title: string, order: bigint, fileType: string): Promise<bigint>;
     deleteAdminMessage(id: bigint): Promise<boolean>;
     deletePhoto(id: bigint): Promise<boolean>;
     deleteReview(id: bigint): Promise<boolean>;
     getAllAdminMessages(): Promise<Array<AdminMessage>>;
+    getAllFiles(): Promise<Array<Photo>>;
     getCustomerByMobile(mobile: string): Promise<Customer>;
     getCustomers(): Promise<Array<Customer>>;
     getMessagesForCustomer(mobile: string): Promise<Array<AdminMessage>>;
@@ -99,10 +106,11 @@ export interface backendInterface {
     markMessageRead(id: bigint): Promise<boolean>;
     registerOrLoginCustomer(name: string, mobile: string): Promise<Customer>;
     sendMessageToCustomer(toMobile: string, toName: string, subject: string, body: string): Promise<bigint>;
-    submitQuote(name: string, mobile: string, service: ServiceType, details: string): Promise<bigint>;
+    submitQuote(name: string, mobile: string, service: ServiceType, details: string, attachmentUrl: string | null): Promise<bigint>;
     submitReview(name: string, rating: bigint, message: string): Promise<bigint>;
     updatePhotoTitle(id: bigint, newTitle: string): Promise<boolean>;
     updatePromoSettings(settings: PromoSettings): Promise<boolean>;
     updateQuoteStatus(id: bigint, status: QuoteStatus): Promise<boolean>;
+    updateQuoteStatusWithReason(id: bigint, status: QuoteStatus, reason: string): Promise<boolean>;
     updateSiteSettings(settings: SiteSettings): Promise<boolean>;
 }

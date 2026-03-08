@@ -33,6 +33,7 @@ export interface Photo {
   'title' : string,
   'order' : bigint,
   'blob' : ExternalBlob,
+  'fileType' : string,
   'timestamp' : bigint,
 }
 export interface PromoSettings {
@@ -45,14 +46,18 @@ export interface PromoSettings {
 export interface Quote {
   'id' : bigint,
   'service' : ServiceType,
+  'attachmentUrl' : [] | [string],
   'status' : QuoteStatus,
   'name' : string,
+  'statusReason' : [] | [string],
   'timestamp' : bigint,
   'details' : string,
   'mobile' : string,
 }
 export type QuoteStatus = { 'new' : null } |
-  { 'replied' : null };
+  { 'replied' : null } |
+  { 'rejected' : null } |
+  { 'accepted' : null };
 export interface Review {
   'id' : bigint,
   'name' : string,
@@ -69,6 +74,7 @@ export interface SiteSettings {
   'whatsapp' : string,
   'email' : string,
   'siteName' : string,
+  'logoUrl' : string,
   'address' : string,
   'phone' : string,
 }
@@ -99,11 +105,12 @@ export interface _SERVICE {
     _CaffeineStorageRefillResult
   >,
   '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
-  'addPhoto' : ActorMethod<[ExternalBlob, string, bigint], bigint>,
+  'addPhoto' : ActorMethod<[ExternalBlob, string, bigint, string], bigint>,
   'deleteAdminMessage' : ActorMethod<[bigint], boolean>,
   'deletePhoto' : ActorMethod<[bigint], boolean>,
   'deleteReview' : ActorMethod<[bigint], boolean>,
   'getAllAdminMessages' : ActorMethod<[], Array<AdminMessage>>,
+  'getAllFiles' : ActorMethod<[], Array<Photo>>,
   'getCustomerByMobile' : ActorMethod<[string], Customer>,
   'getCustomers' : ActorMethod<[], Array<Customer>>,
   'getMessagesForCustomer' : ActorMethod<[string], Array<AdminMessage>>,
@@ -121,11 +128,18 @@ export interface _SERVICE {
     [string, string, string, string],
     bigint
   >,
-  'submitQuote' : ActorMethod<[string, string, ServiceType, string], bigint>,
+  'submitQuote' : ActorMethod<
+    [string, string, ServiceType, string, [] | [string]],
+    bigint
+  >,
   'submitReview' : ActorMethod<[string, bigint, string], bigint>,
   'updatePhotoTitle' : ActorMethod<[bigint, string], boolean>,
   'updatePromoSettings' : ActorMethod<[PromoSettings], boolean>,
   'updateQuoteStatus' : ActorMethod<[bigint, QuoteStatus], boolean>,
+  'updateQuoteStatusWithReason' : ActorMethod<
+    [bigint, QuoteStatus, string],
+    boolean
+  >,
   'updateSiteSettings' : ActorMethod<[SiteSettings], boolean>,
 }
 export declare const idlService: IDL.ServiceClass;

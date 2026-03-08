@@ -19,17 +19,20 @@ import {
   CheckCircle2,
   ChevronDown,
   Download,
+  ExternalLink,
   Eye,
   EyeOff,
   FileText,
   FileUp,
   Gift,
+  HardDrive,
   Images,
   List,
   Loader2,
   Lock,
   Mail,
   MessageSquare,
+  Paperclip,
   Pencil,
   Phone,
   Printer,
@@ -43,6 +46,7 @@ import {
   UserCheck,
   Users,
   X,
+  XCircle,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
@@ -64,6 +68,7 @@ import {
   useDeletePhoto,
   useDeleteReview,
   useGetAllAdminMessages,
+  useGetAllFiles,
   useGetCustomers,
   useGetPhotos,
   useGetPromoSettings,
@@ -74,7 +79,9 @@ import {
   useUpdatePhotoTitle,
   useUpdatePromoSettings,
   useUpdateQuoteStatus,
+  useUpdateQuoteStatusWithReason,
   useUpdateSiteSettings,
+  useUploadFileAndGetUrl,
 } from "../hooks/useQueries";
 
 const ADMIN_PASSWORD = "Magic123";
@@ -109,6 +116,69 @@ function formatTimestamp(ts: bigint): string {
   }
 }
 
+// Helper: force-download via fetch
+function forceDownloadFile(url: string, filename: string) {
+  fetch(url)
+    .then((r) => r.blob())
+    .then((blob) => {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(a.href);
+      }, 100);
+    })
+    .catch(() => {
+      window.open(url, "_blank");
+    });
+}
+
+function isImageUrl(url: string): boolean {
+  return /\.(png|jpg|jpeg|gif|webp)(\?|$)/i.test(url);
+}
+
+// ─── Quote Status Badge ────────────────────────────────────────────────────────
+
+function QuoteStatusBadge({ status }: { status: QuoteStatus }) {
+  const configs: Record<
+    QuoteStatus,
+    { label: string; cls: string; dot: string }
+  > = {
+    [QuoteStatus.new_]: {
+      label: "New",
+      cls: "bg-amber-500/15 text-amber-300 border-amber-500/30",
+      dot: "bg-amber-400",
+    },
+    [QuoteStatus.replied]: {
+      label: "Replied",
+      cls: "bg-[#e1306c]/15 text-[#fcb045] border-[#e1306c]/30",
+      dot: "bg-[#e1306c]",
+    },
+    [QuoteStatus.accepted]: {
+      label: "Accepted",
+      cls: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
+      dot: "bg-emerald-400",
+    },
+    [QuoteStatus.rejected]: {
+      label: "Rejected",
+      cls: "bg-red-500/15 text-red-400 border-red-500/30",
+      dot: "bg-red-400",
+    },
+  };
+  const cfg = configs[status] ?? configs[QuoteStatus.new_];
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${cfg.cls}`}
+    >
+      <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+      {cfg.label}
+    </span>
+  );
+}
+
 // ─── Quote Row with Expandable Detail ─────────────────────────────────────────
 
 function QuoteRow({
@@ -123,7 +193,8 @@ function QuoteRow({
   onToggle: () => void;
 }) {
   const updateStatus = useUpdateQuoteStatus();
-  const addPhoto = useAddPhotoWithProgress();
+  const updateStatusWithReason = useUpdateQuoteStatusWithReason();
+  const uploadFile = useUploadFileAndGetUrl();
   const sendMsg = useSendMessageToCustomer();
   const isNew = quote.status === QuoteStatus.new_;
 
@@ -135,6 +206,13 @@ function QuoteRow({
     () => localStorage.getItem(`nph_quote_pdf_${quote.id}`) || null,
   );
   const pdfInputRef = useRef<HTMLInputElement>(null);
+
+  // Accept/Reject inline state
+  const [actionMode, setActionMode] = useState<"accept" | "reject" | null>(
+    null,
+  );
+  const [actionReason, setActionReason] = useState("");
+  const [actionPending, setActionPending] = useState(false);
 
   const whatsappMsg = encodeURIComponent(
     `Hi ${quote.name}, regarding your ${SERVICE_LABELS[quote.service] ?? quote.service} quote — we're happy to assist! Please let us know your availability.`,
@@ -152,6 +230,46 @@ function QuoteRow({
     }
   };
 
+  const handleAcceptReject = async (
+    status: QuoteStatus.accepted | QuoteStatus.rejected,
+  ) => {
+    setActionPending(true);
+    try {
+      await updateStatusWithReason.mutateAsync({
+        id: quote.id,
+        status,
+        reason: actionReason.trim(),
+      });
+      // Send notification to customer inbox
+      if (status === QuoteStatus.accepted) {
+        await sendMsg.mutateAsync({
+          toMobile: quote.mobile,
+          toName: quote.name,
+          subject: "Your Quote is Accepted!",
+          body: `Dear ${quote.name}, great news! Your ${SERVICE_LABELS[quote.service] ?? "print"} quote request has been ACCEPTED.${actionReason.trim() ? `\n\nDetails: ${actionReason.trim()}` : ""}\n\nWe'll contact you shortly to proceed. Thank you for choosing Nellore Print Hub!`,
+        });
+      } else {
+        await sendMsg.mutateAsync({
+          toMobile: quote.mobile,
+          toName: quote.name,
+          subject: "Quote Update - Action Required",
+          body: `Dear ${quote.name}, regarding your ${SERVICE_LABELS[quote.service] ?? "print"} quote request — we are unable to proceed at this time.${actionReason.trim() ? `\n\nReason: ${actionReason.trim()}` : ""}\n\nPlease contact us directly to discuss alternatives. Thank you — Nellore Print Hub.`,
+        });
+      }
+      toast.success(
+        status === QuoteStatus.accepted
+          ? "Quote accepted & customer notified!"
+          : "Quote rejected & customer notified.",
+      );
+      setActionMode(null);
+      setActionReason("");
+    } catch {
+      toast.error("Failed to update status. Please try again.");
+    } finally {
+      setActionPending(false);
+    }
+  };
+
   const handlePdfUpload = async () => {
     if (!pdfFile) return;
     setPdfUploading(true);
@@ -159,23 +277,25 @@ function QuoteRow({
     try {
       const arrayBuffer = await pdfFile.arrayBuffer();
       const bytes = new Uint8Array(arrayBuffer) as Uint8Array<ArrayBuffer>;
-      const resultId = await addPhoto.mutateAsync({
+      const { directUrl } = await uploadFile.mutateAsync({
         bytes,
         title: `quotation_${quote.id}_${Date.now()}`,
         order: 999n,
+        fileType: "document",
         onProgress: (pct) => setPdfProgress(pct),
       });
-      const blobUrl = `/api/blob/${resultId}`;
-      localStorage.setItem(`nph_quote_pdf_${quote.id}`, blobUrl);
-      setPdfUrl(blobUrl);
+      // directUrl is an absolute URL from the blob storage CDN
+      localStorage.setItem(`nph_quote_pdf_${quote.id}`, directUrl);
+      setPdfUrl(directUrl);
       setPdfFile(null);
 
-      // Send message to customer's website inbox
+      // Send message to customer's website inbox with the absolute file URL
+      const fileDisplayName = pdfFile.name;
       await sendMsg.mutateAsync({
         toMobile: quote.mobile,
         toName: quote.name,
         subject: `Quotation for your ${SERVICE_LABELS[quote.service] ?? "print"} request`,
-        body: `Dear ${quote.name}, your quotation is ready. You can view and download it here: ${window.location.origin}${blobUrl}`,
+        body: `Dear ${quote.name}, your quotation is ready. Click Open to view your file: ${directUrl}`,
       });
 
       // Auto-mark as replied
@@ -184,9 +304,9 @@ function QuoteRow({
         status: QuoteStatus.replied,
       });
 
-      // Open WhatsApp with pre-filled quotation message
+      // Open WhatsApp with pre-filled quotation message using absolute URL
       const waText = encodeURIComponent(
-        `Hi ${quote.name}! 📄 Your quotation is ready.\n\nTap the link below to view your PDF immediately:\n👉 ${window.location.origin}${blobUrl}\n\n(Opens directly as PDF)\n\nThank you — Nellore Print Hub`,
+        `Hi ${quote.name}! 📄 Your quotation from Nellore Print Hub is ready.\n\nFile: ${fileDisplayName}\nTap to view/download:\n👉 ${directUrl}\n\nThank you — Nellore Print Hub`,
       );
       window.open(
         `https://wa.me/${quote.mobile.replace(/[^0-9]/g, "")}?text=${waText}`,
@@ -197,7 +317,7 @@ function QuoteRow({
         "Quotation sent! Customer inbox updated & WhatsApp opened.",
       );
     } catch {
-      toast.error("Failed to upload PDF. Please try again.");
+      toast.error("Failed to upload file. Please try again.");
     } finally {
       setPdfUploading(false);
       setPdfProgress(0);
@@ -214,7 +334,16 @@ function QuoteRow({
         <TableCell className="text-muted-foreground text-sm font-mono w-10">
           {idx + 1}
         </TableCell>
-        <TableCell className="text-white font-semibold">{quote.name}</TableCell>
+        <TableCell className="text-white font-semibold">
+          <div className="flex items-center gap-1.5">
+            {quote.name}
+            {quote.attachmentUrl && (
+              <span title="Has attachment">
+                <Paperclip className="w-3 h-3 text-[#fcb045]/60 flex-shrink-0" />
+              </span>
+            )}
+          </div>
+        </TableCell>
         <TableCell>
           <a
             href={`tel:${quote.mobile}`}
@@ -233,41 +362,33 @@ function QuoteRow({
         </TableCell>
         <TableCell>
           <div className="flex items-center gap-2">
-            <span
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${
-                isNew
-                  ? "bg-amber-500/15 text-amber-700 border-amber-500/30"
-                  : "bg-[#e1306c]/15 text-[#fcb045] border-[#e1306c]/30"
-              }`}
-            >
-              <span
-                className={`w-1.5 h-1.5 rounded-full ${isNew ? "bg-amber-500" : "bg-[#e1306c]"}`}
-              />
-              {isNew ? "New" : "Replied"}
-            </span>
-            <button
-              type="button"
-              data-ocid={`admin.quote.status.toggle.${idx + 1}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleToggleStatus();
-              }}
-              disabled={updateStatus.isPending}
-              title={isNew ? "Mark as Replied" : "Mark as New"}
-              className={`px-2 py-1 rounded-lg text-xs font-medium transition-all border ${
-                isNew
-                  ? "bg-[#e1306c]/15 text-[#fcb045] border-[#e1306c]/30 hover:bg-[#e1306c]/25"
-                  : "bg-amber-500/15 text-amber-700 border-amber-500/30 hover:bg-amber-500/25"
-              } disabled:opacity-50`}
-            >
-              {updateStatus.isPending ? (
-                <Loader2 className="w-3 h-3 animate-spin" />
-              ) : isNew ? (
-                "Mark Replied"
-              ) : (
-                "Mark New"
-              )}
-            </button>
+            <QuoteStatusBadge status={quote.status} />
+            {(quote.status === QuoteStatus.new_ ||
+              quote.status === QuoteStatus.replied) && (
+              <button
+                type="button"
+                data-ocid={`admin.quote.status.toggle.${idx + 1}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleToggleStatus();
+                }}
+                disabled={updateStatus.isPending}
+                title={isNew ? "Mark as Replied" : "Mark as New"}
+                className={`px-2 py-1 rounded-lg text-xs font-medium transition-all border ${
+                  isNew
+                    ? "bg-[#e1306c]/15 text-[#fcb045] border-[#e1306c]/30 hover:bg-[#e1306c]/25"
+                    : "bg-amber-500/15 text-amber-300 border-amber-500/30 hover:bg-amber-500/25"
+                } disabled:opacity-50`}
+              >
+                {updateStatus.isPending ? (
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                ) : isNew ? (
+                  "Mark Replied"
+                ) : (
+                  "Mark New"
+                )}
+              </button>
+            )}
           </div>
         </TableCell>
         <TableCell className="text-muted-foreground text-sm hidden lg:table-cell whitespace-nowrap">
@@ -311,6 +432,72 @@ function QuoteRow({
                     </p>
                   </div>
 
+                  {/* Customer Attachment */}
+                  {quote.attachmentUrl && (
+                    <div className="mb-4">
+                      <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">
+                        Customer Attachment
+                      </p>
+                      <div className="flex items-center gap-3 p-3 rounded-xl border border-[#833ab4]/30 bg-[#833ab4]/8">
+                        {isImageUrl(quote.attachmentUrl) ? (
+                          <img
+                            src={quote.attachmentUrl}
+                            alt="Customer attachment"
+                            className="w-14 h-10 object-cover rounded-lg border border-white/10 flex-shrink-0"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-lg bg-[#833ab4]/20 flex items-center justify-center flex-shrink-0">
+                            <Paperclip className="w-4 h-4 text-[#833ab4]" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-white/80 text-sm font-medium truncate">
+                            {quote.attachmentUrl
+                              .split("/")
+                              .pop()
+                              ?.split("?")[0] || "Attachment"}
+                          </p>
+                          <p className="text-white/40 text-xs">
+                            Customer uploaded file
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <a
+                            href={quote.attachmentUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="gap-1.5 text-white/70 border-white/20 hover:bg-white/10"
+                            >
+                              <ExternalLink className="w-3.5 h-3.5" /> Open File
+                            </Button>
+                          </a>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            data-ocid={`admin.quote.attachment.download_button.${idx + 1}`}
+                            className="gap-1.5 text-white/70 border-white/20 hover:bg-white/10"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const fname =
+                                quote
+                                  .attachmentUrl!.split("/")
+                                  .pop()
+                                  ?.split("?")[0] || "attachment";
+                              forceDownloadFile(quote.attachmentUrl!, fname);
+                            }}
+                          >
+                            <Download className="w-3.5 h-3.5" /> Download
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Action buttons */}
                   <div className="flex flex-wrap items-center gap-2">
                     <a
@@ -345,40 +532,192 @@ function QuoteRow({
                       </Button>
                     </a>
 
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      data-ocid={`admin.quote.reply.toggle.${idx + 1}`}
-                      disabled={updateStatus.isPending}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleToggleStatus();
-                      }}
-                      className={`gap-2 ${
-                        isNew
-                          ? "bg-[#e1306c]/10 border-[#e1306c]/30 text-[#fcb045] hover:bg-[#e1306c]/20 hover:border-[#e1306c]/40"
-                          : "bg-white/8 border-white/15 text-foreground/60 hover:bg-white/12 hover:text-foreground/80"
-                      }`}
-                    >
-                      {updateStatus.isPending ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      ) : isNew ? (
+                    {(quote.status === QuoteStatus.new_ ||
+                      quote.status === QuoteStatus.replied) && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        data-ocid={`admin.quote.reply.toggle.${idx + 1}`}
+                        disabled={updateStatus.isPending}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleToggleStatus();
+                        }}
+                        className={`gap-2 ${
+                          isNew
+                            ? "bg-[#e1306c]/10 border-[#e1306c]/30 text-[#fcb045] hover:bg-[#e1306c]/20 hover:border-[#e1306c]/40"
+                            : "bg-white/8 border-white/15 text-foreground/60 hover:bg-white/12 hover:text-foreground/80"
+                        }`}
+                      >
+                        {updateStatus.isPending ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : isNew ? (
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                        ) : (
+                          <RefreshCw className="w-3.5 h-3.5" />
+                        )}
+                        {updateStatus.isPending
+                          ? "Updating..."
+                          : isNew
+                            ? "Mark as Replied"
+                            : "Mark as New"}
+                      </Button>
+                    )}
+
+                    {/* Accept / Reject buttons */}
+                    {quote.status !== QuoteStatus.accepted && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        data-ocid={`admin.quote.accept.button.${idx + 1}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActionMode(
+                            actionMode === "accept" ? null : "accept",
+                          );
+                          setActionReason("");
+                        }}
+                        className="gap-2 bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20"
+                      >
                         <CheckCircle2 className="w-3.5 h-3.5" />
-                      ) : (
-                        <RefreshCw className="w-3.5 h-3.5" />
-                      )}
-                      {updateStatus.isPending
-                        ? "Updating..."
-                        : isNew
-                          ? "Mark as Replied"
-                          : "Mark as New"}
-                    </Button>
+                        Accept
+                      </Button>
+                    )}
+                    {quote.status !== QuoteStatus.rejected && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        data-ocid={`admin.quote.reject.button.${idx + 1}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActionMode(
+                            actionMode === "reject" ? null : "reject",
+                          );
+                          setActionReason("");
+                        }}
+                        className="gap-2 bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20"
+                      >
+                        <XCircle className="w-3.5 h-3.5" />
+                        Reject
+                      </Button>
+                    )}
                   </div>
 
-                  {/* PDF Quotation Reply */}
+                  {/* Inline accept/reject reason form */}
+                  <AnimatePresence>
+                    {actionMode && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden"
+                      >
+                        <div
+                          className={`mt-3 p-4 rounded-xl border ${
+                            actionMode === "accept"
+                              ? "border-emerald-500/30 bg-emerald-500/6"
+                              : "border-red-500/30 bg-red-500/6"
+                          }`}
+                          onClick={(e) => e.stopPropagation()}
+                          onKeyDown={(e) => e.stopPropagation()}
+                          role="presentation"
+                        >
+                          <p
+                            className={`text-sm font-semibold mb-2 ${actionMode === "accept" ? "text-emerald-400" : "text-red-400"}`}
+                          >
+                            {actionMode === "accept"
+                              ? "Accept Quote"
+                              : "Reject Quote"}{" "}
+                            — Add reason (optional)
+                          </p>
+                          <textarea
+                            value={actionReason}
+                            onChange={(e) => setActionReason(e.target.value)}
+                            placeholder={
+                              actionMode === "accept"
+                                ? "e.g. We can process this within 2 days..."
+                                : "e.g. This size/type is not available currently..."
+                            }
+                            rows={2}
+                            className="w-full bg-white/5 border border-white/12 text-white text-sm placeholder:text-white/30 rounded-lg px-3 py-2 resize-none focus:outline-none focus:border-white/25 mb-3"
+                            onClick={(e) => e.stopPropagation()}
+                            onKeyDown={(e) => e.stopPropagation()}
+                          />
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              data-ocid={`admin.quote.action.confirm_button.${idx + 1}`}
+                              disabled={actionPending}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleAcceptReject(
+                                  actionMode === "accept"
+                                    ? QuoteStatus.accepted
+                                    : QuoteStatus.rejected,
+                                );
+                              }}
+                              className={`gap-1.5 font-bold ${
+                                actionMode === "accept"
+                                  ? "bg-emerald-500 hover:bg-emerald-400 text-white"
+                                  : "bg-red-500 hover:bg-red-400 text-white"
+                              }`}
+                            >
+                              {actionPending ? (
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              ) : actionMode === "accept" ? (
+                                <CheckCircle2 className="w-3.5 h-3.5" />
+                              ) : (
+                                <XCircle className="w-3.5 h-3.5" />
+                              )}
+                              {actionPending
+                                ? "Sending..."
+                                : actionMode === "accept"
+                                  ? "Confirm Accept"
+                                  : "Confirm Reject"}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              data-ocid={`admin.quote.action.cancel_button.${idx + 1}`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActionMode(null);
+                                setActionReason("");
+                              }}
+                              className="text-white/50 hover:text-white"
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  {/* Show status reason if present */}
+                  {quote.statusReason && (
+                    <div
+                      className={`mt-3 p-3 rounded-xl border text-sm ${
+                        quote.status === QuoteStatus.accepted
+                          ? "border-emerald-500/20 bg-emerald-500/5 text-emerald-300"
+                          : "border-red-500/20 bg-red-500/5 text-red-300"
+                      }`}
+                    >
+                      <span className="font-semibold">
+                        {quote.status === QuoteStatus.accepted
+                          ? "Accept"
+                          : "Reject"}{" "}
+                        reason:{" "}
+                      </span>
+                      {quote.statusReason}
+                    </div>
+                  )}
+
+                  {/* PDF / File Quotation Reply */}
                   <div className="mt-4 pt-4 border-t border-black/8">
                     <p className="text-xs text-muted-foreground uppercase tracking-wider mb-3">
-                      Quotation PDF Reply
+                      Send Quotation File
                     </p>
 
                     {pdfUrl ? (
@@ -386,10 +725,10 @@ function QuoteRow({
                         <FileText className="w-5 h-5 text-[#fcb045] flex-shrink-0" />
                         <div className="flex-1 min-w-0">
                           <p className="text-[#fcb045] text-sm font-semibold">
-                            Quotation PDF attached
+                            Quotation file sent
                           </p>
                           <p className="text-muted-foreground text-xs truncate">
-                            {pdfUrl}
+                            {pdfUrl.split("/").pop()?.split("?")[0] || pdfUrl}
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
@@ -407,19 +746,20 @@ function QuoteRow({
                               <Eye className="w-3.5 h-3.5" /> View
                             </Button>
                           </a>
-                          <a
-                            href={pdfUrl}
-                            download
-                            onClick={(e) => e.stopPropagation()}
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="gap-1.5 text-[#fcb045] border-[#e1306c]/40 hover:bg-[#e1306c]/10"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const fname =
+                                pdfUrl.split("/").pop()?.split("?")[0] ||
+                                "quotation";
+                              forceDownloadFile(pdfUrl, fname);
+                            }}
                           >
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="gap-1.5 text-[#fcb045] border-[#e1306c]/40 hover:bg-[#e1306c]/10"
-                            >
-                              <Download className="w-3.5 h-3.5" /> Download
-                            </Button>
-                          </a>
+                            <Download className="w-3.5 h-3.5" /> Download
+                          </Button>
                           <Button
                             size="sm"
                             variant="outline"
@@ -428,7 +768,7 @@ function QuoteRow({
                             onClick={(e) => {
                               e.stopPropagation();
                               const waResendText = encodeURIComponent(
-                                `Hi ${quote.name}! 📄 Your quotation is ready.\n\nTap the link below to view your PDF immediately:\n👉 ${window.location.origin}${pdfUrl}\n\n(Opens directly as PDF)\n\nThank you — Nellore Print Hub`,
+                                `Hi ${quote.name}! 📄 Your quotation from Nellore Print Hub is ready.\n\nTap to view/download:\n👉 ${pdfUrl}\n\nThank you — Nellore Print Hub`,
                               );
                               window.open(
                                 `https://wa.me/${quote.mobile.replace(/[^0-9]/g, "")}?text=${waResendText}`,
@@ -476,10 +816,10 @@ function QuoteRow({
                           ) : (
                             <div>
                               <p className="text-sm text-muted-foreground">
-                                Upload quotation PDF
+                                Upload quotation (PDF, image, or any file)
                               </p>
                               <p className="text-xs text-muted-foreground">
-                                Click to select PDF file
+                                Click to select file
                               </p>
                             </div>
                           )}
@@ -487,7 +827,7 @@ function QuoteRow({
                         <input
                           id={`pdf-input-${quote.id}`}
                           type="file"
-                          accept=".pdf,application/pdf"
+                          accept="*"
                           className="hidden"
                           ref={pdfInputRef}
                           onChange={(e) => {
@@ -544,7 +884,7 @@ function QuoteRow({
 
 // ─── Quotes Panel ──────────────────────────────────────────────────────────────
 
-type FilterType = "all" | "new" | "replied";
+type FilterType = "all" | "new" | "replied" | "accepted" | "rejected";
 
 function QuotesPanel() {
   const { data: quotes, isLoading, isError } = useGetQuotes();
@@ -554,6 +894,8 @@ function QuotesPanel() {
   const filtered = (quotes ?? []).filter((q) => {
     if (filter === "new") return q.status === QuoteStatus.new_;
     if (filter === "replied") return q.status === QuoteStatus.replied;
+    if (filter === "accepted") return q.status === QuoteStatus.accepted;
+    if (filter === "rejected") return q.status === QuoteStatus.rejected;
     return true;
   });
 
@@ -562,6 +904,10 @@ function QuotesPanel() {
     quotes?.filter((q) => q.status === QuoteStatus.new_).length ?? 0;
   const repliedCount =
     quotes?.filter((q) => q.status === QuoteStatus.replied).length ?? 0;
+  const acceptedCount =
+    quotes?.filter((q) => q.status === QuoteStatus.accepted).length ?? 0;
+  const rejectedCount =
+    quotes?.filter((q) => q.status === QuoteStatus.rejected).length ?? 0;
 
   const FILTERS: {
     key: FilterType;
@@ -569,7 +915,7 @@ function QuotesPanel() {
     count: number;
     color: string;
   }[] = [
-    { key: "all", label: "All Quotes", count: totalCount, color: "text-white" },
+    { key: "all", label: "All", count: totalCount, color: "text-white" },
     { key: "new", label: "New", count: newCount, color: "text-amber-300" },
     {
       key: "replied",
@@ -577,12 +923,24 @@ function QuotesPanel() {
       count: repliedCount,
       color: "text-[#e1306c]",
     },
+    {
+      key: "accepted",
+      label: "Accepted",
+      count: acceptedCount,
+      color: "text-emerald-400",
+    },
+    {
+      key: "rejected",
+      label: "Rejected",
+      count: rejectedCount,
+      color: "text-red-400",
+    },
   ];
 
   return (
     <div className="space-y-6">
       {/* Stats bar */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -590,7 +948,7 @@ function QuotesPanel() {
           className="glass rounded-xl p-4 flex flex-col gap-1"
         >
           <span className="text-muted-foreground text-xs uppercase tracking-wider">
-            Total Quotes
+            Total
           </span>
           <span className="font-display font-black text-3xl text-white">
             {isLoading ? (
@@ -621,16 +979,33 @@ function QuotesPanel() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-          className="glass rounded-xl p-4 flex flex-col gap-1 border border-[#e1306c]/20"
+          className="glass rounded-xl p-4 flex flex-col gap-1 border border-emerald-500/20"
         >
-          <span className="text-[#e1306c]/70 text-xs uppercase tracking-wider">
-            Replied
+          <span className="text-emerald-400/70 text-xs uppercase tracking-wider">
+            Accepted
           </span>
-          <span className="font-display font-black text-3xl text-[#e1306c]">
+          <span className="font-display font-black text-3xl text-emerald-400">
             {isLoading ? (
               <Skeleton className="h-8 w-12 bg-white/5" />
             ) : (
-              repliedCount
+              acceptedCount
+            )}
+          </span>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="glass rounded-xl p-4 flex flex-col gap-1 border border-red-500/20"
+        >
+          <span className="text-red-400/70 text-xs uppercase tracking-wider">
+            Rejected
+          </span>
+          <span className="font-display font-black text-3xl text-red-400">
+            {isLoading ? (
+              <Skeleton className="h-8 w-12 bg-white/5" />
+            ) : (
+              rejectedCount
             )}
           </span>
         </motion.div>
@@ -761,7 +1136,7 @@ function QuotesPanel() {
 function SiteSettingsPanel() {
   const { data: settings, isLoading, isError } = useGetSiteSettings();
   const updateSettings = useUpdateSiteSettings();
-  const addPhoto = useAddPhotoWithProgress();
+  const uploadFileAndGetUrl = useUploadFileAndGetUrl();
 
   const [form, setForm] = useState({
     siteName: "",
@@ -775,6 +1150,7 @@ function SiteSettingsPanel() {
   // Logo upload state
   const [currentLogoSrc, setCurrentLogoSrc] = useState<string>(
     () =>
+      settings?.logoUrl ||
       localStorage.getItem("nph_logo_url") ||
       "/assets/generated/nellore-print-hub-logo-transparent.dim_600x200.png",
   );
@@ -803,6 +1179,10 @@ function SiteSettingsPanel() {
         address: settings.address,
         whatsapp: settings.whatsapp,
       });
+      // Update logo display from settings
+      if (settings.logoUrl) {
+        setCurrentLogoSrc(settings.logoUrl);
+      }
     }
   }, [settings]);
 
@@ -821,20 +1201,40 @@ function SiteSettingsPanel() {
     try {
       const arrayBuffer = await logoFile.arrayBuffer();
       const bytes = new Uint8Array(arrayBuffer) as Uint8Array<ArrayBuffer>;
-      const resultId = await addPhoto.mutateAsync({
+      // Upload with fileType "logo" so it does NOT appear in the gallery
+      const { directUrl } = await uploadFileAndGetUrl.mutateAsync({
         bytes,
         title: `logo_${Date.now()}`,
         order: 0n,
+        fileType: "logo",
         onProgress: (pct) => setLogoUploadProgress(pct),
       });
-      // Build the direct URL from blob id
-      const blobUrl = `/api/blob/${resultId}`;
-      // Use the preview URL as the logo since blob URL may not be directly accessible
-      // Save to localStorage using the object URL temporarily; for production use blobUrl
-      const savedUrl = logoPreviewUrl || blobUrl;
-      localStorage.setItem("nph_logo_url", savedUrl);
-      setCurrentLogoSrc(savedUrl);
-      window.dispatchEvent(new Event("logo-updated"));
+      // Save to siteSettings.logoUrl so all clients see it
+      const currentFormSettings = settings ?? {
+        siteName: form.siteName,
+        tagline: form.tagline,
+        phone: form.phone,
+        email: form.email,
+        address: form.address,
+        whatsapp: form.whatsapp,
+        logoUrl: "",
+      };
+      await updateSettings.mutateAsync({
+        ...currentFormSettings,
+        siteName: form.siteName || currentFormSettings.siteName,
+        tagline: form.tagline || currentFormSettings.tagline,
+        phone: form.phone || currentFormSettings.phone,
+        email: form.email || currentFormSettings.email,
+        address: form.address || currentFormSettings.address,
+        whatsapp: form.whatsapp || currentFormSettings.whatsapp,
+        logoUrl: directUrl,
+      });
+      // Also save to localStorage as a fast local fallback
+      localStorage.setItem("nph_logo_url", directUrl);
+      setCurrentLogoSrc(directUrl);
+      window.dispatchEvent(
+        new CustomEvent("logo-updated", { detail: { url: directUrl } }),
+      );
       toast.success("Logo updated successfully!");
       setLogoFile(null);
       setLogoPreviewUrl(null);
@@ -855,6 +1255,7 @@ function SiteSettingsPanel() {
         email: form.email,
         address: form.address,
         whatsapp: form.whatsapp,
+        logoUrl: settings?.logoUrl ?? currentLogoSrc ?? "",
       });
       // Save intro text to localStorage
       if (introHeadline.trim()) {
@@ -1377,6 +1778,7 @@ function GalleryPanel() {
         bytes,
         title: uploadTitle.trim(),
         order,
+        fileType: "gallery",
         onProgress: (pct) => setUploadProgress(pct),
       });
       toast.success("Photo uploaded successfully!");
@@ -2767,6 +3169,444 @@ function PromoPanel() {
   );
 }
 
+// ─── Files Panel (Drive) ────────────────────────────────────────────────────────
+
+const FILE_TYPE_LABELS: Record<string, { label: string; cls: string }> = {
+  gallery: {
+    label: "Gallery",
+    cls: "bg-[#833ab4]/15 text-[#833ab4] border-[#833ab4]/30",
+  },
+  logo: {
+    label: "Logo",
+    cls: "bg-[#fcb045]/15 text-[#fcb045] border-[#fcb045]/30",
+  },
+  document: {
+    label: "Document",
+    cls: "bg-[#e1306c]/15 text-[#fcb045] border-[#e1306c]/30",
+  },
+  attachment: {
+    label: "Attachment",
+    cls: "bg-white/10 text-white/60 border-white/20",
+  },
+};
+
+function FilesPanel() {
+  const { data: allFiles, isLoading, isError } = useGetAllFiles();
+  const deletePhoto = useDeletePhoto();
+  const addPhoto = useAddPhotoWithProgress();
+  const _uploadFileAndGetUrl = useUploadFileAndGetUrl();
+
+  const [search, setSearch] = useState("");
+  const [filterType, setFilterType] = useState<string>("all");
+  const [showUpload, setShowUpload] = useState(false);
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploadTitle, setUploadTitle] = useState("");
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const filtered = (allFiles ?? [])
+    .filter((f) => filterType === "all" || f.fileType === filterType)
+    .filter(
+      (f) =>
+        search.trim() === "" ||
+        f.title.toLowerCase().includes(search.toLowerCase()) ||
+        f.fileType.toLowerCase().includes(search.toLowerCase()),
+    )
+    .sort((a, b) => Number(b.timestamp - a.timestamp));
+
+  const stats = {
+    total: allFiles?.length ?? 0,
+    images:
+      allFiles?.filter((f) => ["gallery", "logo"].includes(f.fileType))
+        .length ?? 0,
+    docs:
+      allFiles?.filter((f) => ["document", "attachment"].includes(f.fileType))
+        .length ?? 0,
+  };
+
+  const handleUpload = async () => {
+    if (!uploadFile) {
+      toast.error("Please select a file.");
+      return;
+    }
+    const title = uploadTitle.trim() || uploadFile.name;
+    try {
+      const arrayBuffer = await uploadFile.arrayBuffer();
+      const bytes = new Uint8Array(arrayBuffer) as Uint8Array<ArrayBuffer>;
+      await addPhoto.mutateAsync({
+        bytes,
+        title,
+        order: 0n,
+        fileType: "document",
+        onProgress: (pct) => setUploadProgress(pct),
+      });
+      toast.success("File uploaded successfully!");
+      setUploadFile(null);
+      setUploadTitle("");
+      setUploadProgress(0);
+      setShowUpload(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    } catch {
+      toast.error("Upload failed. Please try again.");
+      setUploadProgress(0);
+    }
+  };
+
+  const handleDelete = async (id: bigint) => {
+    try {
+      await deletePhoto.mutateAsync(id);
+      toast.success("File deleted.");
+    } catch {
+      toast.error("Failed to delete file.");
+    }
+  };
+
+  const inputClass =
+    "bg-white/5 border-white/12 text-white placeholder:text-white/30 h-11 focus:border-[#e1306c]/50 focus:ring-[#e1306c]/20 rounded-xl";
+
+  const FILE_TYPES = ["all", "gallery", "logo", "document", "attachment"];
+
+  return (
+    <div className="space-y-6">
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-3">
+        {[
+          { label: "Total Files", value: stats.total, cls: "" },
+          { label: "Images", value: stats.images, cls: "border-[#833ab4]/20" },
+          { label: "Documents", value: stats.docs, cls: "border-[#e1306c]/20" },
+        ].map(({ label, value, cls }, i) => (
+          <motion.div
+            key={label}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.05 }}
+            className={`glass rounded-xl p-4 flex flex-col gap-1 ${cls}`}
+          >
+            <span className="text-muted-foreground text-xs uppercase tracking-wider">
+              {label}
+            </span>
+            <span className="font-display font-black text-3xl text-white">
+              {isLoading ? <Skeleton className="h-8 w-10 bg-white/5" /> : value}
+            </span>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Search + Filter + Upload button */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1">
+          <input
+            type="text"
+            data-ocid="files.search_input"
+            placeholder="Search by name or type..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full bg-white/5 border border-white/12 text-white placeholder:text-white/30 h-10 px-3 pl-9 rounded-xl text-sm focus:outline-none focus:border-[#e1306c]/40"
+          />
+          <HardDrive className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+        </div>
+        <div className="flex gap-1 flex-wrap">
+          {FILE_TYPES.map((t) => (
+            <button
+              key={t}
+              type="button"
+              data-ocid="files.filter.tab"
+              onClick={() => setFilterType(t)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 capitalize ${
+                filterType === t
+                  ? "brand-gradient text-white font-bold"
+                  : "glass text-white/60 hover:text-white"
+              }`}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
+        <Button
+          data-ocid="files.upload_button"
+          onClick={() => setShowUpload((v) => !v)}
+          size="sm"
+          className="gap-2 brand-gradient text-white font-bold rounded-xl"
+        >
+          {showUpload ? (
+            <X className="w-4 h-4" />
+          ) : (
+            <Upload className="w-4 h-4" />
+          )}
+          {showUpload ? "Cancel" : "Upload"}
+        </Button>
+      </div>
+
+      {/* Upload panel */}
+      <AnimatePresence>
+        {showUpload && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.25, ease: "easeInOut" }}
+            className="overflow-hidden"
+          >
+            <div className="glass rounded-2xl p-5 border border-[#e1306c]/20 space-y-4">
+              <h3 className="font-display font-bold text-white text-base flex items-center gap-2">
+                <Upload className="w-4 h-4 text-[#e1306c]" />
+                Upload Document / File
+              </h3>
+              <label
+                data-ocid="files.dropzone"
+                htmlFor="files-upload-input"
+                className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-white/15 hover:border-[#e1306c]/40 rounded-xl p-5 cursor-pointer transition-all bg-white/3 hover:bg-white/6"
+              >
+                {uploadFile ? (
+                  <>
+                    <CheckCircle2 className="w-7 h-7 text-[#e1306c]" />
+                    <p className="text-white font-medium text-sm">
+                      {uploadFile.name}
+                    </p>
+                    <p className="text-muted-foreground text-xs">
+                      {(uploadFile.size / 1024).toFixed(0)} KB
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <HardDrive className="w-7 h-7 text-white/25" />
+                    <p className="text-white/55 text-sm">
+                      Click to select any file
+                    </p>
+                  </>
+                )}
+              </label>
+              <input
+                id="files-upload-input"
+                ref={fileInputRef}
+                type="file"
+                accept="*"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) {
+                    setUploadFile(f);
+                    if (!uploadTitle)
+                      setUploadTitle(f.name.replace(/\.[^/.]+$/, ""));
+                  }
+                }}
+              />
+              <div className="space-y-1">
+                <label
+                  htmlFor="files-title-input"
+                  className="text-white/70 text-sm font-medium block"
+                >
+                  File Name / Title
+                </label>
+                <Input
+                  id="files-title-input"
+                  data-ocid="files.title.input"
+                  value={uploadTitle}
+                  onChange={(e) => setUploadTitle(e.target.value)}
+                  placeholder="e.g. Price List 2025"
+                  className={inputClass}
+                />
+              </div>
+              {addPhoto.isPending && (
+                <div className="space-y-1">
+                  <div className="flex justify-between text-xs text-white/50">
+                    <span>Uploading…</span>
+                    <span>{Math.round(uploadProgress)}%</span>
+                  </div>
+                  <Progress
+                    value={uploadProgress}
+                    className="h-1.5 bg-white/10 [&>div]:bg-[#e1306c]"
+                  />
+                </div>
+              )}
+              <Button
+                data-ocid="files.submit_button"
+                onClick={handleUpload}
+                disabled={addPhoto.isPending || !uploadFile}
+                className="w-full h-10 brand-gradient text-white font-bold rounded-xl gap-2"
+              >
+                {addPhoto.isPending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Uploading…
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4" />
+                    Upload File
+                  </>
+                )}
+              </Button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Loading */}
+      {isLoading && (
+        <div data-ocid="files.loading_state" className="space-y-2">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <Skeleton key={i} className="h-14 w-full rounded-xl bg-white/5" />
+          ))}
+        </div>
+      )}
+
+      {/* Error */}
+      {isError && (
+        <div
+          data-ocid="files.error_state"
+          className="flex items-center gap-3 p-5 glass rounded-2xl border border-red-500/20 text-red-400"
+        >
+          <AlertCircle className="w-5 h-5 flex-shrink-0" />
+          <p className="text-sm">Failed to load files. Please refresh.</p>
+        </div>
+      )}
+
+      {/* Empty state */}
+      {!isLoading && !isError && filtered.length === 0 && (
+        <div
+          data-ocid="files.empty_state"
+          className="flex flex-col items-center justify-center py-20 text-center glass rounded-2xl"
+        >
+          <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
+            <HardDrive className="w-7 h-7 text-muted-foreground" />
+          </div>
+          <p className="text-white font-semibold mb-1">No files found</p>
+          <p className="text-muted-foreground text-sm">
+            {filterType === "all"
+              ? "Upload a file to get started."
+              : `No "${filterType}" files found.`}
+          </p>
+        </div>
+      )}
+
+      {/* Files table */}
+      {!isLoading && !isError && filtered.length > 0 && (
+        <div
+          data-ocid="files.table"
+          className="glass rounded-2xl overflow-hidden"
+        >
+          <Table>
+            <TableHeader>
+              <TableRow className="border-white/8 hover:bg-transparent">
+                <TableHead className="text-white/60 font-semibold w-10">
+                  #
+                </TableHead>
+                <TableHead className="text-white/60 font-semibold">
+                  Preview
+                </TableHead>
+                <TableHead className="text-white/60 font-semibold">
+                  Name
+                </TableHead>
+                <TableHead className="text-white/60 font-semibold">
+                  Type
+                </TableHead>
+                <TableHead className="text-white/60 font-semibold hidden md:table-cell">
+                  Date
+                </TableHead>
+                <TableHead className="text-white/60 font-semibold">
+                  Actions
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filtered.map((file, idx) => {
+                const isImg =
+                  ["gallery", "logo"].includes(file.fileType) ||
+                  /\.(png|jpg|jpeg|gif|webp)$/i.test(file.title);
+                const directUrl = file.blob.getDirectURL();
+                const typeConfig =
+                  FILE_TYPE_LABELS[file.fileType] ??
+                  FILE_TYPE_LABELS.attachment;
+                const filename = file.title || `file_${idx}`;
+
+                return (
+                  <TableRow
+                    key={String(file.id)}
+                    data-ocid={`files.row.${idx + 1}`}
+                    className="border-white/6 hover:bg-white/4 transition-colors"
+                  >
+                    <TableCell className="text-muted-foreground text-sm font-mono w-10">
+                      {idx + 1}
+                    </TableCell>
+                    <TableCell className="w-16">
+                      {isImg ? (
+                        <img
+                          src={directUrl}
+                          alt={file.title}
+                          className="w-12 h-9 object-cover rounded-lg border border-white/10"
+                        />
+                      ) : (
+                        <div className="w-12 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
+                          <FileText className="w-4 h-4 text-white/30" />
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-white text-sm font-medium max-w-[150px] truncate">
+                      {file.title}
+                    </TableCell>
+                    <TableCell>
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border capitalize ${typeConfig.cls}`}
+                      >
+                        {file.fileType}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm hidden md:table-cell whitespace-nowrap">
+                      {formatTimestamp(file.timestamp)}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1.5">
+                        <a
+                          href={directUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <button
+                            type="button"
+                            title="Open file"
+                            className="w-7 h-7 rounded-lg bg-white/8 border border-white/15 text-white/60 hover:text-white hover:bg-white/15 flex items-center justify-center transition-all"
+                          >
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          </button>
+                        </a>
+                        <button
+                          type="button"
+                          data-ocid={`files.download_button.${idx + 1}`}
+                          title="Download"
+                          onClick={() => forceDownloadFile(directUrl, filename)}
+                          className="w-7 h-7 rounded-lg bg-white/8 border border-white/15 text-white/60 hover:text-white hover:bg-white/15 flex items-center justify-center transition-all"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          data-ocid={`files.delete_button.${idx + 1}`}
+                          title="Delete"
+                          onClick={() => handleDelete(file.id)}
+                          disabled={deletePhoto.isPending}
+                          className="w-7 h-7 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 flex items-center justify-center transition-all disabled:opacity-50"
+                        >
+                          {deletePhoto.isPending ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <Trash2 className="w-3.5 h-3.5" />
+                          )}
+                        </button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Dashboard (after login) ───────────────────────────────────────────────────
 
 type AdminTab =
@@ -2776,7 +3616,8 @@ type AdminTab =
   | "reviews"
   | "visitors"
   | "messages"
-  | "promo";
+  | "promo"
+  | "files";
 
 function Dashboard() {
   const [activeTab, setActiveTab] = useState<AdminTab>("quotes");
@@ -2891,6 +3732,19 @@ function Dashboard() {
             >
               <Gift className="w-4 h-4" />
               <span className="hidden sm:inline">Promo</span>
+            </button>
+            <button
+              type="button"
+              data-ocid="admin.files.tab"
+              onClick={() => setActiveTab("files")}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                activeTab === "files"
+                  ? "brand-gradient text-white font-bold"
+                  : "text-white/60 hover:text-white"
+              }`}
+            >
+              <HardDrive className="w-4 h-4" />
+              <span className="hidden sm:inline">Files</span>
             </button>
           </div>
 
@@ -3033,7 +3887,7 @@ function Dashboard() {
               </div>
               <MessagesPanel />
             </motion.div>
-          ) : (
+          ) : activeTab === "promo" ? (
             <motion.div
               key="promo"
               initial={{ opacity: 0, x: 16 }}
@@ -3052,6 +3906,26 @@ function Dashboard() {
                 </p>
               </div>
               <PromoPanel />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="files"
+              initial={{ opacity: 0, x: 16 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -16 }}
+              transition={{ duration: 0.22 }}
+            >
+              <div className="mb-6">
+                <h2 className="font-display font-bold text-2xl text-white flex items-center gap-2">
+                  <HardDrive className="w-6 h-6 text-[#e1306c]" />
+                  File Drive
+                </h2>
+                <p className="text-muted-foreground text-sm mt-0.5">
+                  View, download, and manage all uploaded files — gallery
+                  images, logos, documents, and attachments.
+                </p>
+              </div>
+              <FilesPanel />
             </motion.div>
           )}
         </AnimatePresence>
